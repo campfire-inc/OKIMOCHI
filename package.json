@@ -1,0 +1,21 @@
+{
+  "name": "slack-bitcoin-bot",
+  "version": "1.0.0",
+  "description": "slack bot for bitcoin micropayment",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "slack",
+    "bitcoin"
+  ],
+  "author": "joemphilips",
+  "license": "MIT",
+  "dependencies": {
+    "botkit": "^0.5.4",
+    "botkit-storage-mongo": "^1.0.6",
+    "mysql": "^2.13.0",
+    "sync-request": "^4.1.0"
+  }
+}
