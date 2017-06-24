@@ -2,6 +2,9 @@ const Botkit = require('botkit');
 const request = require('sync-request');
 const config = require('./config');
 const mysql = require('mysql');
+const mongoStorage = require('botkit-storage-mongo')({
+  mongoUri: '127.0.0.1'
+});
 
 if (!process.env.token) {
   console.log('Error: Specify token in environment');
