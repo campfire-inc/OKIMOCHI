@@ -76,3 +76,27 @@ function saveWallet(userId, passphrase) {
     }
   );
 }
+
+
+// help
+
+controller.hears('^help$', ['direct_mention', 'direct_message'], (bot, message) => {
+  let usage = `
+  ```
+  # show @users bitcoin deposit address
+  - @bitcoin-tip depositAddress @user
+
+  # register the address for getting paied
+  - @bitcoin-tip registerAddress @user
+
+  # show this help
+  - @bitcoin-tip help
+
+  # show balance of the @user
+  - @bicoin-tip balance @user
+
+  # show BTC-JPY rate
+  - @bitcoin-tip rate
+  ```
+  `;
+});
