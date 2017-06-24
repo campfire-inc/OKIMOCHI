@@ -1,8 +1,8 @@
 version: '2'
 services:
-  web:
+  app:
     build: .
-    command: npm start
+    command: node index.js
     volumes:
       - .:/usr/app
     ports:
@@ -20,7 +20,9 @@ services:
       -printtoconsole
       -regtest=1
       -rest
-      -rpcallowip=
+      -rpcallowip=127.0.0.0/24
+      -rpcpassword=bitcoin-tipper
+      -rpcuser=slackbot
     tty: true
     stdin_open: true
 
