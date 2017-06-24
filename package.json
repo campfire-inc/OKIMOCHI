@@ -13,6 +13,7 @@
   "author": "joemphilips",
   "license": "MIT",
   "dependencies": {
+    "bcoin": "^1.0.0-beta.12",
     "bitcoin": "^3.0.1",
     "bitcoin-core": "^1.2.0",
     "botkit": "^0.5.4",

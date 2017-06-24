@@ -6,12 +6,45 @@ const mongoStorage = require('botkit-storage-mongo')({
 });
 
 // bitcoin
-const Client = require('bitcoin-core');
-const client = new Client({
-  network: "regtest"
+const bcoin = require('bcoin').set('testnet');
+
+const chain = new bcoin.chain({
+  db: 'leveldb',
+  location: process.env.HOME + '/spvchain',
+  spv: true
+});
+const pool = new bcoin.pool({
+  chain: chain,
+  spv: true,
+  maxPeers: 8
+});
+const walletdb = new bcoin.walletdb({
+  db: 'memory'
 });
 
-client.getInfo().then((help) => console.log(help));
+pool.open().then(function() {
+  return walletdb.open();
+}).then(function() {
+  return walletdb.create();
+}).then(function(wallet) {
+  console.log('created wallet with address %s', wallet.getAddress('base58'));
+
+  // アドレスを監視対象に追加
+  pool.watchAddress(wallet.getAddress());
+
+  // P2Pネットワークからのtxのやり取りを開始
+  pool.connect().then(function() {
+    pool.startSync();
+    pool.on('tx', (tx) => {
+      walletdb.addTx(tx);
+    });
+
+    wallet.on('balance', (balance) => {
+      console.log('balance updated.');
+      console.log(bcoinl.amount.btc(balance.unconfirmed));
+    });
+  });
+});
 
 
 // functions
