@@ -48,6 +48,16 @@ function saveWallet(userId, passphrase) {
   );
 }
 
+function activateWallet(userId, passphrase) {
+  let client = new bwclient(config.bwc);
+  client.importFromMnemonic(passphrase, {
+    network: 'testnet'
+  }, err => {
+    if (err) {
+      throw new Error(err);
+    }
+  });
+}
 
 // db and miscs
 
