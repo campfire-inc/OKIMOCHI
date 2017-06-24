@@ -13,9 +13,12 @@
   "author": "joemphilips",
   "license": "MIT",
   "dependencies": {
+    "bitcoin": "^3.0.1",
+    "bitcoin-core": "^1.2.0",
     "botkit": "^0.5.4",
     "botkit-storage-mongo": "^1.0.6",
     "mysql": "^2.13.0",
-    "sync-request": "^4.1.0"
+    "sync-request": "^4.1.0",
+    "webcoin": "^2.2.2"
   }
 }

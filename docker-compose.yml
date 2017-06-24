@@ -1,0 +1,26 @@
+version: '2'
+services:
+  web:
+    build: .
+    command: npm start
+    volumes:
+      - .:/usr/app
+    ports:
+      - "8080:8080"
+    environment:
+      PORT: 8080
+    restart: always
+    tty: true
+    stdin_open: true
+  bitcoind:
+    image: seegno/bitcoind:0.14.2-alpine
+    volumes:
+      - ~/Library/Application\ Support/Bitcoin:/home/bitcoin/.bitcoin
+    command:
+      -printtoconsole
+      -regtest=1
+      -rest
+      -rpcallowip=
+    tty: true
+    stdin_open: true
+
