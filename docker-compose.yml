@@ -16,13 +16,20 @@ services:
     image: seegno/bitcoind:0.14.2-alpine
     volumes:
       - ~/Library/Application\ Support/Bitcoin:/home/bitcoin/.bitcoin
+    ports:
+      - "8332:8332"
+      - "8333:8333"
+      - "18332:18332"
+      - "18333:18333"
+      - "18444:18444"
     command:
       -printtoconsole
-      -regtest=1
       -rest
+      -regtest
+      -server
       -rpcallowip=127.0.0.0/24
+      -rpcallowip=172.20.0.0/24
       -rpcpassword=bitcoin-tipper
       -rpcuser=slackbot
     tty: true
     stdin_open: true
-

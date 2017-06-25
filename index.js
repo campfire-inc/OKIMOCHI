@@ -1,4 +1,4 @@
-onst Botkit = require('botkit');
+const Botkit = require('botkit');
 const config = require('./config');
 const mysql = require('mysql');
 const mongoStorage = require('botkit-storage-mongo')({
@@ -6,12 +6,14 @@ const mongoStorage = require('botkit-storage-mongo')({
 });
 
 // bitcoin
-const Client = require('bitcoin-core');
-const client = new Client({
+const BitcoindClient = require('bitcoin-core');
+const bitcoindclient = new BitcoindClient({
   network: "regtest",
-  user: 'slackbot',
-  pass: 'bitcoin-tipper'
+  username: 'slackbot',
+  password: 'bitcoin-tipper',
+  host: '127.0.0.1'
 });
+
 
 // functions
 
@@ -54,10 +56,11 @@ function activateWallet(userId, passphrase) {
   });
 }
 
+const userIdPattern = /<@([A-Z\d]+)>/;
+
 // slackbot settings.
 
 let controller = Botkit.slackbot({
-  debug: true
 }).configureSlackApp(
   config.botconfig
 );
@@ -71,8 +74,17 @@ controller.spawn({
   }
 });
 
-// help
 
+// balance
+/*
+controller.hears(`^balance ${userIdPattern.source}$`, ['direct_mention'], (bot, message) => {
+  let userId = message.match[1];
+  let (userId in )
+})
+*/
+
+
+// help
 controller.hears('^help$', ['direct_mention', 'direct_message'], (bot, message) => {
   let usage = `
   # show @users bitcoin deposit address
@@ -90,4 +102,5 @@ controller.hears('^help$', ['direct_mention', 'direct_message'], (bot, message) 
   # show BTC-JPY rate
   - @bitcoin-tip rate
   `;
+  bot.reply(message, usage);
 });
