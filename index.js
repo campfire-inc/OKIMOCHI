@@ -56,6 +56,17 @@ function activateWallet(userId, passphrase) {
   });
 }
 
+const message_to_BTC_map = {
+  ":bitcoin:": 0.001,
+  "感謝": 0.0001,
+  "ありがと": 0.0001,
+  "thanks": 0.0001,
+  "どうも": 0.0001,
+  ":pray:": 0.0001
+}
+
+const thxMessages = Object.keys(message_to_BTC_map);
+
 const userIdPattern = /<@([A-Z\d]+)>/;
 
 // slackbot settings.
@@ -93,6 +104,16 @@ controller.hears(`^deposit ${userIdPattern.source}$`, ['direct_mention', 'direct
     bot.reply(message, "your deposit address is " + address);
   })
 });
+
+// pay by gratitude
+console.log("thx messages are" + thxMessages.toString())
+controller.hears(thxMessages, ['direct_mention', 'direct_message', 'ambient'], (bot, message) => {
+  const userIds = message.match[1].slice(0, -1).split(' ');
+  bot.reply(message, "payed to " + userIds);
+});
+
+// pay intentionally
+
 
 // balance
 /*
