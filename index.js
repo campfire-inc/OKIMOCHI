@@ -8,7 +8,7 @@ const mongoStorage = require('botkit-storage-mongo')({
 // bitcoin
 const BitcoindClient = require('bitcoin-core');
 const bitcoindclient = new BitcoindClient({
-  network: "regtest",
+  network: "mainnet",
   username: 'slackbot',
   password: 'bitcoin-tipper',
   host: '127.0.0.1'
@@ -61,6 +61,7 @@ const userIdPattern = /<@([A-Z\d]+)>/;
 // slackbot settings.
 
 let controller = Botkit.slackbot({
+  storage: mongoStorage
 }).configureSlackApp(
   config.botconfig
 );
@@ -74,6 +75,24 @@ controller.spawn({
   }
 });
 
+const testuser = {
+  id: "hogeusername",
+  address: "hogehogeaddress"
+};
+controller.storage.teams.save(testuser);
+controller.storage.teams.get('hogeusername', (err, beans) => {
+  if (err) {
+    console.log(err);
+  }
+  console.log(beans);
+});
+
+// deposit
+controller.hears(`^deposit ${userIdPattern.source}$`, ['direct_mention', 'direct_message'], (bot, message) => {
+  bitcoindclient.getNewAddress().then((address) => {
+    bot.reply(message, "your deposit address is " + address);
+  })
+});
 
 // balance
 /*
@@ -88,7 +107,7 @@ controller.hears(`^balance ${userIdPattern.source}$`, ['direct_mention'], (bot, 
 controller.hears('^help$', ['direct_mention', 'direct_message'], (bot, message) => {
   let usage = `
   # show @users bitcoin deposit address
-  - @bitcoin-tip depositAddress @user
+  - @bitcoin-tip DepositAddress @user
 
   # register the address for getting paied
   - @bitcoin-tip registerAddress @user

@@ -10,6 +10,8 @@ services:
     environment:
       PORT: 8080
     restart: always
+    links:
+      - mongo
     tty: true
     stdin_open: true
   bitcoind:
@@ -25,7 +27,6 @@ services:
     command:
       -printtoconsole
       -rest
-      -regtest
       -server
       -rpcallowip=127.0.0.0/24
       -rpcallowip=172.20.0.0/24
@@ -33,3 +34,10 @@ services:
       -rpcuser=slackbot
     tty: true
     stdin_open: true
+  mongo:
+    restart: always
+    image: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./userdb:/data/db
