@@ -1,17 +1,17 @@
-const Botkit = require('botkit');
-const config = require('./config');
-const mysql = require('mysql');
-const mongoStorage = require('botkit-storage-mongo')({
-  mongoUri: '127.0.0.1'
+const Botkit = require("botkit");
+const config = require("./config");
+const mysql = require("mysql");
+const mongoStorage = require("botkit-storage-mongo")({
+  mongoUri: "127.0.0.1"
 });
 
 // bitcoin
-const BitcoindClient = require('bitcoin-core');
+const BitcoindClient = require("bitcoin-core");
 const bitcoindclient = new BitcoindClient({
   network: "mainnet",
-  username: 'slackbot',
-  password: 'bitcoin-tipper',
-  host: '127.0.0.1'
+  username: "slackbot",
+  password: "bitcoin-tipper",
+  host: "127.0.0.1"
 });
 
 
@@ -31,11 +31,11 @@ function inSatoshi(BTC) {
 }
 
 function saveWallet(userId, passphrase) {
-  connection.query('INSERT INTO account SET ?',
+  connection.query("INSERT INTO account SET ?",
     {
       slack_id: userId,
       passphrase: passphrase,
-      role: 'user'
+      role: "user"
     },
     (err, results, fields) => {
       if (err) {
@@ -48,7 +48,7 @@ function saveWallet(userId, passphrase) {
 function activateWallet(userId, passphrase) {
   let client = new bwclient(config.bwc);
   client.importFromMnemonic(passphrase, {
-    network: 'testnet'
+    network: "testnet"
   }, err => {
     if (err) {
       throw new Error(err);
@@ -66,8 +66,7 @@ const message_to_BTC_map = {
 }
 
 const thxMessages = Object.keys(message_to_BTC_map);
-
-const userIdPattern = /<@([A-Z\d]+)>/;
+const userIdPattern = /@([A-Z\d]+)/ig;
 
 // slackbot settings.
 
@@ -91,7 +90,7 @@ const testuser = {
   address: "hogehogeaddress"
 };
 controller.storage.teams.save(testuser);
-controller.storage.teams.get('hogeusername', (err, beans) => {
+controller.storage.teams.get("hogeusername", (err, beans) => {
   if (err) {
     console.log(err);
   }
@@ -99,20 +98,35 @@ controller.storage.teams.get('hogeusername', (err, beans) => {
 });
 
 // deposit
-controller.hears(`^deposit ${userIdPattern.source}$`, ['direct_mention', 'direct_message'], (bot, message) => {
+controller.hears(`^deposit ${userIdPattern.source}$`, ["direct_mention", "direct_message"], (bot, message) => {
   bitcoindclient.getNewAddress().then((address) => {
     bot.reply(message, "your deposit address is " + address);
   })
 });
 
 // pay by gratitude
-console.log("thx messages are" + thxMessages.toString())
-controller.hears(thxMessages, ['direct_mention', 'direct_message', 'ambient'], (bot, message) => {
-  const userIds = message.match[1].slice(0, -1).split(' ');
-  bot.reply(message, "payed to " + userIds);
+
+const patternize = (msg) => String.raw`(.*)${msg}(.*)`;
+const paypattern = thxMessages.map(patternize);
+
+controller.hears(paypattern, ["direct_mention", "direct_message", "ambient"], (bot, message) => {
+  const before = message.match[1];
+  const after = message.match[2];
+  console.log("before is " + before + " and after is " + after);
+
+  if ((userIdPattern.test(before) === false) && (userIdPattern.test(after) === false)) {
+    bot.reply(message, "not going to pay")
+    return
+  }
+
+  let bfuser = before.match(userIdPattern)
+  let afuser = after.match(userIdPattern)
+  const usernames = [bfuser, afuser].filter((v) => v !== null)
+  bot.reply(message, "payed to " + usernames);
 });
 
 // pay intentionally
+
 
 
 // balance
@@ -125,7 +139,7 @@ controller.hears(`^balance ${userIdPattern.source}$`, ['direct_mention'], (bot, 
 
 
 // help
-controller.hears('^help$', ['direct_mention', 'direct_message'], (bot, message) => {
+controller.hears("^help$", ["direct_mention", "direct_message"], (bot, message) => {
   let usage = `
   # show @users bitcoin deposit address
   - @bitcoin-tip DepositAddress @user
