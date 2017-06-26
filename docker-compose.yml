@@ -32,12 +32,14 @@ services:
       -rpcallowip=172.20.0.0/24
       -rpcpassword=bitcoin-tipper
       -rpcuser=slackbot
-    tty: true
-    stdin_open: true
   mongo:
     restart: always
     image: mongo
+    command:
+      --dbpath=/data/db
+      --rest
     ports:
       - "27017:27017"
+      - "28017:28017"
     volumes:
       - ./userdb:/data/db
