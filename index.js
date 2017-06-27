@@ -7,12 +7,7 @@ const mongoStorage = require("botkit-storage-mongo")({
 
 // bitcoin
 const BitcoindClient = require("bitcoin-core");
-const bitcoindclient = new BitcoindClient({
-  network: "mainnet",
-  username: "slackbot",
-  password: "bitcoin-tipper",
-  host: "127.0.0.1"
-});
+const bitcoindclient = new BitcoindClient(config.bitcoin);
 
 
 // functions
@@ -86,11 +81,11 @@ controller.spawn({
 });
 
 const testuser = {
-  id: "hogeusername",
-  address: "hogehogeaddress"
+  id: "@hogeusername",
+  address: "mg73QvN2KmVzJ9wW56uU7ViFwzrfeqchmw"
 };
-controller.storage.teams.save(testuser);
-controller.storage.teams.get("hogeusername", (err, beans) => {
+controller.storage.users.save(testuser);
+controller.storage.users.get("@hogeusername", (err, beans) => {
   if (err) {
     console.log(err);
   }
@@ -106,23 +101,38 @@ controller.hears(`^deposit ${userIdPattern.source}$`, ["direct_mention", "direct
 
 // pay by gratitude
 
-const patternize = (msg) => String.raw`(.*)${msg}(.*)`;
+const patternize = (msg) => String.raw`(.*)(${msg})(.*)`;
 const paypattern = thxMessages.map(patternize);
 
 controller.hears(paypattern, ["direct_mention", "direct_message", "ambient"], (bot, message) => {
   const before = message.match[1];
-  const after = message.match[2];
-  console.log("before is " + before + " and after is " + after);
+  const thxMessage = message.match[2]
+  const after = message.match[3];
 
   if ((userIdPattern.test(before) === false) && (userIdPattern.test(after) === false)) {
-    bot.reply(message, "not going to pay")
+    bot.reply(message, "not going to pay since there was no user in the message");
     return
   }
 
   let bfuser = before.match(userIdPattern)
   let afuser = after.match(userIdPattern)
-  const usernames = [bfuser, afuser].filter((v) => v !== null)
+  let usernames = [bfuser, afuser].filter((v) => v !== null)
+  usernames = Array.prototype.concat.apply([], usernames) // flatten
   bot.reply(message, "payed to " + usernames);
+
+  for(let u of usernames){
+    controller.storage.users.find({id: u}, (err, content) => {
+      if (err) {
+        throw new Error("no username in entry "+ err)
+      }
+      const paybackAddress = content[0].address;
+      console.log("payback address is " + paybackAddress)
+      bitcoindclient.sendToAddress(paybackAddress,
+                                   message_to_BTC_map[thxMessage],
+                                   "this is comment.")
+      console.log("content is ", content);
+    })
+  }
 });
 
 // pay intentionally

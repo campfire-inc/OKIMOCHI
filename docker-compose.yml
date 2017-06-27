@@ -27,6 +27,7 @@ services:
     command:
       -printtoconsole
       -rest
+      -testnet
       -server
       -rpcallowip=127.0.0.0/24
       -rpcallowip=172.20.0.0/24
