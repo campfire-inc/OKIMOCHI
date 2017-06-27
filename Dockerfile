@@ -7,7 +7,7 @@ RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
 COPY config.js index.js package.json /usr/src/app/
-RUN npm install
+RUN npm install --production --no-progress && npm cache clean
 
 
 CMD ["node", "index.js"]
