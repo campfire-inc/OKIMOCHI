@@ -4,7 +4,7 @@ services:
     build: .
     command: node index.js
     volumes:
-      - .:/usr/app
+      - ".:/usr/app"
     ports:
       - "8080:8080"
     environment:
@@ -17,7 +17,7 @@ services:
   bitcoind:
     image: seegno/bitcoind:0.14.2-alpine
     volumes:
-      - ~/Library/Application\ Support/Bitcoin:/home/bitcoin/.bitcoin
+      - "~/Library/Application\ Support/Bitcoin:/home/bitcoin/.bitcoin"
     ports:
       - "8332:8332"
       - "8333:8333"
@@ -43,4 +43,4 @@ services:
       - "27017:27017"
       - "28017:28017"
     volumes:
-      - ./userdb:/data/db
+      - "./userdb:/data/db"

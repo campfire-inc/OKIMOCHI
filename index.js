@@ -57,7 +57,10 @@ const message_to_BTC_map = {
   "ありがと": 0.0001,
   "thanks": 0.0001,
   "どうも": 0.0001,
-  ":pray:": 0.0001
+  ":pray:": 0.0001,
+  ":okimochi:": 0.001,
+  "気持ち": 0.001,
+  "きもち": 0.001
 }
 
 const thxMessages = Object.keys(message_to_BTC_map);
@@ -129,7 +132,8 @@ controller.hears(paypattern, ["direct_mention", "direct_message", "ambient"], (b
       console.log("payback address is " + paybackAddress)
       bitcoindclient.sendToAddress(paybackAddress,
                                    message_to_BTC_map[thxMessage],
-                                   "this is comment.")
+                                   "this is comment.",
+                                   u)
       console.log("content is ", content);
     })
   }
