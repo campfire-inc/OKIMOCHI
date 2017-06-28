@@ -25,32 +25,6 @@ function inSatoshi(BTC) {
   return parseFloat((btc * 100000000).toFixed(0));
 }
 
-function saveWallet(userId, passphrase) {
-  connection.query("INSERT INTO account SET ?",
-    {
-      slack_id: userId,
-      passphrase: passphrase,
-      role: "user"
-    },
-    (err, results, fields) => {
-      if (err) {
-        throw new Error(err);
-      }
-    }
-  );
-}
-
-function activateWallet(userId, passphrase) {
-  let client = new bwclient(config.bwc);
-  client.importFromMnemonic(passphrase, {
-    network: "testnet"
-  }, err => {
-    if (err) {
-      throw new Error(err);
-    }
-  });
-}
-
 const message_to_BTC_map = {
   ":bitcoin:": 0.001,
   "感謝": 0.0001,
@@ -83,6 +57,7 @@ controller.spawn({
   }
 });
 
+
 const testuser = {
   id: "@hogeusername",
   address: "mg73QvN2KmVzJ9wW56uU7ViFwzrfeqchmw"
@@ -95,10 +70,15 @@ controller.storage.users.get("@hogeusername", (err, beans) => {
   console.log(beans);
 });
 
+
+
 // deposit
-controller.hears(`^deposit ${userIdPattern.source}$`, ["direct_mention", "direct_message"], (bot, message) => {
+controller.hears(`deposit`, ["direct_mention", "direct_message", "ambient", "mention"], (bot, message) => {
   bitcoindclient.getNewAddress().then((address) => {
-    bot.reply(message, "your deposit address is " + address);
+    controller.storage.users.save({id: "@fugauser", address: address }).then((res) => {
+      console.log(res)
+      bot.reply(message, "your deposit address is " + address);
+    })
   })
 });
 
@@ -156,7 +136,7 @@ controller.hears(`^balance ${userIdPattern.source}$`, ['direct_mention'], (bot, 
 controller.hears("^help$", ["direct_mention", "direct_message"], (bot, message) => {
   let usage = `
   # show @users bitcoin deposit address
-  - @bitcoin-tip DepositAddress @user
+  - @bitcoin-tip deposit
 
   # register the address for getting paied
   - @bitcoin-tip registerAddress @user
@@ -169,6 +149,7 @@ controller.hears("^help$", ["direct_mention", "direct_message"], (bot, message) 
 
   # show BTC-JPY rate
   - @bitcoin-tip rate
+
   `;
   bot.reply(message, usage);
 });
