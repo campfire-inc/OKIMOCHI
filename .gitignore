@@ -2,3 +2,5 @@ node_modules
 .*swp
 userdb/*
 !userdb/.gitkeep
+bitcoin/*
+!bitcoin/.gitkeep

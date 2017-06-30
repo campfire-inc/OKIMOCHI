@@ -2,7 +2,7 @@ const Botkit = require("botkit");
 const config = require("./config");
 const mysql = require("mysql");
 const mongoStorage = require("botkit-storage-mongo")({
-  mongoUri: "127.0.0.1"
+  mongoUri: config.mongoUri
 });
 
 // bitcoin
@@ -101,20 +101,26 @@ controller.hears(paypattern, ["direct_mention", "direct_message", "ambient"], (b
   let afuser = after.match(userIdPattern)
   let usernames = [bfuser, afuser].filter((v) => v !== null)
   usernames = Array.prototype.concat.apply([], usernames) // flatten
-  bot.reply(message, "payed to " + usernames);
+  console.log("going to pay " + usernames);
 
   for(let u of usernames){
-    controller.storage.users.find({id: u}, (err, content) => {
+    controller.storage.users.get(u, (err, content) => {
       if (err) {
         throw new Error("no username in entry "+ err)
       }
-      const paybackAddress = content[0].address;
-      console.log("payback address is " + paybackAddress)
-      bitcoindclient.sendToAddress(paybackAddress,
-                                   message_to_BTC_map[thxMessage],
-                                   "this is comment.",
-                                   u)
-      console.log("content is ", content);
+      if (typeof content === 'undefined' || typeof content[0] === 'undefined'){
+        controller.storage.users.save({id: u}, (err) => {
+          bot.reply("registered username " + u);
+        })
+      }else{
+        console.log("content is ", content);
+        const paybackAddress = content[0].address;
+        console.log("payback address is " + paybackAddress)
+        bitcoindclient.sendToAddress(paybackAddress,
+          message_to_BTC_map[thxMessage],
+          "this is comment.",
+          u)
+      }
     })
   }
 });
