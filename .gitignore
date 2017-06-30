@@ -4,3 +4,4 @@ userdb/*
 !userdb/.gitkeep
 bitcoin/*
 !bitcoin/.gitkeep
+okimochi.log

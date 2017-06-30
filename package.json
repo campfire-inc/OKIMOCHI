@@ -20,6 +20,7 @@
     "botkit-storage-mongo": "github:joemphilips/botkit-storage-mongo#master",
     "mysql": "^2.13.0",
     "sync-request": "^4.1.0",
-    "webcoin": "^2.2.2"
+    "webcoin": "^2.2.2",
+    "winston": "^2.3.1"
   }
 }

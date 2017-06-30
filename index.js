@@ -1,3 +1,4 @@
+const winston = require('winston');
 const Botkit = require("botkit");
 const config = require("./config");
 const mysql = require("mysql");
@@ -43,7 +44,14 @@ const userIdPattern = /@([A-Z\d]+)/ig;
 // slackbot settings.
 
 let controller = Botkit.slackbot({
-  storage: mongoStorage
+  storage: mongoStorage,
+  logger: new winston.Logger({
+    levels: winston.config.syslog.levels,
+    transports: [
+      new (winston.transports.Console)(),
+      new (winston.transports.File)({ filename: './okimochi.log'})
+    ]
+  })
 }).configureSlackApp(
   config.botconfig
 );
@@ -99,7 +107,9 @@ controller.hears(paypattern, ["direct_mention", "direct_message", "ambient"], (b
 
   let bfuser = before.match(userIdPattern)
   let afuser = after.match(userIdPattern)
+  console.log("bfuser is " + bfuser + " and afuser is " + afuser);
   let usernames = [bfuser, afuser].filter((v) => v !== null)
+  console.log("usernames be fore concat are " + usernames)
   usernames = Array.prototype.concat.apply([], usernames) // flatten
   console.log("going to pay " + usernames);
 
@@ -110,7 +120,7 @@ controller.hears(paypattern, ["direct_mention", "direct_message", "ambient"], (b
       }
       if (typeof content === 'undefined' || typeof content[0] === 'undefined'){
         controller.storage.users.save({id: u}, (err) => {
-          bot.reply("registered username " + u);
+          return bot.reply(message, "registered username " + u);
         })
       }else{
         console.log("content is ", content);
@@ -120,6 +130,7 @@ controller.hears(paypattern, ["direct_mention", "direct_message", "ambient"], (b
           message_to_BTC_map[thxMessage],
           "this is comment.",
           u)
+        return bot.reply(message, "payed to " + u)
       }
     })
   }
