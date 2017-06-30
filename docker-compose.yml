@@ -3,6 +3,8 @@ services:
   app:
     build: .
     command: node index.js
+    networks:
+      - okimochi
     volumes:
       - ".:/usr/app"
     ports:
@@ -12,12 +14,15 @@ services:
     restart: always
     links:
       - mongo
+      - bitcoind
     tty: true
     stdin_open: true
   bitcoind:
     image: seegno/bitcoind:0.14.2-alpine
+    networks:
+      - okimochi
     volumes:
-      - "~/Library/Application\ Support/Bitcoin:/home/bitcoin/.bitcoin"
+      - "./bitcoin:/home/bitcoin/.bitcoin"
     ports:
       - "8332:8332"
       - "8333:8333"
@@ -29,11 +34,12 @@ services:
       -rest
       -testnet
       -server
-      -rpcallowip=127.0.0.0/24
-      -rpcallowip=172.20.0.0/24
       -rpcpassword=bitcoin-tipper
       -rpcuser=slackbot
+      -rpcallowip=192.168.0.0/16
   mongo:
+    networks:
+      - okimochi
     restart: always
     image: mongo
     command:
@@ -44,3 +50,7 @@ services:
       - "28017:28017"
     volumes:
       - "./userdb:/data/db"
+
+networks:
+  okimochi:
+    external: true
