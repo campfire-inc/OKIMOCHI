@@ -5,3 +5,4 @@ userdb/*
 bitcoin/*
 !bitcoin/.gitkeep
 okimochi.log
+.env
