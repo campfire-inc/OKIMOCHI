@@ -82,11 +82,17 @@ controller.storage.users.get("@hogeusername", (err, beans) => {
 
 
 // deposit
-controller.hears(`deposit`, ["direct_mention", "direct_message", "ambient", "mention"], (bot, message) => {
-  bitcoindclient.getNewAddress().then((address) => {
-    controller.storage.users.save({id: message.user, address: address }).then((res) => {
-      console.log(res)
-      bot.reply(message, "your deposit address is " + address);
+controller.hears(`deposit`, ["direct_mention", "direct_message", "mention"], (bot, message) => {
+    controller.storage.users.get(message.user, (err, userinfo) => {
+      if (!(userinfo.depositAddress instanceof Array)){
+        userinfo.depositAddress = []
+      }
+      bitcoindclient.getNewAddress().then((address) => {
+        userinfo.depositAddress.push(address);
+        controller.storage.users.save(userinfo, (res) => {
+          console.log(res)
+          return bot.reply(message, "your deposit address is " + address);
+      })
     })
   })
 });
@@ -120,12 +126,12 @@ controller.hears(paypattern, ["direct_mention", "direct_message", "ambient"], (b
         throw new Error("no username in entry "+ err)
       }
       if (content === null || !content.address){
-        console.log("content was " + JSON.stringify(content));
+        controller.logger.info("content was " + JSON.stringify(content));
         controller.storage.users.save({id: u}, (err) => {
           return bot.reply(message, u + "had no registered address, so not going to pay");
         })
       }else{
-        console.log("content is " + content);
+        controller.logger.info("content is " + content);
         const paybackAddress = content.address
         console.log("payback address is " + paybackAddress)
         bitcoindclient.sendToAddress(paybackAddress,
@@ -148,18 +154,19 @@ controller.hears('register', ["direct_mention", "direct_message"], (bot, message
       throw err
     }
     convo.ask("please paste your bitcoin address (separated by \\n)", (response, convo) => {
-      controller.storage.users.get(message.user, (err, user) => {
+      controller.storage.users.get(message.user, (err, userinfo) => {
+        controller.logger.debug('user info retrieved from db was ' + userinfo)
         if (err) {
           throw err
         }
-        if (!(user.address instanceof Array)){
-          user.address = []
+        if (!(userinfo.address instanceof Array)){
+          userinfo.address = []
         }
         for(let address of response.text.split("\n")){
           bitcoindclient.validateAddress(response.text)
-          .then(user.address.push(address))
+          .then(userinfo.address.push(address))
         }
-        controller.storage.users.save({id: message.user, address: user.address}, (err) => {
+        controller.storage.users.save(userinfo, (err) => {
           convo.say("successfully registered address as " + formatUser(message.user) + "'s !");
           convo.next();
         })
