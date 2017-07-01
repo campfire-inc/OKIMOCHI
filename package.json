@@ -1,5 +1,5 @@
 {
-  "name": "slack-bitcoin-bot",
+  "name": "okimochi",
   "version": "1.0.0",
   "description": "slack bot for bitcoin micropayment",
   "main": "index.js",
@@ -17,9 +17,10 @@
     "bitcoin": "^3.0.1",
     "bitcoin-core": "^1.2.0",
     "botkit": "^0.5.4",
-    "botkit-storage-mongo": "^1.0.6",
+    "botkit-storage-mongo": "github:joemphilips/botkit-storage-mongo#master",
     "mysql": "^2.13.0",
     "sync-request": "^4.1.0",
-    "webcoin": "^2.2.2"
+    "webcoin": "^2.2.2",
+    "winston": "^2.3.1"
   }
 }

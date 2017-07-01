@@ -1,8 +1,9 @@
+const winston = require('winston');
 const Botkit = require("botkit");
 const config = require("./config");
 const mysql = require("mysql");
 const mongoStorage = require("botkit-storage-mongo")({
-  mongoUri: "127.0.0.1"
+  mongoUri: config.mongoUri
 });
 
 // bitcoin
@@ -25,32 +26,6 @@ function inSatoshi(BTC) {
   return parseFloat((btc * 100000000).toFixed(0));
 }
 
-function saveWallet(userId, passphrase) {
-  connection.query("INSERT INTO account SET ?",
-    {
-      slack_id: userId,
-      passphrase: passphrase,
-      role: "user"
-    },
-    (err, results, fields) => {
-      if (err) {
-        throw new Error(err);
-      }
-    }
-  );
-}
-
-function activateWallet(userId, passphrase) {
-  let client = new bwclient(config.bwc);
-  client.importFromMnemonic(passphrase, {
-    network: "testnet"
-  }, err => {
-    if (err) {
-      throw new Error(err);
-    }
-  });
-}
-
 const message_to_BTC_map = {
   ":bitcoin:": 0.001,
   "感謝": 0.0001,
@@ -64,12 +39,20 @@ const message_to_BTC_map = {
 }
 
 const thxMessages = Object.keys(message_to_BTC_map);
-const userIdPattern = /@([A-Z\d]+)/ig;
+const userIdPattern = /<@([A-Z\d]+)>/ig;
+const formatUser = (user) => `<@${user}>`
 
 // slackbot settings.
 
 let controller = Botkit.slackbot({
-  storage: mongoStorage
+  storage: mongoStorage,
+  logger: new winston.Logger({
+    levels: winston.config.syslog.levels,
+    transports: [
+      new (winston.transports.Console)(),
+      new (winston.transports.File)({ filename: './okimochi.log'})
+    ]
+  })
 }).configureSlackApp(
   config.botconfig
 );
@@ -83,6 +66,7 @@ controller.spawn({
   }
 });
 
+
 const testuser = {
   id: "@hogeusername",
   address: "mg73QvN2KmVzJ9wW56uU7ViFwzrfeqchmw"
@@ -95,10 +79,15 @@ controller.storage.users.get("@hogeusername", (err, beans) => {
   console.log(beans);
 });
 
+
+
 // deposit
-controller.hears(`^deposit ${userIdPattern.source}$`, ["direct_mention", "direct_message"], (bot, message) => {
+controller.hears(`deposit`, ["direct_mention", "direct_message", "ambient", "mention"], (bot, message) => {
   bitcoindclient.getNewAddress().then((address) => {
-    bot.reply(message, "your deposit address is " + address);
+    controller.storage.users.save({id: message.user, address: address }).then((res) => {
+      console.log(res)
+      bot.reply(message, "your deposit address is " + address);
+    })
   })
 });
 
@@ -119,29 +108,65 @@ controller.hears(paypattern, ["direct_mention", "direct_message", "ambient"], (b
 
   let bfuser = before.match(userIdPattern)
   let afuser = after.match(userIdPattern)
+  console.log("bfuser is " + bfuser + " and afuser is " + afuser);
   let usernames = [bfuser, afuser].filter((v) => v !== null)
+  console.log("usernames be fore concat are " + usernames)
   usernames = Array.prototype.concat.apply([], usernames) // flatten
-  bot.reply(message, "payed to " + usernames);
+  console.log("going to pay " + usernames);
 
   for(let u of usernames){
-    controller.storage.users.find({id: u}, (err, content) => {
+    controller.storage.users.get(u, (err, content) => {
       if (err) {
         throw new Error("no username in entry "+ err)
       }
-      const paybackAddress = content[0].address;
-      console.log("payback address is " + paybackAddress)
-      bitcoindclient.sendToAddress(paybackAddress,
-                                   message_to_BTC_map[thxMessage],
-                                   "this is comment.",
-                                   u)
-      console.log("content is ", content);
+      if (content === null || !content.address){
+        console.log("content was " + JSON.stringify(content));
+        controller.storage.users.save({id: u}, (err) => {
+          return bot.reply(message, u + "had no registered address, so not going to pay");
+        })
+      }else{
+        console.log("content is " + content);
+        const paybackAddress = content.address
+        console.log("payback address is " + paybackAddress)
+        bitcoindclient.sendToAddress(paybackAddress,
+          message_to_BTC_map[thxMessage],
+          "this is comment.",
+          u)
+        return bot.reply(message, "payed to <" + u + ">")
+      }
     })
   }
 });
 
 // pay intentionally
 
+// registerAddress
 
+controller.hears('register', ["direct_mention", "direct_message"], (bot, message) => {
+  bot.startConversation(message, (err, convo) => {
+    if (err) {
+      throw err
+    }
+    convo.ask("please paste your bitcoin address (separated by \\n)", (response, convo) => {
+      controller.storage.users.get(message.user, (err, user) => {
+        if (err) {
+          throw err
+        }
+        if (!(user.address instanceof Array)){
+          user.address = []
+        }
+        for(let address of response.text.split("\n")){
+          bitcoindclient.validateAddress(response.text)
+          .then(user.address.push(address))
+        }
+        controller.storage.users.save({id: message.user, address: user.address}, (err) => {
+          convo.say("successfully registered address as " + formatUser(message.user) + "'s !");
+          convo.next();
+        })
+      })
+    });
+  })
+})
 
 // balance
 /*
@@ -156,10 +181,10 @@ controller.hears(`^balance ${userIdPattern.source}$`, ['direct_mention'], (bot, 
 controller.hears("^help$", ["direct_mention", "direct_message"], (bot, message) => {
   let usage = `
   # show @users bitcoin deposit address
-  - @bitcoin-tip DepositAddress @user
+  - @bitcoin-tip deposit
 
   # register the address for getting paied
-  - @bitcoin-tip registerAddress @user
+  - @bitcoin-tip register
 
   # show this help
   - @bitcoin-tip help
@@ -169,6 +194,7 @@ controller.hears("^help$", ["direct_mention", "direct_message"], (bot, message) 
 
   # show BTC-JPY rate
   - @bitcoin-tip rate
+
   `;
   bot.reply(message, usage);
 });
