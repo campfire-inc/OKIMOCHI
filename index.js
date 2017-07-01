@@ -39,7 +39,8 @@ const message_to_BTC_map = {
 }
 
 const thxMessages = Object.keys(message_to_BTC_map);
-const userIdPattern = /@([A-Z\d]+)/ig;
+const userIdPattern = /<@([A-Z\d]+)>/ig;
+const formatUser = (user) => `<@${user}>`
 
 // slackbot settings.
 
@@ -83,7 +84,7 @@ controller.storage.users.get("@hogeusername", (err, beans) => {
 // deposit
 controller.hears(`deposit`, ["direct_mention", "direct_message", "ambient", "mention"], (bot, message) => {
   bitcoindclient.getNewAddress().then((address) => {
-    controller.storage.users.save({id: "@fugauser", address: address }).then((res) => {
+    controller.storage.users.save({id: message.user, address: address }).then((res) => {
       console.log(res)
       bot.reply(message, "your deposit address is " + address);
     })
@@ -118,19 +119,20 @@ controller.hears(paypattern, ["direct_mention", "direct_message", "ambient"], (b
       if (err) {
         throw new Error("no username in entry "+ err)
       }
-      if (typeof content === 'undefined' || typeof content[0] === 'undefined'){
+      if (content === null || !content.address){
+        console.log("content was " + JSON.stringify(content));
         controller.storage.users.save({id: u}, (err) => {
-          return bot.reply(message, "registered username " + u);
+          return bot.reply(message, u + "had no registered address, so not going to pay");
         })
       }else{
-        console.log("content is ", content);
-        const paybackAddress = content[0].address;
+        console.log("content is " + content);
+        const paybackAddress = content.address
         console.log("payback address is " + paybackAddress)
         bitcoindclient.sendToAddress(paybackAddress,
           message_to_BTC_map[thxMessage],
           "this is comment.",
           u)
-        return bot.reply(message, "payed to " + u)
+        return bot.reply(message, "payed to <" + u + ">")
       }
     })
   }
@@ -138,7 +140,33 @@ controller.hears(paypattern, ["direct_mention", "direct_message", "ambient"], (b
 
 // pay intentionally
 
+// registerAddress
 
+controller.hears('register', ["direct_mention", "direct_message"], (bot, message) => {
+  bot.startConversation(message, (err, convo) => {
+    if (err) {
+      throw err
+    }
+    convo.ask("please paste your bitcoin address (separated by \\n)", (response, convo) => {
+      controller.storage.users.get(message.user, (err, user) => {
+        if (err) {
+          throw err
+        }
+        if (!(user.address instanceof Array)){
+          user.address = []
+        }
+        for(let address of response.text.split("\n")){
+          bitcoindclient.validateAddress(response.text)
+          .then(user.address.push(address))
+        }
+        controller.storage.users.save({id: message.user, address: user.address}, (err) => {
+          convo.say("successfully registered address as " + formatUser(message.user) + "'s !");
+          convo.next();
+        })
+      })
+    });
+  })
+})
 
 // balance
 /*
@@ -156,7 +184,7 @@ controller.hears("^help$", ["direct_mention", "direct_message"], (bot, message) 
   - @bitcoin-tip deposit
 
   # register the address for getting paied
-  - @bitcoin-tip registerAddress @user
+  - @bitcoin-tip register
 
   # show this help
   - @bitcoin-tip help
