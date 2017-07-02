@@ -118,6 +118,7 @@ controller.hears(paypattern, ["direct_mention", "direct_message", "ambient"], (b
   let usernames = [bfuser, afuser].filter((v) => v !== null)
   console.log("usernames be fore concat are " + usernames)
   usernames = Array.prototype.concat.apply([], usernames) // flatten
+    .map((u) => u.replace(/@|<|>/g, ""))
   console.log("going to pay " + usernames);
 
   for(let u of usernames){
@@ -132,13 +133,13 @@ controller.hears(paypattern, ["direct_mention", "direct_message", "ambient"], (b
         })
       }else{
         controller.logger.info("content is " + content);
-        const paybackAddress = content.address
+        const paybackAddress = content.address.pop();
         console.log("payback address is " + paybackAddress)
         bitcoindclient.sendToAddress(paybackAddress,
           message_to_BTC_map[thxMessage],
           "this is comment.",
           u)
-        return bot.reply(message, "payed to <" + u + ">")
+        return bot.reply(message, "payed to " + formatUser(u) )
       }
     })
   }
