@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "slack bot for bitcoin micropayment",
   "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/campfire-inc/OKIMOCHI"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
