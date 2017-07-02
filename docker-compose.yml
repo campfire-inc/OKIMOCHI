@@ -2,6 +2,7 @@ version: '2'
 services:
   okimochi:
     build: .
+    image: joemphilips/okimochi:latest
     env_file: .env
     command: node index.js
     networks:
