@@ -59,6 +59,7 @@ const message_to_BTC_map = {
 const thxMessages = Object.keys(message_to_BTC_map);
 const userIdPattern = /<@([A-Z\d]+)>/ig;
 const formatUser = (user) => `<@${user}>`
+const amountPattern = /([\d\.]*)/ig;
 
 // slackbot settings.
 
@@ -233,9 +234,55 @@ controller.hears(paypattern, ["direct_mention", "direct_message", "ambient"], (b
     })
   }
 });
+*/
 
 // pay intentionally
+controller.hears(`tip ${userIdPattern.source} ${amountPattern.source}(.*)`, ["direct_mention", "direct_message"], (bot, message) => {
+  controller.logger.debug("whole match pattern was " + message.match[0]);
+  const userId = message.match[1];
+  const amount = Number(message.match[2]);
+  const Txmessage = message.match[3] || "no message";
+  if (isNaN(amount)){
+    return bot.reply(message, "please give amount of BTC in number !");
+  }
 
+  controller.logger.debug("userId was " + userId);
+  User.findOne({ id: message.user } ,(err, content) => {
+    debug(content)
+
+    // when the user is not registered
+    if (content === null || content === undefined){
+      controller.logger.info("content was " + JSON.stringify(content));
+      bot.reply(message, formatUser(userId) + " had no registered address, so not going to pay.\nPlease register first!");
+
+    } else {
+
+      // check if all paybackAddresses has been used.
+      const paybackAddresses = content.paybackAddresses
+      let address;
+      let addressIndex;
+      if (paybackAddresses.every((a) => a.used)){
+        bot.reply(message, "all addresses has been used. So using the one we used before!")
+        address = paybackAddresses.pop().address
+      } else {
+        addressIndex = paybackAddresses.findIndex((e) => !e.used)
+        debug(addressIndex)
+        address = paybackAddresses[addressIndex].address
+      }
+      debug("going to pay to " + address);
+      try {
+        bitcoindclient.sendToAddress(address,
+          amount,
+          Txmessage,
+          "this is comment."
+        )
+      } catch (e) {
+        bot.reply(message, e.toString())
+      }
+    bot.reply(message, "payed to " + formatUser(userId));
+    }
+  })
+})
 
 // balance
 /*
