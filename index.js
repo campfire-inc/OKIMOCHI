@@ -2,9 +2,7 @@ const winston = require('winston');
 const Botkit = require("botkit");
 const config = require("./config");
 const mysql = require("mysql");
-const mongoStorage = require("botkit-storage-mongo")({
-  mongoUri: config.mongoUri
-});
+const MongoClient = require("mongodb");
 
 // bitcoin
 const BitcoindClient = require("bitcoin-core");
@@ -45,7 +43,6 @@ const formatUser = (user) => `<@${user}>`
 // slackbot settings.
 
 let controller = Botkit.slackbot({
-  storage: mongoStorage,
   logger: new winston.Logger({
     levels: winston.config.syslog.levels,
     transports: [
@@ -60,7 +57,7 @@ let controller = Botkit.slackbot({
 
 controller.spawn({
   token: process.env.TOKEN
-}).startRTM(err => {
+}).startRTM((err) => {
   if (err) {
     throw new Error(err);
   }
@@ -68,17 +65,17 @@ controller.spawn({
 
 
 const testuser = {
-  id: "@hogeusername",
-  address: "mg73QvN2KmVzJ9wW56uU7ViFwzrfeqchmw"
+  id: "exampleUsername",
+  address: ["mg73QvN2KmVzJ9wW56uU7ViFwzrfeqchmw"]
 };
-controller.storage.users.save(testuser);
-controller.storage.users.get("@hogeusername", (err, beans) => {
-  if (err) {
-    console.log(err);
-  }
-  console.log(beans);
-});
-
+MongoClient.connect(config.mongoUri)
+  .then((db)  => {db.collection('user').save(testuser)});
+MongoClient.connect(config.mongoUri)
+  .then((db) => db.collection('user').find({ id: "exampleUsername"}).toArray())
+  .then((content) => {
+    console.log("content of exampleUsername is " + JSON.stringify(content));
+  })
+  .catch(err => {throw new Error(err)});
 
 
 // deposit
@@ -97,6 +94,7 @@ controller.hears(`deposit`, ["direct_mention", "direct_message", "mention"], (bo
   })
 });
 
+/*
 // pay by gratitude
 
 const patternize = (msg) => String.raw`(.*)(${msg})(.*)`;
