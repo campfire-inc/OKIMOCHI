@@ -1,15 +1,35 @@
 const winston = require('winston');
 const Botkit = require("botkit");
 const config = require("./config");
-const mysql = require("mysql");
-const MongoClient = require("mongodb");
+const debug = require('debug')('okimochi');
 
 // bitcoin
 const BitcoindClient = require("bitcoin-core");
 const bitcoindclient = new BitcoindClient(config.bitcoin);
 
-
 // functions
+function PromiseSetAddressToUser(userId, address){
+  debug(userId);
+  debug(address)
+  return new Promise((resolve, reject) => {
+  bitcoindclient.validateAddress(address, (err, result) => {
+    debug(err);
+    debug(result);
+    if (err){
+      reject(err)
+    }
+      if (result && result.isvalid){
+        User.update( {id: userId},
+        {$push: {paybackAddresses: {address: address, used: false}}},
+        {upsert: true, 'new': true}, (res) => {resolve(res)})
+        resolve()
+      } else {
+        reject(new Error('please enter valid address !'))
+      }
+    })
+  })
+}
+
 
 function jpy2btc(jpyAmount) {
   let rate = getRateJPY();
@@ -64,36 +84,107 @@ controller.spawn({
 });
 
 
-const testuser = {
-  id: "exampleUsername",
-  address: ["mg73QvN2KmVzJ9wW56uU7ViFwzrfeqchmw"]
-};
-MongoClient.connect(config.mongoUri)
-  .then((db)  => {db.collection('user').save(testuser)});
-MongoClient.connect(config.mongoUri)
-  .then((db) => db.collection('user').find({ id: "exampleUsername"}).toArray())
-  .then((content) => {
-    console.log("content of exampleUsername is " + JSON.stringify(content));
-  })
-  .catch(err => {throw new Error(err)});
+// database initialization
+const mongoose = require("mongoose");
+mongoose.Promise = global.Promise
+mongoose.connect(config.mongoUri, {
+  useMongoClient: true
+})
+  .then((db) => {return db.once('open', () => {
+    console.log("db is open!")
+  })})
+  .catch((err) => {throw err})
 
+
+
+const Schema = mongoose.Schema,
+  ObjectId = Schema.ObjectId;
+
+let UserSchema = new Schema({
+  _id: ObjectId,
+  id: String,
+  depositAddresses: [String],
+  paybackAddresses: [
+    {
+      address: String,
+      used: {type: Boolean, default: false}
+    }
+  ],
+})
+
+const User = mongoose.model('User', UserSchema);
+const testuser = new User({
+  id: "exampleUsername",
+  depositAddresses: ["mg73QvN2KmVzJ9wW56uU7ViFwzrfeqchmw"],
+  paybackAddresses: [{
+    address: "miS3tb8CZ2CXWwRsGNK2EqXCfmzP6bcjv",
+    used: false
+  }]
+});
+
+mongoose.connection.on( 'connected', function(){  
+    console.log('connected.');
+});
+
+mongoose.connection.on( 'error', function(err){  
+    console.log( 'failed to connect a mongo db : ' + err );
+});
+
+// mongoose.disconnect() を実行すると、disconnected => close の順番でコールされる
+mongoose.connection.on( 'disconnected', function(){  
+    console.log( 'disconnected.' );
+});
+
+mongoose.connection.on( 'close', function(){  
+    console.log( 'connection closed.' );
+});
+
+User.update({id: "exampleUsername"}, testuser, {upsert: true})
+  .then((res) => {
+    console.log(res);
+    User.find({id: "exampleUsername"})
+      .then(res => {
+        debug("found user is " + JSON.stringify(res))
+      })
+    })
+  .catch(err => {throw new Error(err)})
 
 // deposit
 controller.hears(`deposit`, ["direct_mention", "direct_message", "mention"], (bot, message) => {
-    controller.storage.users.get(message.user, (err, userinfo) => {
-      if (!(userinfo.depositAddress instanceof Array)){
-        userinfo.depositAddress = []
+  controller.logger.debug("heard deposit")
+  bitcoindclient.getNewAddress()
+    .then((address) => {
+      return new Promise((resolve, reject) => {User.update({ id: message.user },
+          {$push: {depositAddresses: address}},
+          {upsert: true}, () => resolve(address))
+        }
+      )
+     })
+    .then((address) => {
+      bot.reply(message, "your deposit address is " + address)
+    })
+    .catch((err) => {bot.reply(err)})
+})
+
+// register
+controller.hears('register', ["direct_mention", "direct_message"], (bot, message) => {
+  bot.startConversation(message, (err, convo) => {
+    if (err) {
+      throw err
+    }
+    convo.ask("please paste your bitcoin address (separated by \\n)", (response, convo) => {
+      let ps = [];
+      for (let address of response.text.split("\n")) {
+        ps.push(PromiseSetAddressToUser(message.user, address))
       }
-      bitcoindclient.getNewAddress().then((address) => {
-        userinfo.depositAddress.push(address);
-        controller.storage.users.save(userinfo, (res) => {
-          console.log(res)
-          return bot.reply(message, "your deposit address is " + address);
-      })
+      debug(ps)
+      Promise.all(ps)
+        .then(() => convo.say("successfully registered address as " + formatUser(message.user) + "'s !"))
+        .then(() => convo.next())
+        .catch((err) => {convo.say(err.toString())}).then(() => {convo.next()})
     })
   })
-});
-
+})
 /*
 // pay by gratitude
 
@@ -145,34 +236,6 @@ controller.hears(paypattern, ["direct_mention", "direct_message", "ambient"], (b
 
 // pay intentionally
 
-// registerAddress
-
-controller.hears('register', ["direct_mention", "direct_message"], (bot, message) => {
-  bot.startConversation(message, (err, convo) => {
-    if (err) {
-      throw err
-    }
-    convo.ask("please paste your bitcoin address (separated by \\n)", (response, convo) => {
-      controller.storage.users.get(message.user, (err, userinfo) => {
-        controller.logger.debug('user info retrieved from db was ' + userinfo)
-        if (err) {
-          throw err
-        }
-        if (!(userinfo.address instanceof Array)){
-          userinfo.address = []
-        }
-        for(let address of response.text.split("\n")){
-          bitcoindclient.validateAddress(response.text)
-          .then(userinfo.address.push(address))
-        }
-        controller.storage.users.save(userinfo, (err) => {
-          convo.say("successfully registered address as " + formatUser(message.user) + "'s !");
-          convo.next();
-        })
-      })
-    });
-  })
-})
 
 // balance
 /*

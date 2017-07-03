@@ -22,6 +22,7 @@
     "bitcoin-core": "^1.2.0",
     "botkit": "^0.5.4",
     "botkit-storage-mongo": "github:joemphilips/botkit-storage-mongo#master",
+    "mongoose": "^4.11.1",
     "mysql": "^2.13.0",
     "sync-request": "^4.1.0",
     "webcoin": "^2.2.2",
