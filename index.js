@@ -2,6 +2,7 @@ const winston = require('winston');
 const Botkit = require("botkit");
 const config = require("./config");
 const debug = require('debug')('okimochi');
+const request = require('sync-request');
 
 // bitcoin
 const BitcoindClient = require("bitcoin-core");
@@ -28,6 +29,16 @@ function PromiseSetAddressToUser(userId, address){
       }
     })
   })
+}
+
+function getRateJPY() {
+  const rate_api_url = 'https://coincheck.com/api/exchange/orders/rate?order_type=buy&pair=btc_jpy&amount=1';
+  let response = request('GET', rate_api_url);
+  let rate;
+  if (response.statusCode == 200) {
+    rate = Math.round(JSON.parse(response.body).rate);
+    return rate;
+  }
 }
 
 
@@ -285,13 +296,38 @@ controller.hears(`tip ${userIdPattern.source} ${amountPattern.source}(.*)`, ["di
 })
 
 // balance
-/*
-controller.hears(`^balance ${userIdPattern.source}$`, ['direct_mention'], (bot, message) => {
-  let userId = message.match[1];
-  let (userId in )
-})
-*/
+controller.hears(`balance ${userIdPattern.source}$`, ['direct_mention', 'direct_message'], (bot, message) => {
+  let userid = message.match[1];
+  bot.startConversation(message, (err, convo) => {
 
+    // reply total balance first
+    bitcoindclient.getBalance()
+      .then((balance) => {
+        convo.say('the total balance is ' + balance);
+      })
+    // amount the user have depositted
+    User.find({id: message.user}, (err, content) => {
+
+      // if user has not registered yet.
+      if (content === null || content  === undefined){
+        convo.say(formatuser(userid) + " had no registered address. \nplease register first!");
+        convo.stop();
+      }else {
+        convo.say(formatUser(userid) + "'s balance is " + "未実装です :(")
+      }
+    })
+  })
+})
+
+// rate
+controller.hears('^rate$', ['direct_mention', 'direct_message'], (bot, message) => {
+  let rate = getRateJPY();
+  if (rate) {
+    bot.reply(message, `1BTC is now worth ${rate}JPY!`);
+  } else {
+    bot.reply(message, 'cannot get the rate somehow :pensive:');
+  }
+});
 
 // help
 controller.hears("^help$", ["direct_mention", "direct_message"], (bot, message) => {
