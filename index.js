@@ -184,7 +184,7 @@ controller.hears('register', ["direct_mention", "direct_message"], (bot, message
     if (err) {
       throw err
     }
-    convo.ask("please paste your bitcoin address (separated by \\n)", (response, convo) => {
+    convo.ask("please paste your bitcoin address (separated by \\n) of " + config.bitcoin.network, (response, convo) => {
       let ps = [];
       for (let address of response.text.split("\n")) {
         ps.push(PromiseSetAddressToUser(message.user, address))
@@ -333,20 +333,23 @@ controller.hears('^rate$', ['direct_mention', 'direct_message'], (bot, message) 
 controller.hears("^help$", ["direct_mention", "direct_message"], (bot, message) => {
   let usage = `
   # show @users bitcoin deposit address
-  - @bitcoin-tip deposit
+  - @okimochi-bitcoin deposit
 
   # register the address for getting paied
-  - @bitcoin-tip register
+  - @okimochi-bitcoin register
 
   # show this help
-  - @bitcoin-tip help
+  - @okimochi-bitcoin help
 
   # show balance of the @user
   - @bicoin-tip balance @user
 
   # show BTC-JPY rate
-  - @bitcoin-tip rate
-
+  - @okimochi-bitcoin rate
+  
+  # tip intentionally 
+  - @okimochi-bitcoin tip @user <BTC amount>
+  # 感謝の言葉にはまだ反応しないよ!ごめんね!
   `;
   bot.reply(message, usage);
 });
