@@ -250,48 +250,54 @@ controller.hears(paypattern, ["direct_mention", "direct_message", "ambient"], (b
 // pay intentionally
 controller.hears(`tip ${userIdPattern.source} ${amountPattern.source}(.*)`, ["direct_mention", "direct_message"], (bot, message) => {
   controller.logger.debug("whole match pattern was " + message.match[0]);
-  const userId = message.match[1];
+  const toPayUser = message.match[1];
   const amount = Number(message.match[2]);
   const Txmessage = message.match[3] || "no message";
   if (isNaN(amount)){
     return bot.reply(message, "please give amount of BTC in number !");
   }
+  if (message.user === toPayUser){
+    return bot.reply(message, "can not pay to your self !!")
+  }
+  controller.logger.debug("userId to pay is " + toPayUser);
+  controller.logger.debug("and paying from " + message.user);
 
-  controller.logger.debug("userId was " + userId);
-  User.findOne({ id: message.user } ,(err, content) => {
-    debug(content)
+  User.findOne({ id: message.user }, (err, fromUserContent) => {
+    User.findOne({id: toPayUser}, (err, toUserContent) => {
 
-    // when the user is not registered
-    if (content === null || content === undefined){
-      controller.logger.info("content was " + JSON.stringify(content));
-      bot.reply(message, formatUser(userId) + " had no registered address, so not going to pay.\nPlease register first!");
-
-    } else {
-
-      // check if all paybackAddresses has been used.
-      const paybackAddresses = content.paybackAddresses
-      let address;
-      let addressIndex;
-      if (paybackAddresses.every((a) => a.used)){
-        bot.reply(message, "all addresses has been used. So using the one we used before!")
-        address = paybackAddresses.pop().address
+      if (fromUserContent === null || fromUserContent === undefined ){
+        controller.logger.warning("fromUserContent was " + JSON.stringify(fromUserContent));
+        bot.reply(message, formatUser(message.user) +
+          " had no registered address, so not going to pay.\nPlease register first!");
+      } else if (toUserContent === null || toUserContent === undefined ) {
+        controller.logger.warning("to UserContent was " + JSON.stringify(toUserContent));
+        bot.reply(message, formatUser(toPayUser) +
+          " had no registered address, so not going to pay.\nPlease register first!");
       } else {
-        addressIndex = paybackAddresses.findIndex((e) => !e.used)
-        debug(addressIndex)
-        address = paybackAddresses[addressIndex].address
-      }
-      debug("going to pay to " + address);
-      try {
+
+        // check if all paybackAddresses has been used.
+        const paybackAddresses = toUserContent.paybackAddresses
+        let address;
+        let addressIndex;
+        if (paybackAddresses.every((a) => a.used)){
+          bot.reply(message, "all addresses has been used. So using the one we used before!")
+          address = paybackAddresses.pop().address
+        } else {
+          addressIndex = paybackAddresses.findIndex((e) => !e.used)
+          debug(addressIndex)
+          address = paybackAddresses[addressIndex].address
+        }
+        debug("going to pay to " + address);
         bitcoindclient.sendToAddress(address,
           amount,
           Txmessage,
           "this is comment."
         )
-      } catch (e) {
-        bot.reply(message, e.toString())
+          .then(() => bot.reply(message, "payed to " + formatUser(toPayUser))
+          .catch((err) => bot.reply(message, err.toString()))
+        )
       }
-    bot.reply(message, "payed to " + formatUser(userId));
-    }
+    })
   })
 })
 
@@ -303,14 +309,15 @@ controller.hears(`balance ${userIdPattern.source}$`, ['direct_mention', 'direct_
     // reply total balance first
     bitcoindclient.getBalance()
       .then((balance) => {
-        convo.say('the total balance is ' + balance);
+        convo.say('the total deposited balance is ' + balance);
       })
+
     // amount the user have depositted
     User.find({id: message.user}, (err, content) => {
 
       // if user has not registered yet.
       if (content === null || content  === undefined){
-        convo.say(formatuser(userid) + " had no registered address. \nplease register first!");
+        convo.say(formatUser(userid) + " had no registered address. \nplease register first!");
         convo.stop();
       }else {
         convo.say(formatUser(userid) + "'s balance is " + "未実装です :(")
@@ -332,6 +339,7 @@ controller.hears('^rate$', ['direct_mention', 'direct_message'], (bot, message) 
 // help
 controller.hears("^help$", ["direct_mention", "direct_message"], (bot, message) => {
   let usage = `
+  \`\`\`
   # show @users bitcoin deposit address
   - @okimochi-bitcoin deposit
 
@@ -346,10 +354,12 @@ controller.hears("^help$", ["direct_mention", "direct_message"], (bot, message) 
 
   # show BTC-JPY rate
   - @okimochi-bitcoin rate
-  
-  # tip intentionally 
-  - @okimochi-bitcoin tip @user <BTC amount>
+
+  # tip intentionally ... message will be included as Tx message for bitcoin
+  - @okimochi-bitcoin tip @user <BTC amount> <message>
+
   # 感謝の言葉にはまだ反応しないよ!ごめんね!
+  \`\`\`
   `;
   bot.reply(message, usage);
 });
