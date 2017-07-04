@@ -8,7 +8,8 @@
     "url": "git://github.com/campfire-inc/OKIMOCHI"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "docker-compose up -d --no-build"
   },
   "keywords": [
     "slack",
