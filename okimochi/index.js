@@ -31,6 +31,37 @@ function PromiseSetAddressToUser(userId, address){
   })
 }
 
+/**
+ * from users information. choose unused paybackAddress Preferentially.
+ * And mark that Address as "used". and returns updated info and address to use.
+ * @param {Object} userContent
+ * @return {Array} first address for using as paying back. Second updated user info
+ *  and third is String for bot to speak
+ */
+function extractUnusedAddress(userContent){
+  let paybackAddresses = userContent.paybackAddresses
+  let address;
+  let replyMessage = "";
+  let addressIndex;
+  if (paybackAddresses.every((a) => a.used)){
+    replyMessage += "warning: all addresses has been used.\n" +
+      "So using the one we used before!\n" +
+      "Please register the new address for the sake of fungibility! \n"
+    address = paybackAddresses.pop().address
+  } else {
+    addressIndex = paybackAddresses.findIndex((e) => !e.used)
+    debug(addressIndex)
+    address = paybackAddresses[addressIndex].address
+    debug(userContent)
+    console.log("\n\n\n\n")
+    debug(addressIndex)
+    userContent.paybackAddresses[addressIndex].used = true;
+  }
+  replyMessage += "Sending Tx to " + address + "\n"
+  return [address, userContent, replyMessage];
+}
+
+
 function getRateJPY() {
   const rate_api_url = 'https://coincheck.com/api/exchange/orders/rate?order_type=buy&pair=btc_jpy&amount=1';
   let response = request('GET', rate_api_url);
@@ -166,16 +197,16 @@ controller.hears(`deposit`, ["direct_mention", "direct_message", "mention"], (bo
   controller.logger.debug("heard deposit")
   bitcoindclient.getNewAddress()
     .then((address) => {
-      return new Promise((resolve, reject) => {User.update({ id: message.user },
-          {$push: {depositAddresses: address}},
-          {upsert: true}, () => resolve(address))
-        }
-      )
-     })
-    .then((address) => {
       bot.reply(message, "your deposit address is " + address)
+      return address
     })
+    .then((address) => User.update({ id: message.user },
+        {$push: {depositAddresses: address}},
+        {upsert: true}, () => debug("registered " + address + " as " + 
+          formatUser(message.user) + "'s")))
     .catch((err) => {bot.reply(err)})
+
+    
 })
 
 // register
@@ -276,24 +307,18 @@ controller.hears(`tip ${userIdPattern.source} ${amountPattern.source}(.*)`, ["di
       } else {
 
         // check if all paybackAddresses has been used.
-        const paybackAddresses = toUserContent.paybackAddresses
-        let address;
-        let addressIndex;
-        if (paybackAddresses.every((a) => a.used)){
-          bot.reply(message, "all addresses has been used. So using the one we used before!")
-          address = paybackAddresses.pop().address
-        } else {
-          addressIndex = paybackAddresses.findIndex((e) => !e.used)
-          debug(addressIndex)
-          address = paybackAddresses[addressIndex].address
-        }
+        let [address, updatedContent, replyMessage] =
+          extractUnusedAddress(toUserContent); 
         debug("going to pay to " + address);
+        debug("of user " + updatedContent);
         bitcoindclient.sendToAddress(address,
           amount,
           Txmessage,
           "this is comment."
         )
-          .then(() => bot.reply(message, "payed to " + formatUser(toPayUser)))
+          .then(() => updatedContent.save())
+          .then(() => bot.reply(message, replyMessage +
+            "payed to " + formatUser(toPayUser)))
           .catch((err) => bot.reply(message, err.toString()))
       }
     })
@@ -312,14 +337,28 @@ controller.hears(`balance ${userIdPattern.source}$`, ['direct_mention', 'direct_
       })
 
     // amount the user have depositted
-    User.find({id: message.user}, (err, content) => {
+    User.findOne({id: userid}, (err, content) => {
+      content = content.toObject()
+      debug("content is " + content)
 
       // if user has not registered yet.
-      if (content === null || content  === undefined){
-        convo.say(formatUser(userid) + " had no registered address. \nplease register first!");
+      if (content === null || content  === undefined ){
+        convo.say(formatUser(userid) +
+          " had no registered address. \nplease register first!");
         convo.stop();
+      /* } else if (content.depositAddresses === undefined){
+        convo.say(formatUser(userid) + " have never depositted before");
+        convo.next(); */
       }else {
-        convo.say(formatUser(userid) + "'s balance is " + "未実装です :(")
+        ps = content.depositAddresses
+          .map((a) => bitcoindclient.getReceivedByAddress(a))
+        Promise.all(ps)
+          .then((amounts) => {
+            debug("amounts are" + amounts)
+            convo.say(formatUser(userid) + " depositted " +
+            amounts.reduce((a, b) => a + b) + " BTC")
+          })
+          .catch((err) => convo.say(err.toString()))
       }
     })
   })
