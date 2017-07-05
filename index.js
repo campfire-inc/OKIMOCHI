@@ -197,16 +197,16 @@ controller.hears(`deposit`, ["direct_mention", "direct_message", "mention"], (bo
   controller.logger.debug("heard deposit")
   bitcoindclient.getNewAddress()
     .then((address) => {
-      return new Promise((resolve, reject) => {User.update({ id: message.user },
-          {$push: {depositAddresses: address}},
-          {upsert: true}, () => resolve(address))
-        }
-      )
-     })
-    .then((address) => {
       bot.reply(message, "your deposit address is " + address)
+      return address
     })
+    .then((address) => User.update({ id: message.user },
+        {$push: {depositAddresses: address}},
+        {upsert: true}, () => debug("registered " + address + " as " + 
+          formatUser(message.user) + "'s")))
     .catch((err) => {bot.reply(err)})
+
+    
 })
 
 // register
@@ -337,14 +337,28 @@ controller.hears(`balance ${userIdPattern.source}$`, ['direct_mention', 'direct_
       })
 
     // amount the user have depositted
-    User.find({id: message.user}, (err, content) => {
+    User.findOne({id: userid}, (err, content) => {
+      content = content.toObject()
+      debug("content is " + content)
 
       // if user has not registered yet.
-      if (content === null || content  === undefined){
-        convo.say(formatUser(userid) + " had no registered address. \nplease register first!");
+      if (content === null || content  === undefined ){
+        convo.say(formatUser(userid) +
+          " had no registered address. \nplease register first!");
         convo.stop();
+      /* } else if (content.depositAddresses === undefined){
+        convo.say(formatUser(userid) + " have never depositted before");
+        convo.next(); */
       }else {
-        convo.say(formatUser(userid) + "'s balance is " + "未実装です :(")
+        ps = content.depositAddresses
+          .map((a) => bitcoindclient.getReceivedByAddress(a))
+        Promise.all(ps)
+          .then((amounts) => {
+            debug("amounts are" + amounts)
+            convo.say(formatUser(userid) + " depositted " +
+            amounts.reduce((a, b) => a + b) + " BTC")
+          })
+          .catch((err) => convo.say(err.toString()))
       }
     })
   })
