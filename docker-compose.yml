@@ -1,7 +1,7 @@
 version: '2'
 services:
   okimochi:
-    build: .
+    build: ./okimochi
     image: joemphilips/okimochi:latest
     env_file: .env
     command: node index.js
