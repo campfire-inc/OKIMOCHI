@@ -31,6 +31,37 @@ function PromiseSetAddressToUser(userId, address){
   })
 }
 
+/**
+ * from users information. choose unused paybackAddress Preferentially.
+ * And mark that Address as "used". and returns updated info and address to use.
+ * @param {Object} userContent
+ * @return {Array} first address for using as paying back. Second updated user info
+ *  and third is String for bot to speak
+ */
+function extractUnusedAddress(userContent){
+  let paybackAddresses = userContent.paybackAddresses
+  let address;
+  let replyMessage = "";
+  let addressIndex;
+  if (paybackAddresses.every((a) => a.used)){
+    replyMessage += "warning: all addresses has been used.\n" +
+      "So using the one we used before!\n" +
+      "Please register the new address for the sake of fungibility! \n"
+    address = paybackAddresses.pop().address
+  } else {
+    addressIndex = paybackAddresses.findIndex((e) => !e.used)
+    debug(addressIndex)
+    address = paybackAddresses[addressIndex].address
+    debug(userContent)
+    console.log("\n\n\n\n")
+    debug(addressIndex)
+    userContent.paybackAddresses[addressIndex].used = true;
+  }
+  replyMessage += "Sending Tx to " + address + "\n"
+  return [address, userContent, replyMessage];
+}
+
+
 function getRateJPY() {
   const rate_api_url = 'https://coincheck.com/api/exchange/orders/rate?order_type=buy&pair=btc_jpy&amount=1';
   let response = request('GET', rate_api_url);
@@ -276,24 +307,18 @@ controller.hears(`tip ${userIdPattern.source} ${amountPattern.source}(.*)`, ["di
       } else {
 
         // check if all paybackAddresses has been used.
-        const paybackAddresses = toUserContent.paybackAddresses
-        let address;
-        let addressIndex;
-        if (paybackAddresses.every((a) => a.used)){
-          bot.reply(message, "all addresses has been used. So using the one we used before!")
-          address = paybackAddresses.pop().address
-        } else {
-          addressIndex = paybackAddresses.findIndex((e) => !e.used)
-          debug(addressIndex)
-          address = paybackAddresses[addressIndex].address
-        }
+        let [address, updatedContent, replyMessage] =
+          extractUnusedAddress(toUserContent); 
         debug("going to pay to " + address);
+        debug("of user " + updatedContent);
         bitcoindclient.sendToAddress(address,
           amount,
           Txmessage,
           "this is comment."
         )
-          .then(() => bot.reply(message, "payed to " + formatUser(toPayUser)))
+          .then(() => updatedContent.save())
+          .then(() => bot.reply(message, replyMessage +
+            "payed to " + formatUser(toPayUser)))
           .catch((err) => bot.reply(message, err.toString()))
       }
     })
