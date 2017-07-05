@@ -293,9 +293,8 @@ controller.hears(`tip ${userIdPattern.source} ${amountPattern.source}(.*)`, ["di
           Txmessage,
           "this is comment."
         )
-          .then(() => bot.reply(message, "payed to " + formatUser(toPayUser))
+          .then(() => bot.reply(message, "payed to " + formatUser(toPayUser)))
           .catch((err) => bot.reply(message, err.toString()))
-        )
       }
     })
   })
