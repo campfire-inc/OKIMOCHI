@@ -197,16 +197,16 @@ controller.hears(`deposit`, ["direct_mention", "direct_message", "mention"], (bo
   controller.logger.debug("heard deposit")
   bitcoindclient.getNewAddress()
     .then((address) => {
-      return new Promise((resolve, reject) => {User.update({ id: message.user },
-          {$push: {depositAddresses: address}},
-          {upsert: true}, () => resolve(address))
-        }
-      )
-     })
-    .then((address) => {
       bot.reply(message, "your deposit address is " + address)
+      return address
     })
+    .then((address) => User.update({ id: message.user },
+        {$push: {depositAddresses: address}},
+        {upsert: true}, () => debug("registered " + address + " as " + 
+          formatUser(message.user) + "'s")))
     .catch((err) => {bot.reply(err)})
+
+    
 })
 
 // register
