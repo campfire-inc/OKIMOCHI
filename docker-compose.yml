@@ -4,12 +4,7 @@ services:
     build: ./okimochi
     image: joemphilips/okimochi:latest
     env_file: .env
-    environment:
-      MONGO_URI: 192.168.0.1
-      BITCOIND_URI: 192.168.0.1
     command: node index.js
-    networks:
-      - okimochi
     volumes:
       - ".:/usr/app"
     ports:
@@ -24,8 +19,6 @@ services:
     stdin_open: true
   bitcoind:
     image: seegno/bitcoind:0.14.2-alpine
-    networks:
-      - okimochi
     volumes:
       - "./bitcoin:/home/bitcoin/.bitcoin"
     ports:
@@ -39,12 +32,10 @@ services:
       -rest
       -testnet
       -server
-      -rpcpassword=bitcoin-tipper
       -rpcuser=slackbot
-      -rpcallowip=192.168.0.0/16
+      -rpcpassword=bitcoin-tipper
+      -rpcallowip=172.0.0.0/8
   mongo:
-    networks:
-      - okimochi
     restart: always
     image: mongo
     command:
@@ -55,7 +46,3 @@ services:
       - "28017:28017"
     volumes:
       - "./userdb:/data/db"
-
-networks:
-  okimochi:
-    external: true
