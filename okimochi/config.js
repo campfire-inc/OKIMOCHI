@@ -10,6 +10,7 @@ module.exports = {
     network: process.env.BITCOIND_NETWORK || 'testnet',
     username: process.env.BITCOIND_USERNAME || 'slackbot',
     password: process.env.BITCOIND_PASSWORD || 'bitcoin-tipper',
-    host: process.env.BITCOIND_URI || "localhost"
+    host: process.env.BITCOIND_PORT_8333_TCP_ADDR ||
+      process.env.BITCOIND_URI || "localhost"
   }
 }
