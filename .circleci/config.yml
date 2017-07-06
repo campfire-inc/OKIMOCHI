@@ -1,0 +1,31 @@
+version: 2
+jobs:
+  build:
+    working_directory: /home/circleci/okimochi
+    docker:
+      - image: circleci/node:7.10
+    steps:
+      - checkout
+      - run:
+          name: update-npm
+          command: 'cd okimochi && sudo npm install -g npm@latest'
+  test:
+    working_directory: /home/circleci/okimochi
+    docker:
+      - image: circleci/node:7.10
+    steps:
+      - run:
+          name: test
+          command: 'cd okimochi && npm test'
+
+workflows:
+  version: 2
+  build_and_test:
+    branches:
+      ignore:
+        - master
+    jobs:
+      - build
+      - test:
+          requires:
+          - build
