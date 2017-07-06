@@ -131,7 +131,8 @@ controller.spawn({
 const mongoose = require("mongoose");
 mongoose.Promise = global.Promise
 mongoose.connect(config.mongoUri, {
-  useMongoClient: true
+  useMongoClient: true,
+  server: {auto_reconnect: true}
 })
   .then((db) => {return db.once('open', () => {
     console.log("db is open!")
@@ -165,20 +166,20 @@ const testuser = new User({
   }]
 });
 
-mongoose.connection.on( 'connected', function(){  
+mongoose.connection.on( 'connected', function(){
     console.log('connected.');
 });
 
-mongoose.connection.on( 'error', function(err){  
+mongoose.connection.on( 'error', function(err){
     console.log( 'failed to connect a mongo db : ' + err );
 });
 
 // mongoose.disconnect() を実行すると、disconnected => close の順番でコールされる
-mongoose.connection.on( 'disconnected', function(){  
+mongoose.connection.on( 'disconnected', function(){
     console.log( 'disconnected.' );
 });
 
-mongoose.connection.on( 'close', function(){  
+mongoose.connection.on( 'close', function(){
     console.log( 'connection closed.' );
 });
 
