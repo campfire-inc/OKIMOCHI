@@ -6,3 +6,4 @@ bitcoin/*
 !bitcoin/.gitkeep
 okimochi.log
 .env
+.nyc_output
