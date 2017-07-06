@@ -4,6 +4,9 @@ services:
     build: ./okimochi
     image: joemphilips/okimochi:latest
     env_file: .env
+    environment:
+      MONGO_URI: 192.168.0.1
+      BITCOIND_URI: 192.168.0.1
     command: node index.js
     networks:
       - okimochi
@@ -15,8 +18,8 @@ services:
       PORT: 8080
     restart: always
     links:
-      - mongo
-      - bitcoind
+      - mongo:mongo
+      - bitcoind:bitcoind
     tty: true
     stdin_open: true
   bitcoind:
