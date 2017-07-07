@@ -1,0 +1,12 @@
+version: 2
+jobs:
+  build:
+    working_directory: /home/circleci/okimochi
+    docker:
+      - image: circleci/node:7.10
+    steps:
+      - checkout
+      - run:
+          name: install npm packages
+          command: 'cd okimochi && npm install'
+      - run: 'cd okimochi && npm test'
