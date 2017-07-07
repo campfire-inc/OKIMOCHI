@@ -11,9 +11,7 @@ jobs:
           command: 'cd okimochi && npm install'
   test:
     steps:
-      - run:
-          name: test
-          command: 'cd okimochi && npm test'
+      - run: 'cd okimochi && npm test'
 
 workflows:
   version: 2
@@ -22,4 +20,4 @@ workflows:
       - build
       - test:
           requires:
-          - build
+            - build
