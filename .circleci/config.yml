@@ -1,21 +1,39 @@
+defaults: &defaults
+  working_directory: /home/circleci/okimochi
+  docker:
+    - image: circleci/node:7.10
+
 version: 2
 jobs:
-  build:
-    working_directory: /home/circleci/okimochi
-    docker:
-      - image: circleci/node:7.10
+  deps:
+    <<: *defaults
     steps:
+      - type: cache-restore
+        key: okimochi-{{ checksum "okimochi/package.json" }}
       - checkout
       - run:
           name: install npm packages
           command: 'cd okimochi && npm install'
+      - type: cache-save
+        key: okimochi-{{ checksum "okimochi/package.json" }}
+        paths:
+          - okimochi/node_modules
+      - persist_to_workspace:
+          root: /home/circleci
+          paths:
+            - okimochi/node_modules
+  tests:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: /home/circleci
       - run: 'cd okimochi && npm test'
 
 workflows:
   version: 2
   build_and_test:
     jobs:
-      - build
-      - test:
+      - deps
+      - tests:
           requires:
-            - build
+            - deps
