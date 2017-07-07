@@ -9,8 +9,6 @@ jobs:
       - run:
           name: install npm packages
           command: 'cd okimochi && npm install'
-  test:
-    steps:
       - run: 'cd okimochi && npm test'
 
 workflows:
