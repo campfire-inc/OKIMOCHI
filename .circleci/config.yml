@@ -8,7 +8,10 @@ jobs:
       - checkout
       - run:
           name: update-npm
-          command: 'cd okimochi && sudo npm install -g npm@latest'
+          command: 'sudo npm install -g npm@latest'
+      - run:
+          name: install npm packages
+          command: 'cd okimochi && npm install'
   test:
     working_directory: /home/circleci/okimochi
     docker:
