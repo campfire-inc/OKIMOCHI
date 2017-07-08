@@ -6,7 +6,22 @@ jobs:
       - image: circleci/node:7.10
     steps:
       - checkout
+
+      # build
+      - type: cache-restore
+        key: okimochi-{{ checksum "okimochi/package.json"}}
       - run:
           name: install npm packages
           command: 'cd okimochi && npm install'
+
+      # test
       - run: 'cd okimochi && npm test'
+
+      # deploy
+      - run:
+          name: register to ecr and deploy to ecs
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "develop"]; then
+              ./.circleci/deploy-ecs.sh
+            fi
+
