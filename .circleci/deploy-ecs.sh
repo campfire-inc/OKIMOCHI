@@ -19,7 +19,7 @@ make_task_def(){
         "image": "%s.dkr.ecr.%s.amazonaws.com/%s:%s",
         "essential": true,
         "memory": 400,
-        "cpu": 1000,
+        "cpu": 333,
         "portMappings": [
           {
             "containerPort": 3000,
@@ -67,7 +67,7 @@ make_task_def(){
         ],
         "name": "mongo",
         "image": "mongo:3.4.5",
-        "cpu": 400,
+        "cpu": 130,
         "logConfiguration": {
           "logDriver": "syslog"
           }
@@ -115,8 +115,8 @@ make_task_def(){
         ],
         "name": "bitcoind",
         "image": "seegno/bitcoind:0.14.2-alpine",
-        "cpu": 640,
-        "memoryReservation": 3000,
+        "cpu": 200,
+        "memoryReservation": 1400,
         "logConfiguration": {
         "logDriver": "syslog"
     }
