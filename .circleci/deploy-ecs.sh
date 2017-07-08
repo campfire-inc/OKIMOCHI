@@ -63,7 +63,7 @@ make_task_def(){
             ],
             "name": "mongo",
             "image": "mongo:3.4.5",
-            "cpu": 1k
+            "cpu": 20
         },
 
          {
