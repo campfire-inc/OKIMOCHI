@@ -12,15 +12,18 @@ services:
     environment:
       PORT: 8080
     restart: always
-    links:
-      - mongo:mongo
-      - bitcoind:bitcoind
+    networks:
+      okimochi-network:
+        ipv4_address: 172.0.0.2
     tty: true
     stdin_open: true
   bitcoind:
     image: seegno/bitcoind:0.14.2-alpine
     volumes:
       - "./bitcoin:/home/bitcoin/.bitcoin"
+    networks:
+      okimochi-network:
+        ipv4_address: 172.0.0.3
     ports:
       - "8332:8332"
       - "8333:8333"
@@ -38,6 +41,9 @@ services:
   mongo:
     restart: always
     image: mongo
+    networks:
+      okimochi-network:
+        ipv4_address: 172.0.0.4
     command:
       --dbpath=/data/db
       --rest
@@ -46,3 +52,11 @@ services:
       - "28017:28017"
     volumes:
       - "./userdb:/data/db"
+
+networks:
+  okimochi-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.0.0.0/16
+          gateway: 172.0.0.1
