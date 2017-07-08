@@ -11,6 +11,7 @@ AWS_ECR_REP_NAME=okimochi
 AWS_ACCOUNT_ID=894559805305
 
 # Create Task Definition
+
 make_task_def(){
 	task_template='[
       {
@@ -115,6 +116,22 @@ make_task_def(){
 
 	task_def=$(printf "$task_template" ${AWS_ECS_TASKDEF_NAME} \
       $AWS_ACCOUNT_ID ${AWS_DEFAULT_REGION} ${AWS_ECR_REP_NAME} $CIRCLE_SHA1 ${TOKEN})
+    volume_def='[
+    {
+      "host": {
+        "sourcePath": "/daba/db"
+      },
+      "name": "userdb"
+    },
+    {
+      "host": {
+        "sourcePath": "/bitcoind"
+      },
+      "name": "bitcoind"
+    }
+  ]'
+
+
 }
 
 # more bash-friendly output for jq
@@ -162,7 +179,7 @@ push_ecr_image(){
 
 register_definition() {
 
-    if revision=$(aws ecs register-task-definition --container-definitions "$task_def" --family ${AWS_ECS_TASKDEF_NAME} | $JQ '.taskDefinition.taskDefinitionArn'); then
+    if revision=$(aws ecs register-task-definition --container-definitions "$task_def" --volumes "$volume_def" --family ${AWS_ECS_TASKDEF_NAME} | $JQ '.taskDefinition.taskDefinitionArn'); then
         echo "Revision: $revision"
     else
         echo "Failed to register task definition"
