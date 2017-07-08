@@ -25,7 +25,122 @@ make_task_def(){
 					"hostPort": 3000
 				}
 			]
-		}
+		},
+
+
+         {
+            "volumesFrom": [],
+            "memory": 200,
+            "extraHosts": null,
+            "dnsServers": null,
+            "disableNetworking": null,
+            "dnsSearchDomains": null,
+            "portMappings": [
+                {
+                    "hostPort": 27017,
+                    "containerPort": 27017,
+                    "protocol": "tcp"
+                },
+                {
+                    "hostPort": 28017,
+                    "containerPort": 28017,
+                    "protocol": "tcp"
+                }
+            ],
+            "hostname": null,
+            "essential": true,
+            "entryPoint": [
+                "mongod",
+                "--dbpath=/data/db"
+            ],
+            "mountPoints": [
+                {
+                    "containerPath": "/data/db",
+                    "sourceVolume": "userdb",
+                    "readOnly": null
+                }
+            ],
+            "name": "mongo",
+            "ulimits": null,
+            "dockerSecurityOptions": null,
+            "environment": [],
+            "links": null,
+            "workingDirectory": null,
+            "readonlyRootFilesystem": null,
+            "image": "mongo:3.4.5",
+            "command": [],
+            "user": null,
+            "dockerLabels": null,
+            "logConfiguration": null,
+            "cpu": 1,
+            "privileged": null,
+            "memoryReservation": null
+        },
+
+         {
+            "volumesFrom": [],
+            "memory": null,
+            "extraHosts": null,
+            "dnsServers": null,
+            "disableNetworking": null,
+            "dnsSearchDomains": null,
+            "portMappings": [
+                {
+                    "hostPort": 8332,
+                    "containerPort": 8332,
+                    "protocol": "tcp"
+                },
+                {
+                    "hostPort": 8333,
+                    "containerPort": 8333,
+                    "protocol": "tcp"
+                },
+                {
+                    "hostPort": 18332,
+                    "containerPort": 18332,
+                    "protocol": "tcp"
+                },
+                {
+                    "hostPort": 18333,
+                    "containerPort": 18333,
+                    "protocol": "tcp"
+                }
+            ],
+            "hostname": null,
+            "essential": true,
+            "entryPoint": [
+                "bitcoind",
+                "-printtoconsole",
+                "-rest",
+                "-testnet",
+                "-server",
+                "-rpcallowip=172.0.0.0/8",
+                "-rpcuser=slackbot",
+                "-rpcpassword=bitcoin-tipper"
+            ],
+            "mountPoints": [
+                {
+                    "containerPath": "/home/bitcoin/.bitcoin",
+                    "sourceVolume": "bitcoind",
+                    "readOnly": null
+                }
+            ],
+            "name": "bitcoind",
+            "ulimits": null,
+            "dockerSecurityOptions": null,
+            "environment": [],
+            "links": null,
+            "workingDirectory": null,
+            "readonlyRootFilesystem": null,
+            "image": "seegno/bitcoind:0.14.2-alpine",
+            "command": [],
+            "user": null,
+            "dockerLabels": null,
+            "logConfiguration": null,
+            "cpu": 2,
+            "privileged": null,
+            "memoryReservation": 3000
+        },
 	]'
 
 	task_def=$(printf "$task_template" ${AWS_ECS_TASKDEF_NAME} \
