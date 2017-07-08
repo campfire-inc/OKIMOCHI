@@ -18,8 +18,8 @@ make_task_def(){
         "name": "%s",
         "image": "%s.dkr.ecr.%s.amazonaws.com/%s:%s",
         "essential": true,
-        "memory": 200,
-        "cpu": 10,
+        "memory": 400,
+        "cpu": 1000,
         "portMappings": [
           {
             "containerPort": 3000,
@@ -64,7 +64,7 @@ make_task_def(){
             ],
             "name": "mongo",
             "image": "mongo:3.4.5",
-            "cpu": 20
+            "cpu": 400
         },
 
          {
@@ -109,7 +109,7 @@ make_task_def(){
             ],
             "name": "bitcoind",
             "image": "seegno/bitcoind:0.14.2-alpine",
-            "cpu": 2,
+            "cpu": 640,
             "memoryReservation": 3000
         }
 ]'
