@@ -8,6 +8,7 @@ AWS_ECS_TASKDEF_NAME=okimochi
 AWS_ECS_CLUSTER_NAME=okimochi-cluster
 AWS_ECS_SERVICE_NAME=okimochi-service
 AWS_ECR_REP_NAME=okimochi
+AWS_ACCOUNT_ID=894559805305
 
 # Create Task Definition
 make_task_def(){
