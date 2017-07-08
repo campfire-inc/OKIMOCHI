@@ -3,7 +3,7 @@ jobs:
   build:
     working_directory: /home/circleci/okimochi
     docker:
-      - image: circleci/node:7.10
+      - image: joemphilips/node7-awscli
     steps:
       - checkout
       - run:
