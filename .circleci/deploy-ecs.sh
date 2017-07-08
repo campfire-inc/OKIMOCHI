@@ -24,7 +24,15 @@ make_task_def(){
 					"containerPort": 3000,
 					"hostPort": 3000
 				}
-			]
+			],
+            "links": [
+                "bitcoind:bitcoind",
+                "mongo:mongo"
+            ],
+            {
+                "name": "TOKEN",
+                "value": "%s"
+            }
 		},
 
 
@@ -141,10 +149,24 @@ make_task_def(){
             "privileged": null,
             "memoryReservation": 3000
         },
-	]'
+	],
+        "volumes": [
+        {
+            "host": {
+                "sourcePath": "/daba/db"
+            },
+            "name": "userdb"
+        },
+        {
+            "host": {
+                "sourcePath": "/bitcoind"
+            },
+            "name": "bitcoind"
+        }
+    ],'
 
 	task_def=$(printf "$task_template" ${AWS_ECS_TASKDEF_NAME} \
-      $AWS_ACCOUNT_ID ${AWS_DEFAULT_REGION} ${AWS_ECR_REP_NAME} $CIRCLE_SHA1)
+      $AWS_ACCOUNT_ID ${AWS_DEFAULT_REGION} ${AWS_ECR_REP_NAME} $CIRCLE_SHA1 ${TOKEN})
 }
 
 # more bash-friendly output for jq
