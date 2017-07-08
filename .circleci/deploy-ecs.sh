@@ -174,6 +174,7 @@ deploy_cluster() {
 
 push_ecr_image(){
 	eval $(aws ecr get-login --region ${AWS_DEFAULT_REGION})
+    docker tag okimochi:temp $AWS_ACCOUNT_ID.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${AWS_ECR_REP_NAME}:$CIRCLE_SHA1
 	docker push $AWS_ACCOUNT_ID.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${AWS_ECR_REP_NAME}:$CIRCLE_SHA1
 }
 
