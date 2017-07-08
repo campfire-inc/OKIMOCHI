@@ -27,7 +27,7 @@ jobs:
       - run:
           name: build docker image for okimochi only.
           command: |
-            "cd okimochi && docker build okimochi -f okimochi/Dockerfile --no-cache --tag okimochi:temp"
+            docker build okimochi -f okimochi/Dockerfile --no-cache --tag okimochi:temp
       # deploy
       - run:
           name: register to ecr and deploy to ecs
