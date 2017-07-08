@@ -19,9 +19,9 @@ jobs:
 
       # deploy
       - run:
-        command: |
-          if [ "${CIRCLE_BRANCH}" == "master"]; then
-            ././circleci/deploy-ecs.sh
-          fi
-
+          name: register to ecr and deploy to ecs
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "develop"]; then
+              ./.circleci/deploy-ecs.sh
+            fi
 
