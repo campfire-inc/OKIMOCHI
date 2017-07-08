@@ -33,85 +33,94 @@ make_task_def(){
         "environment": [{
           "name": "TOKEN",
           "value": "%s"
-        }]
+        }],
+        "logConfiguration": {
+          "logDriver": "syslog"
+        }
       },
 
 
       {
         "memory": 200,
         "portMappings": [
-            {
-              "hostPort": 27017,
-              "containerPort": 27017,
-              "protocol": "tcp"
-            },
-            {
-              "hostPort": 28017,
-              "containerPort": 28017,
-              "protocol": "tcp"
-            }
+          {
+            "hostPort": 27017,
+            "containerPort": 27017,
+            "protocol": "tcp"
+          },
+          {
+            "hostPort": 28017,
+            "containerPort": 28017,
+            "protocol": "tcp"
+          }
         ],
         "essential": true,
         "entryPoint": [
-                "mongod",
-                "--dbpath=/data/db"
-            ],
-            "mountPoints": [
-                {
-                    "containerPath": "/data/db",
-                    "sourceVolume": "userdb"
-                }
-            ],
-            "name": "mongo",
-            "image": "mongo:3.4.5",
-            "cpu": 400
+          "mongod",
+          "--dbpath=/data/db"
+        ],
+        "mountPoints": [
+          {
+            "containerPath": "/data/db",
+            "sourceVolume": "userdb"
+          }
+        ],
+        "name": "mongo",
+        "image": "mongo:3.4.5",
+        "cpu": 400,
+        "logConfiguration": {
+          "logDriver": "syslog"
+          }
         },
 
-         {
-            "portMappings": [
-                {
-                    "hostPort": 8332,
-                    "containerPort": 8332,
-                    "protocol": "tcp"
-                },
-                {
-                    "hostPort": 8333,
-                    "containerPort": 8333,
-                    "protocol": "tcp"
-                },
-                {
-                    "hostPort": 18332,
-                    "containerPort": 18332,
-                    "protocol": "tcp"
-                },
-                {
-                    "hostPort": 18333,
-                    "containerPort": 18333,
-                    "protocol": "tcp"
-                }
-            ],
-            "essential": true,
-            "entryPoint": [
-                "bitcoind",
-                "-printtoconsole",
-                "-rest",
-                "-testnet",
-                "-server",
-                "-rpcallowip=172.0.0.0/8",
-                "-rpcuser=slackbot",
-                "-rpcpassword=bitcoin-tipper"
-            ],
-            "mountPoints": [
-                {
-                    "containerPath": "/home/bitcoin/.bitcoin",
-                    "sourceVolume": "bitcoind"
-                }
-            ],
-            "name": "bitcoind",
-            "image": "seegno/bitcoind:0.14.2-alpine",
-            "cpu": 640,
-            "memoryReservation": 3000
-        }
+        {
+        "portMappings": [
+          {
+            "hostPort": 8332,
+            "containerPort": 8332,
+            "protocol": "tcp"
+          },
+          {
+            "hostPort": 8333,
+            "containerPort": 8333,
+            "protocol": "tcp"
+          },
+          {
+            "hostPort": 18332,
+            "containerPort": 18332,
+            "protocol": "tcp"
+          },
+          {
+            "hostPort": 18333,
+            "containerPort": 18333,
+            "protocol": "tcp"
+          }
+        ],
+        "essential": true,
+        "entryPoint": [
+          "bitcoind",
+          "-printtoconsole",
+          "-rest",
+          "-testnet",
+          "-server",
+          "-rpcallowip=172.0.0.0/8",
+          "-rpcuser=slackbot",
+          "-rpcpassword=bitcoin-tipper"
+        ],
+        "mountPoints": [
+          {
+            "containerPath": "/home/bitcoin/.bitcoin",
+            "sourceVolume": "bitcoind"
+          }
+        ],
+        "name": "bitcoind",
+        "image": "seegno/bitcoind:0.14.2-alpine",
+        "cpu": 640,
+        "memoryReservation": 3000,
+        "logConfiguration": {
+        "logDriver": "syslog"
+    }
+  }
 ]'
 
 	task_def=$(printf "$task_template" ${AWS_ECS_TASKDEF_NAME} \
