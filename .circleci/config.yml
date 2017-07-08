@@ -3,7 +3,7 @@ jobs:
   build:
     working_directory: /home/circleci/okimochi
     docker:
-      - image: joemphilips/node7-awscli
+      - image: joemphilips/node7-awscli-docker
     steps:
       - checkout
       - run:
@@ -12,17 +12,6 @@ jobs:
       - run: 'cd okimochi && npm test'
 
       - setup_remote_docker
-
-      # use a primary image that already has Docker (recommended)
-      # or install it during a build like we do here
-      - run:
-          name: Install Docker client
-          command: |
-            set -x
-            VER="17.03.0-ce"
-            curl -L -o /tmp/docker-$VER.tgz https://get.docker.com/builds/Linux/x86_64/docker-$VER.tgz
-            tar -xz -C /tmp -f /tmp/docker-$VER.tgz
-            export PATH=/tmp/docker:$PATH
 
       - run:
           name: build docker image for okimochi only.
