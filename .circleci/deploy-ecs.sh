@@ -32,7 +32,7 @@ make_task_def(){
         "environment": [{
           "name": "TOKEN",
           "value": "%s"
-        }],
+        }]
       },
 
 
@@ -51,19 +51,19 @@ make_task_def(){
             }
         ],
         "essential": true,
-            "entryPoint": [
+        "entryPoint": [
                 "mongod",
                 "--dbpath=/data/db"
             ],
             "mountPoints": [
                 {
                     "containerPath": "/data/db",
-                    "sourceVolume": "userdb",
+                    "sourceVolume": "userdb"
                 }
             ],
             "name": "mongo",
             "image": "mongo:3.4.5",
-            "cpu": 1,
+            "cpu": 1k
         },
 
          {
@@ -103,14 +103,14 @@ make_task_def(){
             "mountPoints": [
                 {
                     "containerPath": "/home/bitcoin/.bitcoin",
-                    "sourceVolume": "bitcoind",
+                    "sourceVolume": "bitcoind"
                 }
             ],
             "name": "bitcoind",
             "image": "seegno/bitcoind:0.14.2-alpine",
             "cpu": 2,
             "memoryReservation": 3000
-        },
+        }
 ]'
 
 	task_def=$(printf "$task_template" ${AWS_ECS_TASKDEF_NAME} \
