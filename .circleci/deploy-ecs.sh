@@ -29,10 +29,10 @@ make_task_def(){
           "bitcoind:bitcoind",
           "mongo:mongo"
         ],
-        {
+        "environment": {
           "name": "TOKEN",
           "value": "%s"
-        },
+        }],
       },
 
 
