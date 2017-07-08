@@ -7,10 +7,9 @@ services:
     command: node index.js
     volumes:
       - ".:/usr/app"
-    ports:
-      - "3000:3000"
-    environment:
-      PORT: 8080
+    extra_hosts:
+      - "mongo:172.0.0.4"
+      - "bitcoind:172.0.0.3"
     restart: always
     networks:
       okimochi-network:
@@ -24,12 +23,6 @@ services:
     networks:
       okimochi-network:
         ipv4_address: 172.0.0.3
-    ports:
-      - "8332:8332"
-      - "8333:8333"
-      - "18332:18332"
-      - "18333:18333"
-      - "18444:18444"
     command:
       -printtoconsole
       -rest
@@ -47,9 +40,6 @@ services:
     command:
       --dbpath=/data/db
       --rest
-    ports:
-      - "27017:27017"
-      - "28017:28017"
     volumes:
       - "./userdb:/data/db"
 
