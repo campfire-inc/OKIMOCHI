@@ -21,7 +21,7 @@ jobs:
       - run:
           name: register to ecr and deploy to ecs
           command: |
-            if [ "${CIRCLE_BRANCH}" == "develop" ]; then
+            if [ "${CIRCLE_BRANCH}" == "auto_deploy" ]; then
               ./.circleci/deploy-ecs.sh
             fi
 
