@@ -13,50 +13,44 @@ AWS_ACCOUNT_ID=894559805305
 # Create Task Definition
 make_task_def(){
 	task_template='[
-		{
-			"name": "%s",
-			"image": "%s.dkr.ecr.%s.amazonaws.com/%s:%s",
-			"essential": true,
-			"memory": 200,
-			"cpu": 10,
-			"portMappings": [
-				{
-					"containerPort": 3000,
-					"hostPort": 3000
-				}
-			],
-            "links": [
-                "bitcoind:bitcoind",
-                "mongo:mongo"
-            ],
+      {
+        "name": "%s",
+        "image": "%s.dkr.ecr.%s.amazonaws.com/%s:%s",
+        "essential": true,
+        "memory": 200,
+        "cpu": 10,
+        "portMappings": [
+          {
+            "containerPort": 3000,
+            "hostPort": 3000
+          }
+        ],
+        "links": [
+          "bitcoind:bitcoind",
+          "mongo:mongo"
+        ],
+        {
+          "name": "TOKEN",
+          "value": "%s"
+        },
+      },
+
+
+      {
+        "memory": 200,
+        "portMappings": [
             {
-                "name": "TOKEN",
-                "value": "%s"
+              "hostPort": 27017,
+              "containerPort": 27017,
+              "protocol": "tcp"
+            },
+            {
+              "hostPort": 28017,
+              "containerPort": 28017,
+              "protocol": "tcp"
             }
-		},
-
-
-         {
-            "volumesFrom": [],
-            "memory": 200,
-            "extraHosts": null,
-            "dnsServers": null,
-            "disableNetworking": null,
-            "dnsSearchDomains": null,
-            "portMappings": [
-                {
-                    "hostPort": 27017,
-                    "containerPort": 27017,
-                    "protocol": "tcp"
-                },
-                {
-                    "hostPort": 28017,
-                    "containerPort": 28017,
-                    "protocol": "tcp"
-                }
-            ],
-            "hostname": null,
-            "essential": true,
+        ],
+        "essential": true,
             "entryPoint": [
                 "mongod",
                 "--dbpath=/data/db"
@@ -65,33 +59,14 @@ make_task_def(){
                 {
                     "containerPath": "/data/db",
                     "sourceVolume": "userdb",
-                    "readOnly": null
                 }
             ],
             "name": "mongo",
-            "ulimits": null,
-            "dockerSecurityOptions": null,
-            "environment": [],
-            "links": null,
-            "workingDirectory": null,
-            "readonlyRootFilesystem": null,
             "image": "mongo:3.4.5",
-            "command": [],
-            "user": null,
-            "dockerLabels": null,
-            "logConfiguration": null,
             "cpu": 1,
-            "privileged": null,
-            "memoryReservation": null
         },
 
          {
-            "volumesFrom": [],
-            "memory": null,
-            "extraHosts": null,
-            "dnsServers": null,
-            "disableNetworking": null,
-            "dnsSearchDomains": null,
             "portMappings": [
                 {
                     "hostPort": 8332,
@@ -114,7 +89,6 @@ make_task_def(){
                     "protocol": "tcp"
                 }
             ],
-            "hostname": null,
             "essential": true,
             "entryPoint": [
                 "bitcoind",
@@ -130,40 +104,14 @@ make_task_def(){
                 {
                     "containerPath": "/home/bitcoin/.bitcoin",
                     "sourceVolume": "bitcoind",
-                    "readOnly": null
                 }
             ],
             "name": "bitcoind",
-            "ulimits": null,
-            "dockerSecurityOptions": null,
-            "environment": [],
-            "links": null,
-            "workingDirectory": null,
-            "readonlyRootFilesystem": null,
             "image": "seegno/bitcoind:0.14.2-alpine",
-            "command": [],
-            "user": null,
-            "dockerLabels": null,
-            "logConfiguration": null,
             "cpu": 2,
-            "privileged": null,
             "memoryReservation": 3000
         },
-	],
-        "volumes": [
-        {
-            "host": {
-                "sourcePath": "/daba/db"
-            },
-            "name": "userdb"
-        },
-        {
-            "host": {
-                "sourcePath": "/bitcoind"
-            },
-            "name": "bitcoind"
-        }
-    ],'
+]'
 
 	task_def=$(printf "$task_template" ${AWS_ECS_TASKDEF_NAME} \
       $AWS_ACCOUNT_ID ${AWS_DEFAULT_REGION} ${AWS_ECR_REP_NAME} $CIRCLE_SHA1 ${TOKEN})
