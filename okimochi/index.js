@@ -1,9 +1,12 @@
+require('dotenv').config({path: '../.env'});
 const winston = require('winston');
 const Botkit = require("botkit");
 const config = require("./config");
 const debug = require('debug')('okimochi');
 const request = require('sync-request');
 
+debug("config is")
+debug(config)
 // bitcoin
 const BitcoindClient = require("bitcoin-core");
 const bitcoindclient = new BitcoindClient(config.bitcoin);
@@ -132,7 +135,7 @@ const mongoose = require("mongoose");
 mongoose.Promise = global.Promise
 mongoose.connect(config.mongoUri, {
   useMongoClient: true,
-  server: {auto_reconnect: true}
+  autoReconnect: true
 })
   .then((db) => {return db.once('open', () => {
     console.log("db is open!")

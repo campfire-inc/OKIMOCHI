@@ -1,0 +1,33 @@
+version: 2
+jobs:
+  build:
+    working_directory: /home/circleci/okimochi
+    docker:
+      - image: joemphilips/node7-awscli-docker:latest
+    steps:
+      - checkout
+      - restore_cache:
+          key: dependency-cache-{{ checksum "okimochi/package.json" }}
+      - run:
+          name: install npm packages
+          command: 'cd okimochi && npm install'
+      - save_cache:
+          key: dependency-cache-{{ checksum "okimochi/package.json" }}
+          paths:
+            - okimochi/.node_modules
+      - run: 'cd okimochi && npm test'
+
+      - setup_remote_docker
+
+      - run:
+          name: build docker image for okimochi only.
+          command: |
+            docker build okimochi -f okimochi/Dockerfile --no-cache --tag okimochi:temp
+      # deploy
+      - run:
+          name: register to ecr and deploy to ecs
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "develop" ]; then
+              ./.circleci/deploy-ecs.sh
+            fi
+
