@@ -145,6 +145,9 @@ const amountPattern = /([\d\.]*)/ig;
 // slackbot settings.
 
 let controller = Botkit.slackbot({
+  clientId: process.env.CLIENT_ID,
+  clientSecret: process.env.CLIENT_SECRET,
+  scopes: ['bot'],
   logger: new winston.Logger({
     levels: winston.config.syslog.levels,
     transports: [
