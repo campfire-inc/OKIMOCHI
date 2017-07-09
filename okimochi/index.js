@@ -360,7 +360,7 @@ controller.hears(`balance ${userIdPattern.source}$`, ['direct_mention', 'direct_
           .then((amounts) => {
             debug("amounts are" + amounts)
             convo.say(formatUser(userid) + " depositted " +
-            amounts.reduce((a, b) => a + b) + " BTC")
+            amounts.reduce((a, b) => a + b, 0) + " BTC")
           })
           .catch((err) => convo.say(err.toString()))
       }
