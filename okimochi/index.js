@@ -65,6 +65,31 @@ function extractUnusedAddress(userContent){
 }
 
 
+function getUserBalance(userid, convo){
+  User.findOne({id: userid}, (err, content) => {
+    content = content.toObject()
+    debug("content is " + content)
+
+    // if user has not registered yet.
+    if (content === null || content  === undefined ){
+      convo.say(formatUser(userid) +
+        " had no registered address. \nplease register first!");
+    }else {
+      ps = content.depositAddresses
+        .map((a) => bitcoindclient.getReceivedByAddress(a))
+      Promise.all(ps)
+        .then((amounts) => {
+          debug("amounts are" + amounts)
+          convo.say(formatUser(userid) + " depositted " +
+            amounts.reduce((a, b) => a + b, 0) + " BTC")
+        })
+        .catch((err) => convo.say(err.toString()))
+    }
+  })
+}
+
+
+
 function getRateJPY() {
   const rate_api_url = 'https://coincheck.com/api/exchange/orders/rate?order_type=buy&pair=btc_jpy&amount=1';
   let response = request('GET', rate_api_url);
@@ -247,7 +272,7 @@ controller.hears(paypattern, ["direct_mention", "direct_message", "ambient"], (b
     bot.reply(message, "not going to pay since there was no user in the message");
     return
   }
-
+半分独り言です。
   let bfuser = before.match(userIdPattern)
   let afuser = after.match(userIdPattern)
   console.log("bfuser is " + bfuser + " and afuser is " + afuser);
@@ -330,41 +355,75 @@ controller.hears(`tip ${userIdPattern.source} ${amountPattern.source}(.*)`, ["di
 })
 
 // balance
-controller.hears(`balance ${userIdPattern.source}$`, ['direct_mention', 'direct_message'], (bot, message) => {
-  let userid = message.match[1];
+controller.hears(`balance`, ['direct_mention', 'direct_message'], (bot, message) => {
   bot.startConversation(message, (err, convo) => {
 
-    // reply total balance first
-    bitcoindclient.getBalance()
-      .then((balance) => {
-        convo.say('the total deposited balance is ' + balance);
-      })
+    const firstQuestion = {
+      "username": config.botUsername,
+      "icon_emoji": ":moneybag:",
+      "text": "Which balance do you want to know?",
+      "attachments": [{
+        "attachment_type": 'default',
+        "fallback": "This is fall back message!",
+        "call_back_id": "balance_question1",
+        "color": "#808080",
+        "actions": [
+          {
+            "type": "button",
+            "name": "yourself",
+            "text": formatUser(message.user) + " 's"
+          },
+          {
+            "type": "button",
+            "name": "total",
+            "text": "Total Balance"
+          },
+          {
+            "type": "button",
+            "name": "else",
+            "text": "someone else"
+          }
+        ]
+      }]
+    }
 
-    // amount the user have depositted
-    User.findOne({id: userid}, (err, content) => {
-      content = content.toObject()
-      debug("content is " + content)
 
-      // if user has not registered yet.
-      if (content === null || content  === undefined ){
-        convo.say(formatUser(userid) +
-          " had no registered address. \nplease register first!");
-        convo.stop();
-      /* } else if (content.depositAddresses === undefined){
-        convo.say(formatUser(userid) + " have never depositted before");
-        convo.next(); */
-      }else {
-        ps = content.depositAddresses
-          .map((a) => bitcoindclient.getReceivedByAddress(a))
-        Promise.all(ps)
-          .then((amounts) => {
-            debug("amounts are" + amounts)
-            convo.say(formatUser(userid) + " depositted " +
-            amounts.reduce((a, b) => a + b, 0) + " BTC")
+    const callbacks = [
+      {
+        pattern: "yourself",
+        callback: (reply, convo) => {
+          getUserBalance(message.user, convo)
+          convo.next();
+        }
+      },
+
+      {
+        pattern: "total",
+        callback: (reply, convo) => {
+          bitcoindclient.getBalance()
+            .then((balance) => {
+              convo.say('the total deposited balance is ' + balance);
+            })
+            .catch((err) => {convo.say(err.toString())})
+            .then(() => convo.next())
+        }
+      },
+
+      {
+        pattern: "else",
+        callback: (reply, convo) => {
+          convo.ask("Please mention the user you want to know", (response, convo) => {
+            userId = response.text.match(userIdPattern)[0];
+            debug("uesrId is\n" + userId);
+            getUserBalance(userId, convo);
+            convo.next();
           })
-          .catch((err) => convo.say(err.toString()))
+        }
       }
-    })
+    ]
+
+
+    convo.ask(firstQuestion, callbacks)
   })
 })
 
