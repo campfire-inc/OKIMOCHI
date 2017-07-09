@@ -11,6 +11,8 @@ services:
       - "mongo:172.0.0.4"
       - "bitcoind:172.0.0.3"
     restart: always
+    ports:
+      - "${HOST_PORT}:3000"
     networks:
       okimochi-network:
         ipv4_address: 172.0.0.2

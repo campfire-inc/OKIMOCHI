@@ -477,5 +477,4 @@ controller.hears("^help$", ["direct_mention", "direct_message"], (bot, message) 
 });
 
 
-
-app.listen(process.env.PORT || 3000)
+app.listen(3000)

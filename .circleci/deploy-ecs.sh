@@ -23,7 +23,7 @@ make_task_def(){
         "portMappings": [
           {
             "containerPort": 3000,
-            "hostPort": 3000
+            "hostPort": 80
           }
         ],
         "links": [
@@ -124,7 +124,8 @@ make_task_def(){
 ]'
 
 	task_def=$(printf "$task_template" ${AWS_ECS_TASKDEF_NAME} \
-      $AWS_ACCOUNT_ID ${AWS_DEFAULT_REGION} ${AWS_ECR_REP_NAME} $CIRCLE_SHA1 ${TOKEN})
+      $AWS_ACCOUNT_ID ${AWS_DEFAULT_REGION} ${AWS_ECR_REP_NAME} \
+      $CIRCLE_SHA1 ${TOKEN})
     volume_def='[
     {
       "host": {
