@@ -1,15 +1,5 @@
 require('dotenv').config({path: '../.env'});
 
-// express related modules
-const express = require('express');
-const bodyParser = require('body-parser');
-const app = express();
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-const buttonRouter = require('./src/routes/button');
-app.use("/slack", buttonRouter)
-
-
 const winston = require('winston');
 const Botkit = require("botkit");
 const config = require("./config");
@@ -78,8 +68,8 @@ function extractUnusedAddress(userContent){
 
 function getUserBalance(userid, convo){
   User.findOne({id: userid}, (err, content) => {
-    content = content.toObject()
     debug("content is " + content)
+    content = content.toObject()
 
     // if user has not registered yet.
     if (content === null || content  === undefined ){
@@ -372,39 +362,12 @@ controller.hears(`tip ${userIdPattern.source} ${amountPattern.source}(.*)`, ["di
 controller.hears(`balance`, ['direct_mention', 'direct_message'], (bot, message) => {
   bot.startConversation(message, (err, convo) => {
 
-    const firstQuestion = {
-      "username": config.botUsername,
-      "icon_emoji": ":moneybag:",
-      "text": "Which balance do you want to know?",
-      "attachments": [{
-        "attachment_type": 'default',
-        "fallback": "This is fall back message!",
-        "callback_id": "balance_question1",
-        "color": "#808080",
-        "actions": [
-          {
-            "type": "button",
-            "name": "yourself",
-            "text": "ones for yourself"
-          },
-          {
-            "type": "button",
-            "name": "total",
-            "text": "Total Balance"
-          },
-          {
-            "type": "button",
-            "name": "else",
-            "text": "someone else's"
-          }
-        ]
-      }]
-    }
 
+    const firstQuestion = "who's balance is the one you wont to know? (me|total|@userid)"
 
     const callbacks = [
       {
-        pattern: "yourself",
+        pattern: "me",
         callback: (reply, convo) => {
           getUserBalance(message.user, convo)
           convo.next();
@@ -424,14 +387,19 @@ controller.hears(`balance`, ['direct_mention', 'direct_message'], (bot, message)
       },
 
       {
-        pattern: "else",
+        pattern: userIdPattern,
         callback: (reply, convo) => {
-          convo.ask("Please mention the user you want to know", (response, convo) => {
-            userId = response.text.match(userIdPattern)[0];
-            debug("uesrId is\n" + userId);
-            getUserBalance(userId, convo);
-            convo.next();
-          })
+          userId = reply.text.match(userIdPattern)[0].slice(2, -1);
+          debug("uesrId is\n" + userId);
+          getUserBalance(userId, convo);
+          convo.next();
+        }
+      },
+
+      {
+        default: true,
+        callback: (response, convo) => {
+          convo.stop("some thing wrong happend when showing balance!")
         }
       }
     ]
@@ -479,5 +447,3 @@ controller.hears("^help$", ["direct_mention", "direct_message"], (bot, message) 
   bot.reply(message, usage);
 });
 
-
-app.listen(3000)
