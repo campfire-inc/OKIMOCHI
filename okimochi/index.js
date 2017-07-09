@@ -1,9 +1,20 @@
 require('dotenv').config({path: '../.env'});
+
+// express related modules
+const express = require('express');
+const bodyParser = require('body-parser');
+const app = express();
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+const buttonRouter = require('./src/routes/button');
+app.use("/slack", buttonRouter)
+
+
 const winston = require('winston');
 const Botkit = require("botkit");
 const config = require("./config");
 const debug = require('debug')('okimochi');
-const request = require('sync-request');
+const sync_request = require('sync-request');
 
 debug("config is")
 debug(config)
@@ -92,7 +103,7 @@ function getUserBalance(userid, convo){
 
 function getRateJPY() {
   const rate_api_url = 'https://coincheck.com/api/exchange/orders/rate?order_type=buy&pair=btc_jpy&amount=1';
-  let response = request('GET', rate_api_url);
+  let response = sync_request('GET', rate_api_url);
   let rate;
   if (response.statusCode == 200) {
     rate = Math.round(JSON.parse(response.body).rate);
@@ -365,13 +376,13 @@ controller.hears(`balance`, ['direct_mention', 'direct_message'], (bot, message)
       "attachments": [{
         "attachment_type": 'default',
         "fallback": "This is fall back message!",
-        "call_back_id": "balance_question1",
+        "callback_id": "balance_question1",
         "color": "#808080",
         "actions": [
           {
             "type": "button",
             "name": "yourself",
-            "text": formatUser(message.user) + " 's"
+            "text": "ones for yourself"
           },
           {
             "type": "button",
@@ -381,7 +392,7 @@ controller.hears(`balance`, ['direct_mention', 'direct_message'], (bot, message)
           {
             "type": "button",
             "name": "else",
-            "text": "someone else"
+            "text": "someone else's"
           }
         ]
       }]
@@ -464,3 +475,7 @@ controller.hears("^help$", ["direct_mention", "direct_message"], (bot, message) 
   `;
   bot.reply(message, usage);
 });
+
+
+
+app.listen(process.env.PORT || 3000)
