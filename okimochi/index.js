@@ -69,13 +69,13 @@ function extractUnusedAddress(userContent){
 function getUserBalance(userid, convo){
   User.findOne({id: userid}, (err, content) => {
     debug("content is " + content)
-    content = content.toObject()
 
     // if user has not registered yet.
     if (content === null || content  === undefined ){
       convo.say(formatUser(userid) +
         " had no registered address. \nplease register first!");
     }else {
+      content = content.toObject()
       ps = content.depositAddresses
         .map((a) => bitcoindclient.getReceivedByAddress(a))
       Promise.all(ps)
