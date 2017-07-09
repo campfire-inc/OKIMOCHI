@@ -21,5 +21,8 @@ module.exports = {
     password: process.env.BITCOIND_PASSWORD || 'bitcoin-tipper',
     host: process.env.BITCOIND_PORT_8333_TCP_ADDR ||
       process.env.BITCOIND_URI || "localhost"
-  }
+  },
+  botUsername: "okimochi-bitcoin",
+  iconUrl: "http://3.bp.blogspot.com/-LE-WPdZd5j4/UzoZuyc49QI/AAAAAAAAesw/4EU0zMlH_E4/s800/gold_kinkai_nobebou.png",
+  icon_emoji: ":moneybag:"
 }

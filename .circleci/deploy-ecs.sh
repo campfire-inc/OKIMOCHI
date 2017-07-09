@@ -23,7 +23,7 @@ make_task_def(){
         "portMappings": [
           {
             "containerPort": 3000,
-            "hostPort": 3000
+            "hostPort": 80
           }
         ],
         "links": [
@@ -35,7 +35,7 @@ make_task_def(){
           "value": "%s"
         }],
         "logConfiguration": {
-          "logDriver": "syslog"
+          "logDriver": "json-file"
         }
       },
 
@@ -69,7 +69,7 @@ make_task_def(){
         "image": "mongo:3.4.5",
         "cpu": 130,
         "logConfiguration": {
-          "logDriver": "syslog"
+          "logDriver": "json-file"
           }
         },
 
@@ -118,13 +118,14 @@ make_task_def(){
         "cpu": 200,
         "memoryReservation": 1400,
         "logConfiguration": {
-        "logDriver": "syslog"
+        "logDriver": "json-file"
     }
   }
 ]'
 
 	task_def=$(printf "$task_template" ${AWS_ECS_TASKDEF_NAME} \
-      $AWS_ACCOUNT_ID ${AWS_DEFAULT_REGION} ${AWS_ECR_REP_NAME} $CIRCLE_SHA1 ${TOKEN})
+      $AWS_ACCOUNT_ID ${AWS_DEFAULT_REGION} ${AWS_ECR_REP_NAME} \
+      $CIRCLE_SHA1 ${TOKEN})
     volume_def='[
     {
       "host": {
