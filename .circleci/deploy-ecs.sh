@@ -35,7 +35,7 @@ make_task_def(){
           "value": "%s"
         }],
         "logConfiguration": {
-          "logDriver": "syslog"
+          "logDriver": "json-file"
         }
       },
 
@@ -69,7 +69,7 @@ make_task_def(){
         "image": "mongo:3.4.5",
         "cpu": 130,
         "logConfiguration": {
-          "logDriver": "syslog"
+          "logDriver": "json-file"
           }
         },
 
@@ -118,7 +118,7 @@ make_task_def(){
         "cpu": 200,
         "memoryReservation": 1400,
         "logConfiguration": {
-        "logDriver": "syslog"
+        "logDriver": "json-file"
     }
   }
 ]'
