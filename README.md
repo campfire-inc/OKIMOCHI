@@ -8,7 +8,7 @@ the user friendly micro payment platform working on the slack
 
 ```
 cp .env_example .env # modify .env with your own slack bot token
-docker-compose up
+docker-compose --build up
 ```
 
 
