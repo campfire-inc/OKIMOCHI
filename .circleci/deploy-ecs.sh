@@ -33,6 +33,8 @@ make_task_def(){
         "environment": [{
           "name": "TOKEN",
           "value": "%s",
+        },
+        {
           "name": "NODE_ENV",
           "value": "production"
         },
