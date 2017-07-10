@@ -259,7 +259,7 @@ controller.hears(`deposit`, ["direct_mention", "direct_message", "mention"], (bo
   controller.logger.debug("heard deposit")
   bitcoindclient.getNewAddress()
     .then((address) => {
-      bot.reply(message, "your deposit address is ")
+      bot.reply(message, "Please deposit to this address")
       bot.reply(message, address)
       return address
     })
@@ -430,6 +430,7 @@ controller.hears(`balance`, ['mention', 'direct_mention', 'direct_message'], (bo
         default: true,
         callback: (response, convo) => {
           convo.say("Please specify either me|total|@<username>");
+          convo.repeat();
           convo.next();
         }
       }
