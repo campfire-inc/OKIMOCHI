@@ -4,6 +4,8 @@ services:
     build: ./okimochi
     image: joemphilips/okimochi:latest
     env_file: .env
+    environment:
+      NODE_ENV: development
     command: node index.js
     volumes:
       - ".:/usr/app"
