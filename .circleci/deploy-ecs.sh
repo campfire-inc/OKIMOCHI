@@ -127,8 +127,8 @@ make_task_def(){
         "name": "bitcoind",
         "image": "seegno/bitcoind:0.14.2-alpine",
         "cpu": 200,
-        "memoryReservation": 4000,
-        "memory": 3000,
+        "memoryReservation": 3000,
+        "memory": 4000,
         "logConfiguration": {
         "logDriver": "json-file"
     }
