@@ -1,5 +1,8 @@
 let mongoUri;
-if (process.env.mongo) {
+
+if (process.env.MONGO_PORT_27017_TCP_ADDR){
+  mongoUri =  `mongodb://${process.env.MONGO_PORT_27017_TCP_ADDR}:27017/okimochi`
+} else if (process.env.mongo) {
   mongoUri = `mongodb://${process.env.mongo}:27017/example`;
 } else if(process.env.MONGO_URI ){
   mongoUri = `mongodb://${process.env.MONGO_URI}:27017/example`;
