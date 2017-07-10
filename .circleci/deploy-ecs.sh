@@ -115,7 +115,7 @@ make_task_def(){
           "-rpcallowip=172.0.0.0/8",
           "-rpcuser=slackbot",
           "-rpcpassword=bitcoin-tipper",
-          "-datadir=/home/bitcoin/.bitcoin"
+          "-datadir=/home/bitcoin/.bitcoin",
           "-dbcache=1500"
         ],
         "mountPoints": [
