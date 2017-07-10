@@ -116,6 +116,7 @@ make_task_def(){
           "-rpcuser=slackbot",
           "-rpcpassword=bitcoin-tipper",
           "-datadir=/home/bitcoin/.bitcoin"
+          "-dbcache=1500"
         ],
         "mountPoints": [
           {
@@ -126,7 +127,8 @@ make_task_def(){
         "name": "bitcoind",
         "image": "seegno/bitcoind:0.14.2-alpine",
         "cpu": 200,
-        "memoryReservation": 2000,
+        "memoryReservation": 4000,
+        "memory": 3000,
         "logConfiguration": {
         "logDriver": "json-file"
     }
