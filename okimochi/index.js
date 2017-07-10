@@ -164,10 +164,10 @@ let controller = Botkit.slackbot({
   config.botconfig
 );
 
-const TOKEN = (process.env.NODE_ENV === "development") ? process.env.DEVELOP_TOKEN : process.env.TOKEN
 
 controller.spawn({
-  token: TOKEN
+  token: config.TOKEN,
+  debug: config.SLACK_DEBUG
 }).startRTM((err) => {
   if (err) {
     throw new Error(err);

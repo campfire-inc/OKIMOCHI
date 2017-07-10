@@ -7,6 +7,9 @@ if (process.env.mongo) {
   mongoUri = `mongodb://localhost:27017/example`;
 }
 
+const TOKEN = (process.env.NODE_ENV === "development") ? process.env.DEVELOP_TOKEN : process.env.TOKEN
+const SLACK_DEBUG = (process.env.NODE_ENV === "development") ? true : false
+
 module.exports = {
   adminPassword: "hoge",
   mongoUri: mongoUri,
@@ -22,6 +25,8 @@ module.exports = {
     host: process.env.BITCOIND_PORT_8333_TCP_ADDR ||
       process.env.BITCOIND_URI || "localhost"
   },
+  TOKEN: TOKEN,
+  SLACK_DEBUG: SLACK_DEBUG,
   botUsername: "okimochi-bitcoin",
   iconUrl: "http://3.bp.blogspot.com/-LE-WPdZd5j4/UzoZuyc49QI/AAAAAAAAesw/4EU0zMlH_E4/s800/gold_kinkai_nobebou.png",
   icon_emoji: ":moneybag:"

@@ -18,7 +18,7 @@ make_task_def(){
         "name": "%s",
         "image": "%s.dkr.ecr.%s.amazonaws.com/%s:%s",
         "essential": true,
-        "memory": 400,
+        "memory": 800,
         "cpu": 333,
         "portMappings": [
           {
@@ -46,7 +46,7 @@ make_task_def(){
 
 
       {
-        "memory": 200,
+        "memory": 600,
         "portMappings": [
           {
             "hostPort": 27017,
@@ -122,7 +122,7 @@ make_task_def(){
         "name": "bitcoind",
         "image": "seegno/bitcoind:0.14.2-alpine",
         "cpu": 200,
-        "memoryReservation": 1400,
+        "memoryReservation": 2000,
         "logConfiguration": {
         "logDriver": "json-file"
     }
