@@ -429,13 +429,16 @@ controller.hears(`balance`, ['mention', 'direct_mention', 'direct_message'], (bo
       {
         default: true,
         callback: (response, convo) => {
-          convo.stop("some thing wrong happend when showing balance!")
+          convo.say("something wrong happend when showing balance!");
+          convo.stop();
         }
       }
     ]
 
 
     convo.ask(firstQuestion, callbacks)
+    convo.say("finished task")
+    convo.stop()
   })
 })
 
