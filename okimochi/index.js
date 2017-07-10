@@ -76,10 +76,24 @@ function getUserBalance(userid, convo){
         " had no registered address. \nplease register first!");
     }else {
       content = content.toObject()
-      ps = content.depositAddresses
-        .map((a) => bitcoindclient.getReceivedByAddress(a))
-      debug("ps is " + ps)
-      Promise.all(ps)
+      let ps1 = content.depositAddresses
+        .map((a) => bitcoindclient.validateAddress(a))
+
+      Promise.all(ps1)
+        .then((results) => {
+          debug("results were " + results)
+          return results.filter((r) => r.isvalid)
+        })
+        .then((validAddresses) => {
+          debug("validAddresses were " + validAddresses);
+          return Promise.all(
+            validAddresses.map((a) => {
+              debug("address validation result is " + a);
+              return bitcoindclient.getReceivedByAddress(a.address)
+            })
+          )
+        })
+
         .then((amounts) => {
           debug("amounts are" + amounts)
           convo.say(formatUser(userid) + " depositted " +
