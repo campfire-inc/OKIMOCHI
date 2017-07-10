@@ -36,7 +36,7 @@ services:
     command:
       -printtoconsole
       -rest
-      -testnet
+      -${BITCOIND_NETWORK}
       -server
       -rpcuser=slackbot
       -rpcpassword=bitcoin-tipper

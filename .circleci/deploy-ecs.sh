@@ -106,7 +106,7 @@ make_task_def(){
           "bitcoind",
           "-printtoconsole",
           "-rest",
-          "-testnet",
+          "-mainnet",
           "-server",
           "-rpcallowip=172.0.0.0/8",
           "-rpcuser=slackbot",
