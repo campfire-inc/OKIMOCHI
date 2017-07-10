@@ -448,8 +448,8 @@ controller.hears("help", ["direct_mention", "direct_message"], (bot, message) =>
   # show this help
   - @okimochi-bitcoin help
 
-  # show balance of the @user
-  - @bicoin-tip balance @user
+  # show balance of someone
+  - @bicoin-tip balance
 
   # show BTC-JPY rate
   - @okimochi-bitcoin rate
