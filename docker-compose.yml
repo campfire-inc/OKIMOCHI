@@ -36,11 +36,12 @@ services:
     command:
       -printtoconsole
       -rest
-      -testnet
+      -${BITCOIND_NETWORK}
       -server
       -rpcuser=slackbot
       -rpcpassword=bitcoin-tipper
       -rpcallowip=172.0.0.0/8
+      -datadir=/home/bitcoin/.bitcoin
   mongo:
     restart: always
     image: mongo

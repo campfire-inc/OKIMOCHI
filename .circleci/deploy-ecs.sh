@@ -33,7 +33,12 @@ make_task_def(){
         "environment": [{
           "name": "TOKEN",
           "value": "%s"
-        }],
+        },
+        {
+          "name": "BITCOIND_NETWORK",
+          "value": "mainnet"
+        }
+        ],
         "logConfiguration": {
           "logDriver": "json-file"
         }
@@ -101,11 +106,12 @@ make_task_def(){
           "bitcoind",
           "-printtoconsole",
           "-rest",
-          "-testnet",
+          "-mainnet",
           "-server",
           "-rpcallowip=172.0.0.0/8",
           "-rpcuser=slackbot",
-          "-rpcpassword=bitcoin-tipper"
+          "-rpcpassword=bitcoin-tipper",
+          "-datadir=/home/bitcoin/.bitcoin"
         ],
         "mountPoints": [
           {
