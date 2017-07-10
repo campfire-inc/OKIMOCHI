@@ -359,7 +359,7 @@ controller.hears(`tip ${userIdPattern.source} ${amountPattern.source}(.*)`, ["di
 })
 
 // balance
-controller.hears(`balance`, ['direct_mention', 'direct_message'], (bot, message) => {
+controller.hears(`balance`, ['mention', 'direct_mention', 'direct_message'], (bot, message) => {
   bot.startConversation(message, (err, convo) => {
 
 
@@ -420,7 +420,7 @@ controller.hears('^rate$', ['direct_mention', 'direct_message'], (bot, message) 
 });
 
 // help
-controller.hears("^help$", ["direct_mention", "direct_message"], (bot, message) => {
+controller.hears("help", ["direct_mention", "direct_message"], (bot, message) => {
   let usage = `
   \`\`\`
   # show @users bitcoin deposit address
