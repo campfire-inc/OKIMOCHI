@@ -25,6 +25,12 @@ services:
     networks:
       okimochi-network:
         ipv4_address: 172.0.0.3
+    ports:
+      - "8332:8332"
+      - "8333:8333"
+      - "18332:18332"
+      - "18333:18333"
+      - "18444:18444"
     command:
       -printtoconsole
       -rest
@@ -47,8 +53,4 @@ services:
 
 networks:
   okimochi-network:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.0.0.0/16
-          gateway: 172.0.0.1
+    external: true
