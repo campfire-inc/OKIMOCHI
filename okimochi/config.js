@@ -30,7 +30,10 @@ module.exports = {
   },
   TOKEN: TOKEN,
   SLACK_DEBUG: SLACK_DEBUG,
+
   botUsername: "okimochi-bitcoin",
   iconUrl: "http://3.bp.blogspot.com/-LE-WPdZd5j4/UzoZuyc49QI/AAAAAAAAesw/4EU0zMlH_E4/s800/gold_kinkai_nobebou.png",
-  icon_emoji: ":moneybag:"
+  icon_emoji: ":moneybag:",
+  webhook_url: "https://hooks.slack.com/services/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",
+  default_channel: "#okimochi-test"
 }

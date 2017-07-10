@@ -165,7 +165,7 @@ let controller = Botkit.slackbot({
 );
 
 
-controller.spawn({
+let bot = controller.spawn({
   token: config.TOKEN,
   debug: config.SLACK_DEBUG
 }).startRTM((err) => {
@@ -174,6 +174,19 @@ controller.spawn({
   }
 });
 
+bot.configureIncomingWebhook({
+  url: "https://hooks.slack.com/services/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"
+});
+
+if (process.env.NODE_ENV === "production"){
+  bot.sendWebhook({
+    text: "OKIMOCHI has been updated !",
+    channel: config.default_channel,
+    icon_emoji: config.icon_emoji
+  }, (err, res) => {
+    if (err) throw err;
+  })
+}
 
 // database initialization
 const mongoose = require("mongoose");
@@ -380,7 +393,7 @@ controller.hears(`balance`, ['mention', 'direct_mention', 'direct_message'], (bo
   bot.startConversation(message, (err, convo) => {
 
 
-    const firstQuestion = "who's balance is the one you wont to know? (me|total|@userid)"
+    const firstQuestion = "who's balance is the one you want to know? (me|total|@userid)"
 
     const callbacks = [
       {
