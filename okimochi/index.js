@@ -246,7 +246,8 @@ controller.hears(`deposit`, ["direct_mention", "direct_message", "mention"], (bo
   controller.logger.debug("heard deposit")
   bitcoindclient.getNewAddress()
     .then((address) => {
-      bot.reply(message, "your deposit address is " + address)
+      bot.reply(message, "your deposit address is ")
+      bot.reply(message, address)
       return address
     })
     .then((address) => User.update({ id: message.user },
