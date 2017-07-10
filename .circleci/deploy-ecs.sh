@@ -33,7 +33,12 @@ make_task_def(){
         "environment": [{
           "name": "TOKEN",
           "value": "%s"
-        }],
+        },
+        {
+          "name": "BITCOIND_NETWORK",
+          "value": "mainnet"
+        }
+        ],
         "logConfiguration": {
           "logDriver": "json-file"
         }
