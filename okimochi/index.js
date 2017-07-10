@@ -78,6 +78,7 @@ function getUserBalance(userid, convo){
       content = content.toObject()
       ps = content.depositAddresses
         .map((a) => bitcoindclient.getReceivedByAddress(a))
+      debug("ps is " + ps)
       Promise.all(ps)
         .then((amounts) => {
           debug("amounts are" + amounts)
