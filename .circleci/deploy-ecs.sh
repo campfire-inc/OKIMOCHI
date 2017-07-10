@@ -62,7 +62,7 @@ make_task_def(){
         "mountPoints": [
           {
             "containerPath": "/data/db",
-            "sourceVolume": "/userdb"
+            "sourceVolume": "userdb"
           }
         ],
         "name": "mongo",
@@ -110,7 +110,7 @@ make_task_def(){
         "mountPoints": [
           {
             "containerPath": "/home/bitcoin/.bitcoin",
-            "sourceVolume": "/bitcoind"
+            "sourceVolume": "bitcoind"
           }
         ],
         "name": "bitcoind",
