@@ -19,7 +19,7 @@ make_task_def(){
         "image": "%s.dkr.ecr.%s.amazonaws.com/%s:%s",
         "essential": true,
         "memory": 800,
-        "cpu": 333,
+        "cpu": 400,
         "portMappings": [
           {
             "containerPort": 3000,
@@ -76,7 +76,7 @@ make_task_def(){
         ],
         "name": "mongo",
         "image": "mongo:3.4.5",
-        "cpu": 130,
+        "cpu": 300,
         "logConfiguration": {
           "logDriver": "json-file"
           }
