@@ -32,7 +32,7 @@ make_task_def(){
         ],
         "environment": [{
           "name": "TOKEN",
-          "value": "%s",
+          "value": "%s"
         },
         {
           "name": "NODE_ENV",
