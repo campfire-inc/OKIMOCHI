@@ -131,15 +131,15 @@ function inSatoshi(BTC) {
 }
 
 const message_to_BTC_map = {
-  ":bitcoin:": 0.001,
+  ":bitcoin:": 0.0001,
   "感謝": 0.0001,
   "ありがと": 0.0001,
   "thanks": 0.0001,
   "どうも": 0.0001,
   ":pray:": 0.0001,
   ":okimochi:": 0.001,
-  "気持ち": 0.001,
-  "きもち": 0.001
+  "気持ち": 0.0001,
+  "きもち": 0.0001
 }
 
 const thxMessages = Object.keys(message_to_BTC_map);
@@ -341,7 +341,84 @@ controller.hears(paypattern, ["direct_mention", "direct_message", "ambient"], (b
 });
 */
 
-// pay intentionally
+// tip by reaction
+controller.on(['reaction_added'], (bot, message) => {
+  debug("reaction added !")
+  debug("and message object is " + JSON.stringify(message));
+  const emoji = ":" + message.reaction + ":"
+  if (thxMessages.some((p) => p === emoji)) {
+
+    // 支払い
+    const amount = message_to_BTC_map[emoji]
+    smartPay(message.user, message.item_user, amount, emoji,
+      (err, msg) => {
+        if (err) {
+
+          bot.sendWebhook({
+            text: "had following error when sending to " + formatUser(message.item_user) +
+              " from " + formatUser(message.user) + " by " + emoji  + " \n\n" + err.toString(),
+            channel: message.item.channel,
+            icon_emoji: config.icon_emoji
+          }, (err, res) => {
+            if (err) throw err;
+          })
+
+        } else {
+          debug("msg was " + msg)
+          bot.sendWebhook({
+            text: msg,
+            channel: message.item.channel,
+            icon_emoji: config.icon_emoji
+          }, (err, res) => {
+            if (err) throw err;
+          })
+        }
+    })
+  }
+})
+
+
+function smartPay(fromUserID, toUserID, amount, Txmessage, cb) {
+  debug("paying from " + fromUserID);
+  debug("paying to " + toUserID);
+  let returnMessage = "";
+  User.findOne({ id: fromUserID }, (err, fromUserContent) => {
+    User.findOne({id: toUserID}, (err, toUserContent) => {
+
+      if (fromUserContent === null || fromUserContent === undefined ){
+        console.log("fromUserContent was " + JSON.stringify(fromUserContent));
+        returnMessage = formatUser(fromUserID) +
+          " had no registered address, so not going to pay.\nPlease register first!";
+        cb(null, returnMessage)
+      } else if (toUserContent === null || toUserContent === undefined ) {
+        console.log("to UserContent was " + JSON.stringify(toUserContent));
+        returnMessage = formatUser(toUserID) +
+          " had no registered address, so not going to pay.\nPlease register first!";
+        cb(null, returnMessage)
+      } else {
+
+        // check if all paybackAddresses has been used.
+        let [address, updatedContent, replyMessage] =
+          extractUnusedAddress(toUserContent); 
+        debug("going to pay to " + address);
+        debug("of user " + updatedContent);
+
+        returnMessage = replyMessage +
+            " payed to " + formatUser(toUserID)
+        bitcoindclient.sendToAddress(address,
+          amount,
+          Txmessage,
+          "this is comment."
+        )
+          .then(() => updatedContent.save())
+          .then(() => cb(null, returnMessage))
+          .catch((err) => cb(err, null))
+      }
+    })
+  })
+}
+
+// tip intentionally
 controller.hears(`tip ${userIdPattern.source} ${amountPattern.source}(.*)`, ["direct_mention", "direct_message"], (bot, message) => {
   controller.logger.debug("whole match pattern was " + message.match[0]);
   const toPayUser = message.match[1];
@@ -353,39 +430,10 @@ controller.hears(`tip ${userIdPattern.source} ${amountPattern.source}(.*)`, ["di
   if (message.user === toPayUser){
     return bot.reply(message, "can not pay to your self !!")
   }
-  controller.logger.debug("userId to pay is " + toPayUser);
-  controller.logger.debug("and paying from " + message.user);
-
-  User.findOne({ id: message.user }, (err, fromUserContent) => {
-    User.findOne({id: toPayUser}, (err, toUserContent) => {
-
-      if (fromUserContent === null || fromUserContent === undefined ){
-        controller.logger.warning("fromUserContent was " + JSON.stringify(fromUserContent));
-        bot.reply(message, formatUser(message.user) +
-          " had no registered address, so not going to pay.\nPlease register first!");
-      } else if (toUserContent === null || toUserContent === undefined ) {
-        controller.logger.warning("to UserContent was " + JSON.stringify(toUserContent));
-        bot.reply(message, formatUser(toPayUser) +
-          " had no registered address, so not going to pay.\nPlease register first!");
-      } else {
-
-        // check if all paybackAddresses has been used.
-        let [address, updatedContent, replyMessage] =
-          extractUnusedAddress(toUserContent); 
-        debug("going to pay to " + address);
-        debug("of user " + updatedContent);
-        bitcoindclient.sendToAddress(address,
-          amount,
-          Txmessage,
-          "this is comment."
-        )
-          .then(() => updatedContent.save())
-          .then(() => bot.reply(message, replyMessage +
-            "payed to " + formatUser(toPayUser)))
-          .catch((err) => bot.reply(message, err.toString()))
-      }
-    })
-  })
+  smartPay(message.user, toPayUser, amount, Txmessage,
+    (err, msg) => {
+      if (err) {bot.reply(message, err.toString())} else {bot.reply(message, msg)}
+    });
 })
 
 // balance
