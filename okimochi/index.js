@@ -357,7 +357,7 @@ controller.on(['reaction_added'], (bot, message) => {
           bot.sendWebhook({
             text: "had following error when sending to " + formatUser(message.item_user) +
               " from " + formatUser(message.user) + " by " + emoji  + " \n\n" + err.toString(),
-            channel: message.item.channel,
+            channel: config.default_channel,
             icon_emoji: config.icon_emoji
           }, (err, res) => {
             if (err) throw err;
@@ -367,7 +367,7 @@ controller.on(['reaction_added'], (bot, message) => {
           debug("msg was " + msg)
           bot.sendWebhook({
             text: msg,
-            channel: message.item.channel,
+            channel: config.default_channel,
             icon_emoji: config.icon_emoji
           }, (err, res) => {
             if (err) throw err;
