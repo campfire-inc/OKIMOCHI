@@ -521,7 +521,9 @@ controller.hears("help", ["direct_mention", "direct_message"], (bot, message) =>
   # tip intentionally ... message will be included as Tx message for bitcoin
   - @okimochi-bitcoin tip @user <BTC amount> <message>
 
-  # 感謝の言葉にはまだ反応しないよ!ごめんね!
+  # :bitcoin: や :okimochi: などのリアクションを押すと自動的に支払われるよ！
+  # 将来的には誰かが「ありがとう」などの言葉を発した時にも自動でtipする予定！
+  #
   \`\`\`
   `;
   bot.reply(message, usage);
