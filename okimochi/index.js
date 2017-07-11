@@ -341,7 +341,27 @@ controller.hears(paypattern, ["direct_mention", "direct_message", "ambient"], (b
 });
 */
 
-// pay intentionally
+// tip by reaction
+controller.on(['reaction_added'], (bot, message) => {
+  debug("reaction added !")
+  debug("and message object is " + JSON.stringify(message));
+  if (thxMessages.some((p) => p === ":" + message.reaction + ":")) {
+    bot.sendWebhook({
+      text: formatUser(message.user) + " showed his OKIMOHI to " +
+        formatUser(message.item_user) + "!" + " going to give some BTC! ",
+      channel: message.channel,
+      icon_emoji: config.icon_emoji
+    }, (err, res) => {
+      if (err) throw err;
+   });
+
+    // 支払い
+
+  }
+})
+
+
+// tip intentionally
 controller.hears(`tip ${userIdPattern.source} ${amountPattern.source}(.*)`, ["direct_mention", "direct_message"], (bot, message) => {
   controller.logger.debug("whole match pattern was " + message.match[0]);
   const toPayUser = message.match[1];
