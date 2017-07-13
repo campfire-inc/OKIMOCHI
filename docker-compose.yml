@@ -23,7 +23,7 @@ services:
   bitcoind:
     image: seegno/bitcoind:0.14.2-alpine
     volumes:
-      - "./bitcoin:/home/bitcoin/.bitcoin"
+      - "${BITCOIND_HOST_DIR}:/home/bitcoin/.bitcoin"
     networks:
       okimochi-network:
         ipv4_address: 172.0.0.3
