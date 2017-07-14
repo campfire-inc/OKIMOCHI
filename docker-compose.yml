@@ -42,7 +42,8 @@ services:
       -rpcpassword=bitcoin-tipper
       -rpcallowip=172.0.0.0/8
       -datadir=/home/bitcoin/.bitcoin
-      -dbcache=1500
+      -dbcache=500
+      -rpcthreads=100
       -assumevalid=00000000000000000026c661d175ef328e415e834e62f3d316382e9f3d24e44e
   mongo:
     restart: always

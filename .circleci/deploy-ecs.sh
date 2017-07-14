@@ -116,7 +116,8 @@ make_task_def(){
           "-rpcuser=slackbot",
           "-rpcpassword=bitcoin-tipper",
           "-datadir=/home/bitcoin/.bitcoin",
-          "-dbcache=3800",
+          "-rpcthreads=100",
+          "-dbcache=400",
           "-assumevalid=00000000000000000026c661d175ef328e415e834e62f3d316382e9f3d24e44e"
         ],
         "mountPoints": [
