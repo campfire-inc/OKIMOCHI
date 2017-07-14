@@ -18,7 +18,7 @@ make_task_def(){
         "name": "%s",
         "image": "%s.dkr.ecr.%s.amazonaws.com/%s:%s",
         "essential": true,
-        "memory": 3000,
+        "memory": 1500,
         "cpu": 900,
         "portMappings": [
           {
@@ -55,7 +55,7 @@ make_task_def(){
 
 
       {
-        "memory": 2000,
+        "memory": 400,
         "portMappings": [
           {
             "hostPort": 27017,
