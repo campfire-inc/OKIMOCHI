@@ -44,7 +44,12 @@ make_task_def(){
         }
         ],
         "logConfiguration": {
-          "logDriver": "json-file"
+        "logDriver": "awslogs",
+          "options": {
+            "awslogs-group": "okimochi-loggroup",
+            "awslogs-region": "ap-northeast-1",
+            "awslogs-stream-prefix": "okimochi-log"
+          }
         }
       },
 
@@ -78,9 +83,14 @@ make_task_def(){
         "image": "mongo:3.4.5",
         "cpu": 600,
         "logConfiguration": {
-          "logDriver": "json-file"
+          "logDriver": "awslogs",
+          "options": {
+            "awslogs-group": "okimochi-loggroup",
+            "awslogs-region": "ap-northeast-1",
+            "awslogs-stream-prefix": "mongo-log"
           }
-        },
+        }
+      },
 
         {
         "portMappings": [
@@ -132,7 +142,12 @@ make_task_def(){
         "memoryReservation": 1000,
         "memory": 2000,
         "logConfiguration": {
-        "logDriver": "json-file"
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "okimochi-loggroup",
+          "awslogs-region": "ap-northeast-1",
+          "awslogs-stream-prefix": "bitcoind-okimochi-log"
+        }
     }
   }
 ]'
