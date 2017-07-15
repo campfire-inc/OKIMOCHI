@@ -27,7 +27,6 @@ make_task_def(){
           }
         ],
         "links": [
-          "bitcoind:bitcoind",
           "mongo:mongo"
         ],
         "environment": [{
@@ -41,6 +40,10 @@ make_task_def(){
         {
           "name": "BITCOIND_NETWORK",
           "value": "mainnet"
+        },
+        {
+          "name": "BITCOIND_URI",
+          "value": "54.92.98.67"
         }
         ],
         "logConfiguration": {
@@ -90,66 +93,8 @@ make_task_def(){
             "awslogs-stream-prefix": "mongo-log"
           }
         }
-      },
+      }
 
-        {
-        "portMappings": [
-          {
-            "hostPort": 8332,
-            "containerPort": 8332,
-            "protocol": "tcp"
-          },
-          {
-            "hostPort": 8333,
-            "containerPort": 8333,
-            "protocol": "tcp"
-          },
-          {
-            "hostPort": 18332,
-            "containerPort": 18332,
-            "protocol": "tcp"
-          },
-          {
-            "hostPort": 18333,
-            "containerPort": 18333,
-            "protocol": "tcp"
-          }
-        ],
-        "essential": true,
-        "entryPoint": [
-          "bitcoind",
-          "-printtoconsole",
-          "-rest",
-          "-mainnet",
-          "-server",
-          "-rpcallowip=172.0.0.0/8",
-          "-rpcuser=slackbot",
-          "-rpcpassword=bitcoin-tipper",
-          "-datadir=/home/bitcoin/.bitcoin",
-          "-rpcthreads=100",
-          "-dbcache=400",
-          "-assumevalid=00000000000000000026c661d175ef328e415e834e62f3d316382e9f3d24e44e"
-        ],
-        "mountPoints": [
-          {
-            "containerPath": "/home/bitcoin/.bitcoin",
-            "sourceVolume": "bitcoind"
-          }
-        ],
-        "name": "bitcoind",
-        "image": "seegno/bitcoind:0.14.2-alpine",
-        "cpu": 500,
-        "memoryReservation": 1000,
-        "memory": 2000,
-        "logConfiguration": {
-        "logDriver": "awslogs",
-        "options": {
-          "awslogs-group": "okimochi-loggroup",
-          "awslogs-region": "ap-northeast-1",
-          "awslogs-stream-prefix": "bitcoind-okimochi-log"
-        }
-    }
-  }
 ]'
 
 	task_def=$(printf "$task_template" ${AWS_ECS_TASKDEF_NAME} \
@@ -161,12 +106,6 @@ make_task_def(){
         "sourcePath": "/daba/db"
       },
       "name": "userdb"
-    },
-    {
-      "host": {
-        "sourcePath": "/bitcoind"
-      },
-      "name": "bitcoind"
     }
   ]'
 
