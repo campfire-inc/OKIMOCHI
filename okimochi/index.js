@@ -405,7 +405,7 @@ function smartPay(fromUserID, toUserID, amount, Txmessage, cb) {
         debug("going to pay to " + address);
         debug("of user " + updatedContent);
         if (!address){
-          cb(new Error(toPayUser + " had no registered address! so not going to pay"), null)
+          cb(new Error(toUserID + " had no registered address! so not going to pay"), null)
         } else {
 
           returnMessage = replyMessage +
