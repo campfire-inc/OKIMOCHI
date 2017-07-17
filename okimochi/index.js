@@ -47,7 +47,7 @@ function extractUnusedAddress(userContent){
   let address;
   let replyMessage = "";
   let addressIndex;
-  if (!paybackAddresses){
+  if (!paybackAddresses || paybackAddresses.length === 0){
     address = null
   } else if (paybackAddresses.every((a) => a.used)){
     replyMessage += "warning: all addresses has been used.\n" +
