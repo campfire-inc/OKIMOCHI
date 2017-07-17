@@ -47,7 +47,9 @@ function extractUnusedAddress(userContent){
   let address;
   let replyMessage = "";
   let addressIndex;
-  if (paybackAddresses.every((a) => a.used)){
+  if (!paybackAddresses){
+    address = null
+  } else if (paybackAddresses.every((a) => a.used)){
     replyMessage += "warning: all addresses has been used.\n" +
       "So using the one we used before!\n" +
       "Please register the new address for the sake of fungibility! \n"
@@ -399,20 +401,24 @@ function smartPay(fromUserID, toUserID, amount, Txmessage, cb) {
 
         // check if all paybackAddresses has been used.
         let [address, updatedContent, replyMessage] =
-          extractUnusedAddress(toUserContent); 
+          extractUnusedAddress(toUserContent);
         debug("going to pay to " + address);
         debug("of user " + updatedContent);
+        if (!address){
+          cb(new Error(toPayUser + " had no registered address! so not going to pay"), null)
+        } else {
 
-        returnMessage = replyMessage +
-            " payed to " + formatUser(toUserID)
-        bitcoindclient.sendToAddress(address,
-          amount,
-          Txmessage,
-          "this is comment."
-        )
-          .then(() => updatedContent.save())
-          .then(() => cb(null, returnMessage))
-          .catch((err) => cb(err, null))
+          returnMessage = replyMessage +
+              " payed to " + formatUser(toUserID)
+          bitcoindclient.sendToAddress(address,
+            amount,
+            Txmessage,
+            "this is comment."
+          )
+            .then(() => updatedContent.save())
+            .then(() => cb(null, returnMessage))
+            .catch((err) => cb(err, null))
+        }
       }
     })
   })
