@@ -14,7 +14,7 @@ const bitcoindclient = new BitcoindClient(config.bitcoin);
 
 // functions
 
-function PromiseGetAllUserBalance(which="deposited"){
+function PromiseGetAllUsersDeposit(){
   return new Promise((resolve, reject) => {
     User.find({} , ["id"], {sort: {'id': 1}}, (err, ids) => {
       if (err) reject(err);
@@ -22,7 +22,7 @@ function PromiseGetAllUserBalance(which="deposited"){
       let ps = [];
       for (let i = 0, size = ids.length; i<size; ++i) {
         console.log("id is " + ids[i])
-        ps.push(PromisegetUserBalance(ids[i].id, which))
+        ps.push(PromisegetUserBalance(ids[i].id))
       }
 
       Promise.all(ps).then((balances) => {
@@ -37,12 +37,20 @@ function PromiseGetAllUserBalance(which="deposited"){
 }
 
 
+function PromiseGetAllUserPayback(){
+  return new Promise((resolve, reject) => {
+    User.find({}, ["totalPaybacked"], (err, numbers) => {
+      if (err) reject(err);
+      resolve(numbers.map((content) => content.totalPaybacked));
+    })
+  })
+}
+
 async function PromisegetRankingChart(){
-  let x = await PromiseGetAllUserBalance()
+  let x = await PromiseGetAllUsersDeposit()
   userids = x.map((ret) => formatUser(ret.userid))
   x = x.map((ret) => ret.balance)
-  let y = await PromiseGetAllUserBalance("paybacked")
-  y = y.map((ret) => ret.balance)
+  let y = await PromiseGetAllUserPayback()
 
   debug("x is ", x)
   debug("y is ", y)
@@ -172,26 +180,17 @@ function PromiseFindUser(userid){
 
 /*
  * @param userid {string} to retreive the balance
- * @param which {string} must be either of `deposited` or `paybacked`.
  * @return {Promise} Which will resolves to Integer amount of BTC that the user has deposited.
  */
-function PromisegetUserBalance(userid, which="deposited"){
-  if (which !== "deposited" && which !== "paybacked") {
-    throw new Error("extracable user balance is only either `deposited` or `paybacked` !")
-  };
+function PromisegetUserBalance(userid){
   return PromiseFindUser(userid)
     .then((content) => {
       debug("content is " + content)
 
       content = content.toObject()
-      if (which === "deposited"){
-        return content.depositAddresses
-          .map((a) => bitcoindclient.validateAddress(a))
-      } else {
-        return content.paybackAddresses
-          .map((a) => bitcoindclient.validateAddress(a.address))
-      }
-     })
+      return content.depositAddresses
+        .map((a) => bitcoindclient.validateAddress(a))
+    })
     .then((ps) => {
       return Promise.all(ps)
         .then((results) => {
@@ -327,6 +326,7 @@ let UserSchema = new Schema({
       used: {type: Boolean, default: false}
     }
   ],
+  totalPaybacked: {type: Number, default: 0}
 })
 
 const User = mongoose.model('User', UserSchema);
@@ -336,7 +336,8 @@ const testuser = new User({
   paybackAddresses: [{
     address: "miS3tb8CZ2CXWwRsGNK2EqXCfmzP6bcjv",
     used: false
-  }]
+  }],
+  totalPaybacked: 1.5
 });
 
 mongoose.connection.on( 'connected', function(){
@@ -546,7 +547,10 @@ function smartPay(fromUserID, toUserID, amount, Txmessage, cb) {
             Txmessage,
             "this is comment."
           )
-            .then(() => updatedContent.save())
+            .then(() => {
+              updatedContent.totalpaybacked += amount
+              updatedContent.save()
+            })
             .then(() => cb(null, returnMessage))
             .catch((err) => cb(err, null))
         }
@@ -583,6 +587,7 @@ controller.hears(`ranking`, ['mention', 'direct_mention', 'direct_message'], (bo
     })
     .catch(err => bot.reply(message, err.toString()))
 })
+
 // balance
 controller.hears(`balance`, ['mention', 'direct_mention', 'direct_message'], (bot, message) => {
   bot.startConversation(message, (err, convo) => {
@@ -596,7 +601,7 @@ controller.hears(`balance`, ['mention', 'direct_mention', 'direct_message'], (bo
         callback: (reply, convo) => {
           PromisegetUserBalance(message.user)
             .then((depositedBalance) => {
-              convo.say(formatUser(userid) + " deposited " + depositedBalance + " BTC");
+              convo.say(formatUser(message.user) + " deposited " + depositedBalance + " BTC");
             })
             .catch(err => convo.say(err.toString()))
             .then(() => convo.next());
