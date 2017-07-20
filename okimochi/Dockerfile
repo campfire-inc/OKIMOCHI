@@ -1,4 +1,4 @@
-from node:latest
+from node:8
 MAINTAINER Joe Miyamoto <joemphilips@gmail.com>
 
 RUN mkdir -p /usr/src/app
