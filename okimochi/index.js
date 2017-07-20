@@ -418,7 +418,14 @@ controller.hears('register', ["direct_mention", "direct_message"], (bot, message
           })
         .then(() => convo.say("import registered address and now rescanning"))
         .then(() => convo.next())
-        .catch((err) => {convo.say(err.toString())}).then(() => {convo.next()})
+        .catch((err) => {
+          if (err.toString().match(/ESOCKETTIMEOUT/) !== null){
+            convo.next();
+            debug("there was following error but keep moving ", err)
+          } else {
+            convo.say(err.toString())
+          }
+        }).then(() => {convo.next()})
     })
   })
 })
