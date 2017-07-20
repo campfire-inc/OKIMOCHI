@@ -1,10 +1,10 @@
 require('dotenv').config({path: '../.env'});
-
 const winston = require('winston');
 const Botkit = require("botkit");
 const config = require("./config");
 const debug = require('debug')('okimochi');
 const sync_request = require('sync-request');
+const plotly = require('plotly')(config.plotly.account_name, config.plotly.api_key)
 
 debug("config is")
 debug(config)
@@ -13,6 +13,98 @@ const BitcoindClient = require("bitcoin-core");
 const bitcoindclient = new BitcoindClient(config.bitcoin);
 
 // functions
+
+function PromiseGetAllUsersDeposit(){
+  return new Promise((resolve, reject) => {
+    User.find({} , ["id"], {sort: {'id': 1}}, (err, ids) => {
+      if (err) reject(err);
+      debug("ids are ", ids)
+      let ps = [];
+      for (let i = 0, size = ids.length; i<size; ++i) {
+        console.log("id is " + ids[i])
+        ps.push(PromisegetUserBalance(ids[i].id))
+      }
+
+      Promise.all(ps).then((balances) => {
+        let result = [];
+        for (let i = 0, size = ids.length; i<size; ++i) {
+          result.push({userid: ids[i].id, balance: balances[i]})
+        }
+        resolve(result)
+      })
+    })
+  })
+}
+
+
+function PromiseGetAllUserPayback(){
+  return new Promise((resolve, reject) => {
+    User.find({}, ["totalPaybacked"], (err, numbers) => {
+      if (err) reject(err);
+      resolve(numbers.map((content) => content.totalPaybacked));
+    })
+  })
+}
+
+async function PromisegetRankingChart(){
+  let x = await PromiseGetAllUsersDeposit()
+  userids = x.map((ret) => formatUser(ret.userid))
+  x = x.map((ret) => ret.balance)
+  let y = await PromiseGetAllUserPayback()
+
+  debug("x is ", x)
+  debug("y is ", y)
+  debug("for each user id ", userids)
+
+  var data = [
+  {
+    x: x,
+    y: y,
+    name: 'ranking',
+    text: userids,
+    mode: "markers",
+    marker: {
+      color: "rgb(164, 194, 244)",
+      size: 12,
+      line: {
+        color: "white",
+        width: 0.5
+      }
+    },
+    type: 'scatter'
+  }
+  ];
+var layout = {
+  title: 'okimochi-ranking',
+  xaxis: {
+    title: "the amount deposited",
+    showgrid: false,
+    zeroline: false
+  },
+  yaxis: {
+    title: "the amount of OKIMOCHI",
+    showline: false
+  },
+  autosize: false,
+  width: 960,
+  height: 540
+};
+
+var opts = {
+  layout: layout,
+  filename: 'okimochi-ranking',
+  fileopt: 'new'
+};
+
+return new Promise((resolve, reject) => {
+    plotly.plot(data, opts, (err, msg) => {
+      if (err) reject(err);
+      else resolve(msg);
+    })
+  })
+
+}
+
 function PromiseSetAddressToUser(userId, address){
   debug(userId);
   debug(address)
@@ -85,8 +177,12 @@ function PromiseFindUser(userid){
   });
 }
 
-function getUserBalance(userid){
-  let replyMessage = "";
+
+/*
+ * @param userid {string} to retreive the balance
+ * @return {Promise} Which will resolves to Integer amount of BTC that the user has deposited.
+ */
+function PromisegetUserBalance(userid){
   return PromiseFindUser(userid)
     .then((content) => {
       debug("content is " + content)
@@ -98,14 +194,14 @@ function getUserBalance(userid){
     .then((ps) => {
       return Promise.all(ps)
         .then((results) => {
-          debug("results were " + results)
+          debug("results were ", results)
           return results.filter((r) => r.isvalid)
         })
         .then((validAddresses) => {
-          debug("validAddresses were " + validAddresses);
+          debug("validAddresses were ", validAddresses);
           return Promise.all(
             validAddresses.map((a) => {
-              debug("address validation result is " + a);
+              debug("address validation result is ", a);
               return bitcoindclient.getReceivedByAddress(a.address)
             })
           )
@@ -113,9 +209,8 @@ function getUserBalance(userid){
 
         .then((amounts) => {
           debug("amounts are" + amounts);
-          replyMessage += formatUser(userid) + " depositted " +
-            amounts.reduce((a, b) => a + b, 0) + " BTC"
-          return replyMessage;
+          debug(Object.prototype.toString.call(amounts))
+          return amounts.reduce((a, b) => a + b, 0)
         })
     })
 }
@@ -231,6 +326,7 @@ let UserSchema = new Schema({
       used: {type: Boolean, default: false}
     }
   ],
+  totalPaybacked: {type: Number, default: 0}
 })
 
 const User = mongoose.model('User', UserSchema);
@@ -240,7 +336,8 @@ const testuser = new User({
   paybackAddresses: [{
     address: "miS3tb8CZ2CXWwRsGNK2EqXCfmzP6bcjv",
     used: false
-  }]
+  }],
+  totalPaybacked: 1.5
 });
 
 mongoose.connection.on( 'connected', function(){
@@ -285,7 +382,7 @@ controller.hears(`deposit`, ["direct_mention", "direct_message", "mention"], (bo
           formatUser(message.user) + "'s")))
     .catch((err) => {bot.reply(err)})
 
-    
+
 })
 
 // register
@@ -295,13 +392,31 @@ controller.hears('register', ["direct_mention", "direct_message"], (bot, message
       throw err
     }
     convo.ask("please paste your bitcoin address (separated by \\n) of " + config.bitcoin.network, (response, convo) => {
-      let ps = [];
-      for (let address of response.text.split("\n")) {
-        ps.push(PromiseSetAddressToUser(message.user, address))
+      let ps1 = [];
+      let ps2 = [];
+      let ps3 = [];
+      addresses = response.text.split("\n")
+      for (i=0, size=addresses.length; i < size; ++i) {
+        ps1.push(bitcoindclient.validateAddress(addresses[i]))
+        isLast = i === size - 1
+        if (!isLast){
+          ps2.push(bitcoindclient.importAddress(addresses[i], "for user " + message.user, false))
+        }
+        ps3.push(PromiseSetAddressToUser(message.user, addresses[i]))
       }
-      debug(ps)
-      Promise.all(ps)
+
+      Promise.all(ps3)
         .then(() => convo.say("successfully registered address as " + formatUser(message.user) + "'s !"))
+        .then(() => convo.next())
+        .catch((err) => {convo.say(err.toString())}).then(() => {convo.next()})
+
+      Promise.all(ps1)
+        .then(() => Promise.all(ps2))
+        .then((result) => {
+            debug("result was ", result)
+            return bitcoindclient.importAddress(addresses[addresses.length - 1], formatUser(message.user) + "'s' !", true)
+          })
+        .then(() => convo.say("import registered address and now rescanning"))
         .then(() => convo.next())
         .catch((err) => {convo.say(err.toString())}).then(() => {convo.next()})
     })
@@ -432,7 +547,10 @@ function smartPay(fromUserID, toUserID, amount, Txmessage, cb) {
             Txmessage,
             "this is comment."
           )
-            .then(() => updatedContent.save())
+            .then(() => {
+              updatedContent.totalpaybacked += amount
+              updatedContent.save()
+            })
             .then(() => cb(null, returnMessage))
             .catch((err) => cb(err, null))
         }
@@ -459,6 +577,17 @@ controller.hears(`tip ${userIdPattern.source} ${amountPattern.source}(.*)`, ["di
     });
 })
 
+// ranking
+controller.hears(`ranking`, ['mention', 'direct_mention', 'direct_message'], (bot, message) => {
+  PromisegetRankingChart()
+    .then((msg) => {
+      console.log("msg was \n")
+      bot.reply(message, msg.url)
+      console.log("finished plotting!")
+    })
+    .catch(err => bot.reply(message, err.toString()))
+})
+
 // balance
 controller.hears(`balance`, ['mention', 'direct_mention', 'direct_message'], (bot, message) => {
   bot.startConversation(message, (err, convo) => {
@@ -470,9 +599,9 @@ controller.hears(`balance`, ['mention', 'direct_mention', 'direct_message'], (bo
       {
         pattern: "me",
         callback: (reply, convo) => {
-          getUserBalance(message.user)
-            .then((replyMessage) => {
-              convo.say(replyMessage);
+          PromisegetUserBalance(message.user)
+            .then((depositedBalance) => {
+              convo.say(formatUser(message.user) + " deposited " + depositedBalance + " BTC");
             })
             .catch(err => convo.say(err.toString()))
             .then(() => convo.next());
@@ -496,9 +625,9 @@ controller.hears(`balance`, ['mention', 'direct_mention', 'direct_message'], (bo
         callback: (reply, convo) => {
           userId = reply.text.match(userIdPattern)[0].slice(2, -1);
           debug("uesrId is\n" + userId);
-          getUserBalance(message.user)
-            .then((replyMessage) => {
-            convo.say(replyMessage);
+          PromisegetUserBalance(message.user)
+            .then((depositedBalance) => {
+              convo.say(formatUser(userid) + " deposited " + depositedBalance + " BTC");
           })
             .catch(err => convo.say(err.toString()))
             .then( () => convo.next())
@@ -551,6 +680,9 @@ controller.hears("help", ["direct_mention", "direct_message"], (bot, message) =>
 
   # tip intentionally ... message will be included as Tx message for bitcoin
   - @okimochi-bitcoin tip @user <BTC amount> <message>
+
+  # show ranking for deposited amount and the amount payed to registered Address
+  - @okimochi-bitcoin ranking
 
   # :bitcoin: や :okimochi: などのリアクションを押すと自動的に支払われるよ！
   # 将来的には誰かが「ありがとう」などの言葉を発した時にも自動でtipする予定！
