@@ -1,13 +1,15 @@
 let mongoUri;
 
+const network = process.env.BITCOIND_NETWORK || 'testnet';
+
 if (process.env.MONGO_PORT_27017_TCP_ADDR){
-  mongoUri =  `mongodb://${process.env.MONGO_PORT_27017_TCP_ADDR}:27017/okimochi`
+  mongoUri =  `mongodb://${process.env.MONGO_PORT_27017_TCP_ADDR}:27017/` + network;
 } else if (process.env.mongo) {
-  mongoUri = `mongodb://${process.env.mongo}:27017/example`;
+  mongoUri = `mongodb://${process.env.mongo}:27017/` + network;
 } else if(process.env.MONGO_URI ){
-  mongoUri = `mongodb://${process.env.MONGO_URI}:27017/example`;
+  mongoUri = `mongodb://${process.env.MONGO_URI}:27017/` + network ;
 } else {
-  mongoUri = `mongodb://localhost:27017/example`;
+  mongoUri = `mongodb://localhost:27017/` + network;
 }
 
 const TOKEN = (process.env.NODE_ENV === "development") ? process.env.DEVELOP_TOKEN : process.env.TOKEN
@@ -22,7 +24,7 @@ module.exports = {
     scopes: ['bot']
   },
   bitcoin: {
-    network: process.env.BITCOIND_NETWORK || 'testnet',
+    network: network,
     username: process.env.BITCOIND_USERNAME || 'slackbot',
     password: process.env.BITCOIND_PASSWORD || 'bitcoin-tipper',
     host: process.env.BITCOIND_PORT_8333_TCP_ADDR ||

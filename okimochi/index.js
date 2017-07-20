@@ -68,20 +68,35 @@ function extractUnusedAddress(userContent){
 }
 
 
-function getUserBalance(userid, convo){
-  User.findOne({id: userid}, (err, content) => {
-    debug("content is " + content)
-
+function PromiseFindUser(userid){
+  return new Promise((resolve, reject) => {
+    User.findOne({id: userid}, (err, content) => {
+      if (err) {
+        reject(err)
     // if user has not registered yet.
-    if (content === null || content  === undefined ){
-      convo.say(formatUser(userid) +
-        " had no registered address. \nplease register first!");
-    }else {
-      content = content.toObject()
-      let ps1 = content.depositAddresses
-        .map((a) => bitcoindclient.validateAddress(a))
+      } else if (content === null || content  === undefined ){
+        const replyMessage = formatUser(userid) +
+          " is not in db. \nplease register or deposit first!";
+        reject( new Error(replyMessage))
+      } else {
+        resolve(content)
+      }
+    })
+  });
+}
 
-      Promise.all(ps1)
+function getUserBalance(userid){
+  let replyMessage = "";
+  return PromiseFindUser(userid)
+    .then((content) => {
+      debug("content is " + content)
+
+      content = content.toObject()
+      return content.depositAddresses
+        .map((a) => bitcoindclient.validateAddress(a))
+    })
+    .then((ps) => {
+      return Promise.all(ps)
         .then((results) => {
           debug("results were " + results)
           return results.filter((r) => r.isvalid)
@@ -97,13 +112,12 @@ function getUserBalance(userid, convo){
         })
 
         .then((amounts) => {
-          debug("amounts are" + amounts)
-          convo.say(formatUser(userid) + " depositted " +
-            amounts.reduce((a, b) => a + b, 0) + " BTC")
+          debug("amounts are" + amounts);
+          replyMessage += formatUser(userid) + " depositted " +
+            amounts.reduce((a, b) => a + b, 0) + " BTC"
+          return replyMessage;
         })
-        .catch((err) => convo.say(err.toString()))
-    }
-  })
+    })
 }
 
 
@@ -385,18 +399,21 @@ function smartPay(fromUserID, toUserID, amount, Txmessage, cb) {
   debug("paying to " + toUserID);
   let returnMessage = "";
   User.findOne({ id: fromUserID }, (err, fromUserContent) => {
-    User.findOne({id: toUserID}, (err, toUserContent) => {
+    if (fromUserContent === null || fromUserContent === undefined){
+      console.log("fromUserContent was " + JSON.stringify(fromUserContent));
+      returnMessage = formatUser(fromUserID) +
+        " had no registered address, so not going to pay.\nPlease register first!";
+      cb(null, returnMessage);
+      return;
+    }
 
-      if (fromUserContent === null || fromUserContent === undefined ){
-        console.log("fromUserContent was " + JSON.stringify(fromUserContent));
-        returnMessage = formatUser(fromUserID) +
-          " had no registered address, so not going to pay.\nPlease register first!";
-        cb(null, returnMessage)
-      } else if (toUserContent === null || toUserContent === undefined ) {
+    User.findOne({id: toUserID}, (err, toUserContent) => {
+      if (toUserContent === null || toUserContent === undefined ) {
         console.log("to UserContent was " + JSON.stringify(toUserContent));
         returnMessage = formatUser(toUserID) +
           " had no registered address, so not going to pay.\nPlease register first!";
         cb(null, returnMessage)
+
       } else {
 
         // check if all paybackAddresses has been used.
@@ -409,7 +426,7 @@ function smartPay(fromUserID, toUserID, amount, Txmessage, cb) {
         } else {
 
           returnMessage = replyMessage +
-              " payed to " + formatUser(toUserID)
+            " payed to " + formatUser(toUserID)
           bitcoindclient.sendToAddress(address,
             amount,
             Txmessage,
@@ -453,8 +470,12 @@ controller.hears(`balance`, ['mention', 'direct_mention', 'direct_message'], (bo
       {
         pattern: "me",
         callback: (reply, convo) => {
-          getUserBalance(message.user, convo)
-          convo.next();
+          getUserBalance(message.user)
+            .then((replyMessage) => {
+              convo.say(replyMessage);
+            })
+            .catch(err => convo.say(err.toString()))
+            .then(() => convo.next());
         }
       },
 
@@ -475,8 +496,12 @@ controller.hears(`balance`, ['mention', 'direct_mention', 'direct_message'], (bo
         callback: (reply, convo) => {
           userId = reply.text.match(userIdPattern)[0].slice(2, -1);
           debug("uesrId is\n" + userId);
-          getUserBalance(userId, convo);
-          convo.next();
+          getUserBalance(message.user)
+            .then((replyMessage) => {
+            convo.say(replyMessage);
+          })
+            .catch(err => convo.say(err.toString()))
+            .then( () => convo.next())
         }
       },
 
