@@ -29,7 +29,7 @@ module.exports = {
     password: process.env.BITCOIND_PASSWORD || 'bitcoin-tipper',
     host: process.env.BITCOIND_PORT_8333_TCP_ADDR ||
       process.env.BITCOIND_URI || "localhost",
-    timeout: 10000
+    timeout: 30000
   },
   TOKEN: TOKEN,
   SLACK_DEBUG: SLACK_DEBUG,
