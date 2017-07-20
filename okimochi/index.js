@@ -380,13 +380,31 @@ controller.hears('register', ["direct_mention", "direct_message"], (bot, message
       throw err
     }
     convo.ask("please paste your bitcoin address (separated by \\n) of " + config.bitcoin.network, (response, convo) => {
-      let ps = [];
-      for (let address of response.text.split("\n")) {
-        ps.push(PromiseSetAddressToUser(message.user, address))
+      let ps1 = [];
+      let ps2 = [];
+      let ps3 = [];
+      addresses = response.text.split("\n")
+      for (i=0, size=addresses.length; i < size; ++i) {
+        ps1.push(bitcoindclient.validateAddress(addresses[i]))
+        isLast = i === size - 1
+        if (!isLast){
+          ps2.push(bitcoindclient.importAddress(addresses[i], "for user " + message.user, false))
+        }
+        ps3.push(PromiseSetAddressToUser(message.user, addresses[i]))
       }
-      debug(ps)
-      Promise.all(ps)
+
+      Promise.all(ps3)
         .then(() => convo.say("successfully registered address as " + formatUser(message.user) + "'s !"))
+        .then(() => convo.next())
+        .catch((err) => {convo.say(err.toString())}).then(() => {convo.next()})
+
+      Promise.all(ps1)
+        .then(() => Promise.all(ps2))
+        .then((result) => {
+            debug("result was ", result)
+            return bitcoindclient.importAddress(addresses[addresses.length - 1], formatUser(message.user) + "'s' !", true)
+          })
+        .then(() => convo.say("import registered address and now rescanning"))
         .then(() => convo.next())
         .catch((err) => {convo.say(err.toString())}).then(() => {convo.next()})
     })
