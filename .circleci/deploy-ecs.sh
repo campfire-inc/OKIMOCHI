@@ -38,6 +38,14 @@ make_task_def(){
           "value": "production"
         },
         {
+          "name": "PLOTLY_API_KEY",
+          "value": "%s"
+        },
+        {
+          "name": "PLOTLY_API_USER",
+          "value": "%s"
+        },
+        {
           "name": "BITCOIND_NETWORK",
           "value": "mainnet"
         },
@@ -99,7 +107,7 @@ make_task_def(){
 
 	task_def=$(printf "$task_template" ${AWS_ECS_TASKDEF_NAME} \
       $AWS_ACCOUNT_ID ${AWS_DEFAULT_REGION} ${AWS_ECR_REP_NAME} \
-      $CIRCLE_SHA1 ${TOKEN})
+      $CIRCLE_SHA1 ${TOKEN} ${PLOTLY_API_KEY}, ${PLOTLY_API_USER})
     volume_def='[
     {
       "host": {
