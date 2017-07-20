@@ -28,7 +28,8 @@ module.exports = {
     username: process.env.BITCOIND_USERNAME || 'slackbot',
     password: process.env.BITCOIND_PASSWORD || 'bitcoin-tipper',
     host: process.env.BITCOIND_PORT_8333_TCP_ADDR ||
-      process.env.BITCOIND_URI || "localhost"
+      process.env.BITCOIND_URI || "localhost",
+    timeout: 10000
   },
   TOKEN: TOKEN,
   SLACK_DEBUG: SLACK_DEBUG,
@@ -37,5 +38,10 @@ module.exports = {
   iconUrl: "http://3.bp.blogspot.com/-LE-WPdZd5j4/UzoZuyc49QI/AAAAAAAAesw/4EU0zMlH_E4/s800/gold_kinkai_nobebou.png",
   icon_emoji: ":moneybag:",
   webhook_url: "https://hooks.slack.com/services/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",
-  default_channel: "#okimochi-test"
+  default_channel: "#okimochi-test",
+
+  plotly: {
+    api_key: process.env.PLOTLY_API_KEY,
+    account_name: process.env.PLOTLY_API_USER
+  }
 }

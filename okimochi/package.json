@@ -9,7 +9,7 @@
   },
   "scripts": {
     "test": "nyc mocha test/test_pots.js",
-    "start": "docker-compose up -d --no-build"
+    "start": "node --harmony-async-await index.js"
   },
   "keywords": [
     "slack",
@@ -27,6 +27,7 @@
     "express": "^4.15.3",
     "mongoose": "^4.11.1",
     "mysql": "^2.13.0",
+    "plotly": "^1.0.6",
     "sync-request": "^4.1.0",
     "webcoin": "^2.2.2",
     "winston": "^2.3.1"

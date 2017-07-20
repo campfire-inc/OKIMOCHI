@@ -1,10 +1,10 @@
 require('dotenv').config({path: '../.env'});
-
 const winston = require('winston');
 const Botkit = require("botkit");
 const config = require("./config");
 const debug = require('debug')('okimochi');
 const sync_request = require('sync-request');
+const plotly = require('plotly')(config.plotly.account_name, config.plotly.api_key)
 
 debug("config is")
 debug(config)
@@ -13,6 +13,88 @@ const BitcoindClient = require("bitcoin-core");
 const bitcoindclient = new BitcoindClient(config.bitcoin);
 
 // functions
+
+function getallUsersDepossitedAmounts(){
+  return new Promise((resolve, reject) => {
+    User.find({} , ["id"], (err, ids) => {
+      if (err) reject(err);
+      console.log("ids are "+ ids)
+      let ps = [];
+      for (let i = 0, size = ids.length; i<size; ++i) {
+        console.log("id is " + ids[i])
+        ps.push(PromisegetUserBalance(ids[i].id))
+      }
+
+      Promise.all(ps).then((result) => resolve(result))
+    })
+  })
+}
+
+function getallUsersOkimochiAmounts(length){
+  return new Promise((resolve, reject) => {
+    let result = [];
+    for (i=0, size=length; i<size; ++i){
+      result.push(Math.random())
+    }
+    resolve(result)
+  })
+}
+
+
+async function PromisegetRankingChart(){
+  const x = await getallUsersDepossitedAmounts()
+  const y = await getallUsersOkimochiAmounts(x.length)
+  debug("x is ", x)
+  debug("y is ", y)
+
+  var data = [
+  {
+    x: x,
+    y: y,
+    name: 'ranking',
+    mode: "markers",
+    marker: {
+      color: "rgb(164, 194, 244)",
+      size: 12,
+      line: {
+        color: "white",
+        width: 0.5
+      }
+    },
+    type: 'scatter'
+  }
+  ];
+var layout = {
+  title: 'okimochi-ranking',
+  xaxis: {
+    title: "the amount depositted",
+    showgrid: false,
+    zeroline: false
+  },
+  yaxis: {
+    title: "the amount of OKIMOCHI",
+    showline: false
+  },
+  autosize: false,
+  width: 960,
+  height: 540
+};
+
+var opts = {
+  layout: layout,
+  filename: 'okimochi-ranking',
+  fileopt: 'new'
+};
+
+return new Promise((resolve, reject) => {
+    plotly.plot(data, opts, (err, msg) => {
+      if (err) reject(err);
+      else resolve(msg);
+    })
+  })
+
+}
+
 function PromiseSetAddressToUser(userId, address){
   debug(userId);
   debug(address)
@@ -85,8 +167,12 @@ function PromiseFindUser(userid){
   });
 }
 
-function getUserBalance(userid){
-  let replyMessage = "";
+
+/*
+ * @param {string} userid to retreive the balance
+ * @return {Promise} Which will resolves to Integer amount of BTC that the user has depositted.
+ */
+function PromisegetUserBalance(userid){
   return PromiseFindUser(userid)
     .then((content) => {
       debug("content is " + content)
@@ -113,9 +199,8 @@ function getUserBalance(userid){
 
         .then((amounts) => {
           debug("amounts are" + amounts);
-          replyMessage += formatUser(userid) + " depositted " +
-            amounts.reduce((a, b) => a + b, 0) + " BTC"
-          return replyMessage;
+          debug(Object.prototype.toString.call(amounts))
+          return amounts.reduce((a, b) => a + b, 0)
         })
     })
 }
@@ -285,7 +370,7 @@ controller.hears(`deposit`, ["direct_mention", "direct_message", "mention"], (bo
           formatUser(message.user) + "'s")))
     .catch((err) => {bot.reply(err)})
 
-    
+
 })
 
 // register
@@ -459,6 +544,16 @@ controller.hears(`tip ${userIdPattern.source} ${amountPattern.source}(.*)`, ["di
     });
 })
 
+// ranking
+controller.hears(`ranking`, ['mention', 'direct_mention', 'direct_message'], (bot, message) => {
+  PromisegetRankingChart()
+    .then((msg) => {
+      console.log("msg was \n")
+      bot.reply(message, msg.url)
+      console.log("finished plotting!")
+    })
+    .catch(err => bot.reply(message, err.toString()))
+})
 // balance
 controller.hears(`balance`, ['mention', 'direct_mention', 'direct_message'], (bot, message) => {
   bot.startConversation(message, (err, convo) => {
@@ -470,9 +565,9 @@ controller.hears(`balance`, ['mention', 'direct_mention', 'direct_message'], (bo
       {
         pattern: "me",
         callback: (reply, convo) => {
-          getUserBalance(message.user)
-            .then((replyMessage) => {
-              convo.say(replyMessage);
+          PromisegetUserBalance(message.user)
+            .then((deposittedBalance) => {
+              convo.say(formatUser(userid) + " depositted " + deposittedBalance + " BTC");
             })
             .catch(err => convo.say(err.toString()))
             .then(() => convo.next());
@@ -496,9 +591,9 @@ controller.hears(`balance`, ['mention', 'direct_mention', 'direct_message'], (bo
         callback: (reply, convo) => {
           userId = reply.text.match(userIdPattern)[0].slice(2, -1);
           debug("uesrId is\n" + userId);
-          getUserBalance(message.user)
-            .then((replyMessage) => {
-            convo.say(replyMessage);
+          PromisegetUserBalance(message.user)
+            .then((deposittedBalance) => {
+              convo.say(formatUser(userid) + " depositted " + deposittedBalance + " BTC");
           })
             .catch(err => convo.say(err.toString()))
             .then( () => convo.next())
@@ -551,6 +646,9 @@ controller.hears("help", ["direct_mention", "direct_message"], (bot, message) =>
 
   # tip intentionally ... message will be included as Tx message for bitcoin
   - @okimochi-bitcoin tip @user <BTC amount> <message>
+
+  # show ranking for depositted amount and the amount payed to registered Address
+  - @okimochi-bitcoin ranking
 
   # :bitcoin: や :okimochi: などのリアクションを押すと自動的に支払われるよ！
   # 将来的には誰かが「ありがとう」などの言葉を発した時にも自動でtipする予定！
