@@ -18,6 +18,7 @@ function PromiseGetAllUsersDeposit(){
   return new Promise((resolve, reject) => {
     User.find({} , ["id"], {sort: {'id': 1}}, (err, ids) => {
       if (err) reject(err);
+      if (ids === undefined) reject(new Error("couldn't find undefined! "));
       debug("ids are ", ids)
       let ps = [];
       for (let i = 0, size = ids.length; i<size; ++i) {
@@ -48,8 +49,9 @@ function PromiseGetAllUserPayback(){
 }
 
 async function PromisegetRankingChart(){
+  let x;
   try {
-    let x = await PromiseGetAllUsersDeposit()
+    x = await PromiseGetAllUsersDeposit()
   } catch(e) {
     throw e
   }
