@@ -115,8 +115,8 @@ make_task_def(){
 
 	task_def=$(printf "$task_template" ${AWS_ECS_TASKDEF_NAME} \
       $AWS_ACCOUNT_ID ${AWS_DEFAULT_REGION} ${AWS_ECR_REP_NAME} \
-      $CIRCLE_SHA1 ${TOKEN} ${PLOTLY_API_KEY}, ${PLOTLY_API_USER} \
-      ${BITCOIND_USERNAME}, ${BITCOIND_PASSWORD} )
+      $CIRCLE_SHA1 ${TOKEN} ${PLOTLY_API_KEY} ${PLOTLY_API_USER} \
+      ${BITCOIND_USERNAME} ${BITCOIND_PASSWORD} )
     volume_def='[
     {
       "host": {
