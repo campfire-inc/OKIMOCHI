@@ -32,6 +32,7 @@ function PromiseGetAllUsersDeposit(){
         }
         resolve(result)
       })
+      .catch(err => reject(err))
     })
   })
 }
@@ -47,7 +48,11 @@ function PromiseGetAllUserPayback(){
 }
 
 async function PromisegetRankingChart(){
-  let x = await PromiseGetAllUsersDeposit()
+  try {
+    let x = await PromiseGetAllUsersDeposit()
+  } catch(e) {
+    throw e
+  }
   userids = x.map((ret) => formatUser(ret.userid))
   x = x.map((ret) => ret.balance)
   let y = await PromiseGetAllUserPayback()
