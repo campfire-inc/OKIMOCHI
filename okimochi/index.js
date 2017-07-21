@@ -602,6 +602,7 @@ controller.hears(`ranking`, ['mention', 'direct_mention', 'direct_message'], (bo
 
 // balance
 controller.hears(`balance`, ['mention', 'direct_mention', 'direct_message'], (bot, message) => {
+  bot.reply(message, "This function is deprecated! please use `ranking` to see your balance")
   bot.startConversation(message, (err, convo) => {
 
 
