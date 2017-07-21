@@ -10,8 +10,8 @@ services:
     volumes:
       - ".:/usr/app"
     extra_hosts:
-      - "mongo:172.0.0.4"
-      - "bitcoind:172.0.0.3"
+      - "mongo:${MONGO_URI}"
+      - "bitcoind:${BITCOIND_URI}"
     restart: always
     ports:
       - "${HOST_PORT}:3000"
@@ -38,8 +38,8 @@ services:
       -rest
       -${BITCOIND_NETWORK}
       -server
-      -rpcuser=slackbot
-      -rpcpassword=bitcoin-tipper
+      -rpcuser=${BITCOIND_USERNAME}
+      -rpcpassword=${BITCOIND_PASSWORD}
       -rpcallowip=172.0.0.0/8
       -datadir=/home/bitcoin/.bitcoin
       -dbcache=500
