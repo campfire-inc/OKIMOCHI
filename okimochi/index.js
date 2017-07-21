@@ -257,7 +257,9 @@ const message_to_BTC_map = {
   ":pray:": 0.0001,
   ":okimochi:": 0.001,
   "気持ち": 0.0001,
-  "きもち": 0.0001
+  "きもち": 0.0001,
+  ":thankyou1:" 0.0001,
+  ":+1:" 0.00001,
 }
 
 const thxMessages = Object.keys(message_to_BTC_map);
@@ -602,68 +604,6 @@ controller.hears(`ranking`, ['mention', 'direct_mention', 'direct_message'], (bo
     .catch(err => bot.reply(message, err.toString()))
 })
 
-// balance
-controller.hears(`balance`, ['mention', 'direct_mention', 'direct_message'], (bot, message) => {
-  bot.reply(message, "This function is deprecated! please use `ranking` to see your balance")
-  bot.startConversation(message, (err, convo) => {
-
-
-    const firstQuestion = "who's balance is the one you want to know? (me|total|@userid)"
-
-    const callbacks = [
-      {
-        pattern: "me",
-        callback: (reply, convo) => {
-          PromisegetUserBalance(message.user)
-            .then((depositedBalance) => {
-              convo.say(formatUser(message.user) + " deposited " + depositedBalance + " BTC");
-            })
-            .catch(err => convo.say(err.toString()))
-            .then(() => convo.next());
-        }
-      },
-
-      {
-        pattern: "total",
-        callback: (reply, convo) => {
-          bitcoindclient.getBalance()
-            .then((balance) => {
-              convo.say('the total deposited balance is ' + balance);
-            })
-            .catch((err) => {convo.say(err.toString())})
-            .then(() => convo.next())
-        }
-      },
-
-      {
-        pattern: userIdPattern,
-        callback: (reply, convo) => {
-          userId = reply.text.match(userIdPattern)[0].slice(2, -1);
-          debug("uesrId is\n" + userId);
-          PromisegetUserBalance(message.user)
-            .then((depositedBalance) => {
-              convo.say(formatUser(userid) + " deposited " + depositedBalance + " BTC");
-          })
-            .catch(err => convo.say(err.toString()))
-            .then( () => convo.next())
-        }
-      },
-
-      {
-        default: true,
-        callback: (response, convo) => {
-          convo.say("Please specify either me|total|@<username>");
-          convo.repeat();
-          convo.next();
-        }
-      }
-    ]
-
-
-    convo.ask(firstQuestion, callbacks)
-  })
-})
-
 // rate
 controller.hears('^rate$', ['direct_mention', 'direct_message'], (bot, message) => {
   let rate = getRateJPY();
@@ -686,9 +626,6 @@ controller.hears("help", ["direct_mention", "direct_message"], (bot, message) =>
 
   # show this help
   - @okimochi-bitcoin help
-
-  # show balance of someone
-  - @okimochi-bitcoin balance
 
   # show BTC-JPY rate
   - @okimochi-bitcoin rate
