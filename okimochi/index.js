@@ -258,8 +258,8 @@ const message_to_BTC_map = {
   ":okimochi:": 0.001,
   "気持ち": 0.0001,
   "きもち": 0.0001,
-  ":thankyou1:" 0.0001,
-  ":+1:" 0.00001,
+  ":thankyou1:": 0.0001,
+  ":+1:": 0.00001,
 }
 
 const thxMessages = Object.keys(message_to_BTC_map);
