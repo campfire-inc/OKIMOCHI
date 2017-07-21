@@ -39,7 +39,7 @@ function PromiseGetAllUsersDeposit(){
 
 function PromiseGetAllUserPayback(){
   return new Promise((resolve, reject) => {
-    User.find({}, ["totalPaybacked"], (err, numbers) => {
+    User.find({}, ["totalPaybacked"], { sort: { 'id': 1 }}, (err, numbers) => {
       if (err) reject(err);
       resolve(numbers.map((content) => content.totalPaybacked));
     })
@@ -369,7 +369,7 @@ User.update({id: "exampleUsername"}, testuser, {upsert: true})
 
 // deposit
 controller.hears(`deposit`, ["direct_mention", "direct_message", "mention"], (bot, message) => {
-  controller.logger.debug("heard deposit")
+  debug("heard deposit")
   bitcoindclient.getNewAddress()
     .then((address) => {
       bot.reply(message, "Please deposit to this address")
@@ -380,7 +380,7 @@ controller.hears(`deposit`, ["direct_mention", "direct_message", "mention"], (bo
         {$push: {depositAddresses: address}},
         {upsert: true}, () => debug("registered " + address + " as " + 
           formatUser(message.user) + "'s")))
-    .catch((err) => {bot.reply(err)})
+    .catch((err) => {bot.reply(message, err)})
 
 
 })
@@ -420,8 +420,8 @@ controller.hears('register', ["direct_mention", "direct_message"], (bot, message
         .then(() => convo.next())
         .catch((err) => {
           if (err.toString().match(/ESOCKETTIMEOUT/) !== null){
-            convo.next();
             debug("there was following error but keep moving ", err)
+            convo.next();
           } else {
             convo.say(err.toString())
           }
