@@ -38,6 +38,26 @@ make_task_def(){
           "value": "production"
         },
         {
+          "name": "SLACK_CLIENT_ID",
+          "value": "%s"
+        },
+        {
+          "name": "SLACK_CLIENT_SECRET",
+          "value": "%s"
+        },
+        {
+          "name": "EMOJI",
+          "value": "%s"
+        },
+        {
+          "name": "WEBHOOK_URL",
+          "value": "%s"
+        },
+        {
+          "name": "DEFAULT_CHANNEL",
+          "value": "%s"
+        },
+        {
           "name": "PLOTLY_API_KEY",
           "value": "%s"
         },
@@ -115,7 +135,9 @@ make_task_def(){
 
 	task_def=$(printf "$task_template" ${AWS_ECS_TASKDEF_NAME} \
       $AWS_ACCOUNT_ID ${AWS_DEFAULT_REGION} ${AWS_ECR_REP_NAME} \
-      $CIRCLE_SHA1 ${TOKEN} ${PLOTLY_API_KEY} ${PLOTLY_API_USER} \
+      $CIRCLE_SHA1 ${TOKEN} ${SLACK_CLIENT_ID} ${SLACK_CLIENT_SECRET} \
+      ${EMOJI} ${WEBHOOK_URL} ${DEFAULT_CHANNEL} \
+      ${PLOTLY_API_KEY} ${PLOTLY_API_USER} \
       ${BITCOIND_USERNAME} ${BITCOIND_PASSWORD} )
     volume_def='[
     {

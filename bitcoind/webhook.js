@@ -2,7 +2,7 @@
 
 const request = require('request');
 const path = require('path');
-const config = require(path.join( __dirname, '../config' ));
+const config = require(path.join( __dirname, 'config' ));
 
 const headers = {
   'Content-type': 'application/json'
