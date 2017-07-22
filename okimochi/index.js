@@ -528,6 +528,9 @@ controller.on(['reaction_added'], (bot, message) => {
 function smartPay(fromUserID, toUserID, amount, Txmessage, cb) {
   debug("paying from " + fromUserID);
   debug("paying to " + toUserID);
+  if (fromUserID === toUserID){
+    return cb(null, "");
+  }
   let returnMessage = "";
   User.findOne({ id: fromUserID }, (err, fromUserContent) => {
     if (fromUserContent === null || fromUserContent === undefined){
