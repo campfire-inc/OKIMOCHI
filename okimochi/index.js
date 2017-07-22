@@ -4,10 +4,14 @@ const Botkit = require("botkit");
 const config = require("./config");
 const debug = require('debug')('okimochi');
 const sync_request = require('sync-request');
-const plotly = require('plotly')(config.plotly.account_name, config.plotly.api_key)
+const plotly = require('plotly')(config.plotly.account_name, config.plotly.api_key);
+const QRCode = require('qrcode');
+const fs = require('fs');
+const path = require('path');
 
 debug("config is")
 debug(config)
+
 // bitcoin
 const BitcoindClient = require("bitcoin-core");
 const bitcoindclient = new BitcoindClient(config.bitcoin);
@@ -381,9 +385,30 @@ controller.hears(`deposit`, ["direct_mention", "direct_message", "mention"], (bo
   debug("heard deposit")
   bitcoindclient.getNewAddress()
     .then((address) => {
-      bot.reply(message, "Please deposit to this address")
-      bot.reply(message, address)
-      return address
+      debug("going to show following address \n", address)
+      const tmpfile = path.join('/tmp', address + ".png")
+      QRCode.toFile(tmpfile, address, (err) => {
+        if (err) throw err;
+
+        const msg_with_qrcode = {
+          'text': "Please deposit to this address or ",
+        };
+
+        bot.api.files.upload({
+          file: fs.createReadStream(tmpfile),
+          filename: "please_pay_to_this_address" + ".png",
+          title: address + ".png",
+          initial_comment: "this is same address with the one shown above.",
+          channels: message.channel
+        }, (err, res) => {
+          if (err) bot.reply(err)
+          debug("result is ", res);
+        })
+
+        bot.reply(message, msg_with_qrcode)
+        bot.reply(message, address)
+        return address
+      })
     })
     .then((address) => User.update({ id: message.user },
         {$push: {depositAddresses: address}},

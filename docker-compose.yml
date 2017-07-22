@@ -7,8 +7,6 @@ services:
     environment:
       NODE_ENV: development
     command: node index.js
-    volumes:
-      - ".:/usr/app"
     extra_hosts:
       - "mongo:${MONGO_URI}"
       - "bitcoind:${BITCOIND_URI}"
