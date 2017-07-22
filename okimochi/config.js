@@ -19,8 +19,8 @@ module.exports = {
   adminPassword: "hoge",
   mongoUri: mongoUri,
   botconfig: {
-    clientId: process.env.CLIENT_ID ||"2154447482.200385943586",
-    clientSecret: process.env.CLIENT_SECRET || "9efb47c35019d6e656575e331f5480fc",
+    clientId: process.env.SLACK_CLIENT_ID ||"2154447482.200385943586",
+    clientSecret: process.env.SLACK_CLIENT_SECRET,
     scopes: ['bot']
   },
   bitcoin: {
@@ -36,9 +36,9 @@ module.exports = {
 
   botUsername: "okimochi-bitcoin",
   iconUrl: "http://3.bp.blogspot.com/-LE-WPdZd5j4/UzoZuyc49QI/AAAAAAAAesw/4EU0zMlH_E4/s800/gold_kinkai_nobebou.png",
-  icon_emoji: ":moneybag:",
-  webhook_url: "https://hooks.slack.com/services/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",
-  default_channel: "#okimochi-test",
+  icon_emoji: process.env.EMOJI || ":moneybag:",
+  webhook_url: process.env.WEBHOOK_URL,
+  default_channel: process.env.DEFAULT_CHANNEL || "#okimochi-test",
 
   plotly: {
     api_key: process.env.PLOTLY_API_KEY,
