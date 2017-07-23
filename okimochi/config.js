@@ -12,7 +12,13 @@ if (process.env.MONGO_PORT_27017_TCP_ADDR){
   mongoUri = `mongodb://localhost:27017/` + network;
 }
 
-const TOKEN = (process.env.NODE_ENV === "development") ? process.env.DEVELOP_TOKEN : process.env.TOKEN
+let TOKEN = "";
+if (process.env.NODE_ENV === "development") {
+  TOKEN = process.env.DEVELOP_TOKEN ? process.env.DEVELOP_TOKEN : process.env.TOKEN;
+} else {
+  TOKEN = process.env.TOKEN
+}
+
 const SLACK_DEBUG = (process.env.NODE_ENV === "development") ? true : false
 
 module.exports = {
@@ -23,6 +29,10 @@ module.exports = {
     clientSecret: process.env.SLACK_CLIENT_SECRET,
     scopes: ['bot']
   },
+
+  TOKEN: TOKEN,
+  SLACK_DEBUG: SLACK_DEBUG,
+
   bitcoin: {
     network: network,
     username: process.env.BITCOIND_USERNAME || 'slackbot',
@@ -31,8 +41,6 @@ module.exports = {
       process.env.BITCOIND_URI || "localhost",
     timeout: 30000
   },
-  TOKEN: TOKEN,
-  SLACK_DEBUG: SLACK_DEBUG,
 
   botUsername: "okimochi-bitcoin",
   iconUrl: "http://3.bp.blogspot.com/-LE-WPdZd5j4/UzoZuyc49QI/AAAAAAAAesw/4EU0zMlH_E4/s800/gold_kinkai_nobebou.png",

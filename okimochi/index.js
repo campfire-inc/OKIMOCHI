@@ -287,8 +287,8 @@ const amountPattern = /([\d\.]*)/ig;
 // slackbot settings.
 
 let controller = Botkit.slackbot({
-  clientId: process.env.CLIENT_ID,
-  clientSecret: process.env.CLIENT_SECRET,
+  clientId: config.botconfig.clientId,
+  clientSecret: config.botconfig.clientSecret,
   scopes: ['bot'],
   logger: new winston.Logger({
     levels: winston.config.syslog.levels,
@@ -321,12 +321,12 @@ let UserInfoMap = {};
 bot.api.users.list({}, (err, res) => {
   if (err) throw err;
   debug("bot.api.users.list result is ", res)
+  if (!res.ok) {throw new Error("failed to call slack `users_list` api")}
   res = res.members;
   for (i = 0, size = res.length; i < size; ++i){
     if (res[i]["is_bot"]) continue;
     if (i === 1){
-      debug("name is ", res[i].name)
-      debug("name is ", res[i]["name"])
+      console.log("first user's info is ", res[i])
     }
     UserInfoMap[res[i]["id"]] = { "name": res[i]["name"], "team": res[i]["team_id"], "color": res[i]["color"]}
   }
