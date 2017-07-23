@@ -33,7 +33,10 @@ function PromiseGetAllUsersDeposit(){
       Promise.all(ps).then((balances) => {
         let result = [];
         for (let i = 0, size = ids.length; i<size; ++i) {
-          result.push({userid: ids[i].id, balance: balances[i]})
+          result.push({userid: ids[i].id,
+                       x: balances[i],
+                       team: UserInfoMap[ids[i].id].team,
+                       name: UserInfoMap[ids[i].id].name})
         }
         resolve(result)
       })
@@ -52,31 +55,17 @@ function PromiseGetAllUserPayback(){
   })
 }
 
-async function PromisegetRankingChart(){
-  let x;
-  try {
-    x = await PromiseGetAllUsersDeposit()
-  } catch(e) {
-    throw e
-  }
-  userids = x.map((ret) => formatUser(ret.userid))
-  x = x.map((ret) => ret.balance)
-  let y = await PromiseGetAllUserPayback()
 
-  debug("x is ", x)
-  debug("y is ", y)
-  debug("for each user id ", userids)
-
-  var data = [
-  {
-    x: x,
-    y: y,
+function makeTraceForPlotly(userinfos, hue){
+  return {
+    x: userinfos.map((info) => info.x),
+    y: userinfos.map((info) => info.y),
     name: 'ranking',
-    text: userids,
+    text: userinfos.map((info) => info.name),
     mode: "markers",
     marker: {
-      color: "rgb(164, 194, 244)",
-      size: 12,
+      color: "hsv(" + hue + ", 100, 100)",
+      size: 20,
       line: {
         color: "white",
         width: 0.5
@@ -84,36 +73,61 @@ async function PromisegetRankingChart(){
     },
     type: 'scatter'
   }
-  ];
-var layout = {
-  title: 'okimochi-ranking',
-  xaxis: {
-    title: "the amount deposited",
-    showgrid: false,
-    zeroline: false
-  },
-  yaxis: {
-    title: "the amount of OKIMOCHI",
-    showline: false
-  },
-  autosize: false,
-  width: 960,
-  height: 540
-};
+}
 
-var opts = {
-  layout: layout,
-  filename: 'okimochi-ranking',
-  fileopt: 'new'
-};
 
-return new Promise((resolve, reject) => {
+async function PromisePlotRankingChart(){
+  let x;
+  try {
+    userinfos = await PromiseGetAllUsersDeposit()
+  } catch(e) {
+    throw e
+  }
+
+  let y = await PromiseGetAllUserPayback()
+  for (i=0, size=userinfos.length; i<size ;++i){
+    userinfos[i].y = y[i]
+  }
+
+  debug("each users infos are ", userinfos);
+  teamSet = new Set(userinfos.map(info => info.team))
+
+  let data = [];
+  let hue = 0
+  for (t of teamSet){
+    hue = (hue + 210) % 360
+    let teamMemberInfo = userinfos.filter((info) => info.team === t);
+    data.push(makeTraceForPlotly(teamMemberInfo, hue));
+  }
+
+  const layout = {
+    title: 'okimochi-ranking',
+    xaxis: {
+      title: "the amount deposited",
+      showgrid: false,
+      zeroline: false
+    },
+    yaxis: {
+      title: "the amount of OKIMOCHI",
+      showline: false
+    },
+    autosize: false,
+    width: 960,
+    height: 540
+  };
+
+  const opts = {
+    layout: layout,
+    filename: 'okimochi-ranking',
+    fileopt: 'new'
+  };
+
+  return new Promise((resolve, reject) => {
     plotly.plot(data, opts, (err, msg) => {
       if (err) reject(err);
       else resolve(msg);
     })
   })
-
 }
 
 function PromiseSetAddressToUser(userId, address){
@@ -219,7 +233,7 @@ function PromisegetUserBalance(userid){
         })
 
         .then((amounts) => {
-          debug("amounts are" + amounts);
+          debug("amounts are", amounts);
           debug(Object.prototype.toString.call(amounts))
           return amounts.reduce((a, b) => a + b, 0)
         })
@@ -302,6 +316,24 @@ bot.configureIncomingWebhook({
   url: "https://hooks.slack.com/services/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"
 });
 
+// from id (e.g. U2FG58SDR) => to information used in this bot (mostly by plotting ranking)
+let UserInfoMap = {};
+
+bot.api.users.list({}, (err, res) => {
+  if (err) throw err;
+  debug("bot.api.users.list result is ", res)
+  res = res.members;
+  for (i = 0, size = res.length; i < size; ++i){
+    if (res[i]["is_bot"]) continue;
+    if (i === 1){
+      debug("name is ", res[i].name)
+      debug("name is ", res[i]["name"])
+    }
+    UserInfoMap[res[i]["id"]] = { "name": res[i]["name"], "team": res[i]["team_id"], "color": res[i]["color"]}
+  }
+  debug("UserInfoMap is ", UserInfoMap);
+});
+
 if (process.env.NODE_ENV === "production"){
   bot.sendWebhook({
     text: "OKIMOCHI has been updated !",
@@ -325,7 +357,6 @@ mongoose.connect(config.mongoUri, {
   .catch((err) => {throw err})
 
 
-
 const Schema = mongoose.Schema,
   ObjectId = Schema.ObjectId;
 
@@ -343,15 +374,6 @@ let UserSchema = new Schema({
 })
 
 const User = mongoose.model('User', UserSchema);
-const testuser = new User({
-  id: "exampleUsername",
-  depositAddresses: ["mg73QvN2KmVzJ9wW56uU7ViFwzrfeqchmw"],
-  paybackAddresses: [{
-    address: "miS3tb8CZ2CXWwRsGNK2EqXCfmzP6bcjv",
-    used: false
-  }],
-  totalPaybacked: 1.5
-});
 
 mongoose.connection.on( 'connected', function(){
     console.log('connected.');
@@ -370,16 +392,6 @@ mongoose.connection.on( 'close', function(){
     console.log( 'connection closed.' );
 });
 
-User.update({id: "exampleUsername"}, testuser, {upsert: true})
-  .then((res) => {
-    console.log(res);
-    User.find({id: "exampleUsername"})
-      .then(res => {
-        debug("found user is " + JSON.stringify(res))
-      })
-    })
-  .catch(err => {throw new Error(err)})
-
 // deposit
 controller.hears(`deposit`, ["direct_mention", "direct_message", "mention"], (bot, message) => {
   debug("heard deposit")
@@ -391,14 +403,14 @@ controller.hears(`deposit`, ["direct_mention", "direct_message", "mention"], (bo
         if (err) throw err;
 
         const msg_with_qrcode = {
-          'text': "Please deposit to this address or ",
+          'text': "Please deposit to this address (by qrcode if you prefer.)",
         };
 
         bot.api.files.upload({
           file: fs.createReadStream(tmpfile),
           filename: "please_pay_to_this_address" + ".png",
           title: address + ".png",
-          initial_comment: "this is same address with the one shown above.",
+          initial_comment: "this is a same address with the one shown above.",
           channels: message.channel
         }, (err, res) => {
           if (err) bot.reply(err)
@@ -407,8 +419,8 @@ controller.hears(`deposit`, ["direct_mention", "direct_message", "mention"], (bo
 
         bot.reply(message, msg_with_qrcode)
         bot.reply(message, address)
-        return address
       })
+      return address
     })
     .then((address) => User.update({ id: message.user },
         {$push: {depositAddresses: address}},
@@ -623,7 +635,7 @@ controller.hears(`tip ${userIdPattern.source} ${amountPattern.source}(.*)`, ["di
 
 // ranking
 controller.hears(`ranking`, ['mention', 'direct_mention', 'direct_message'], (bot, message) => {
-  PromisegetRankingChart()
+  PromisePlotRankingChart()
     .then((msg) => {
       console.log("msg was \n")
       bot.reply(message, msg.url)
