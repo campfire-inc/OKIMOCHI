@@ -28,8 +28,14 @@ module.exports = {
   ## （※ユーザーごとにデポジット額をカウントするので、自分で呼び出したアドレスに振り込むと良い）
   - @okimochi-bitcoin deposit
 
+  # 支払い保留中のビットコインの額を確認(registerすれば不要)
+  - @okimochi-bitcoin pendingBalance
+
+  # 支払い保留中のビットコインの引き出し(registerすれば不要)
+  - @okimochi-bitcoin withdrow
+
   # 自身のアドレスの登録
-  ## このコマンドの後にアドレスを貼り付けると自動で振り込まれる
+  ## このコマンドの後にbotが振込先アドレスを聞いてくるので、貼り付けると自動で振り込まれる
   ## 改行を挟めば複数登録できるので多めに登録しておくと吉
   - @okimochi-bitcoin register
 
@@ -54,6 +60,12 @@ module.exports = {
   %s
   `, Object.keys(emoji_to_BTC_map).join("\n")),
 
-  message_to_BTC_map: Object.assign(gratitude_to_BTC_map, emoji_to_BTC_map)
-
+  message_to_BTC_map: Object.assign(gratitude_to_BTC_map, emoji_to_BTC_map),
+  cannot_pay: ` はビットコインアドレスを登録していないので、支払いはOKIMOCHI内で保留しています！
+  ビットコインを本当にあなたのものにしたい場合は以下の手順を踏んでください！
+  1. \`@okimochi-bitcoin pendingBalance \` で保留されているビットコインの額を確認
+  2. \`@okimochi-bitcoin withdrow\` で自身のビットコインアドレスに送金
+  3. \`@okimochi-bitcoin register\` でビットコインアドレスを登録することで、次回から自動でここに送金（任意）
+    * \`register\` で登録する場合は、可能なら改行で区切って複数登録しておくことをお勧めします。
+  `
 }

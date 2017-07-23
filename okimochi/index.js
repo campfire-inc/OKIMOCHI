@@ -366,7 +366,8 @@ let UserSchema = new Schema({
       used: {type: Boolean, default: false}
     }
   ],
-  totalPaybacked: {type: Number, default: 0}
+  totalPaybacked: {type: Number, default: 0},
+  pendingBalance: {type: Number, default: 0}
 })
 
 const User = mongoose.model('User', UserSchema);
@@ -557,57 +558,58 @@ controller.on(['reaction_added'], (bot, message) => {
   }
 })
 
-
+/*
+ * function to mangae all payment done by this bot.
+ */
 function smartPay(fromUserID, toUserID, amount, Txmessage, cb) {
   debug("paying from " + fromUserID);
   debug("paying to " + toUserID);
   if (fromUserID === toUserID){
     return cb(null, "");
   }
+
   let returnMessage = "";
-  User.findOne({ id: fromUserID }, (err, fromUserContent) => {
-    if (fromUserContent === null || fromUserContent === undefined){
-      console.log("fromUserContent was " + JSON.stringify(fromUserContent));
-      returnMessage = formatUser(fromUserID) +
-        " had no registered address, so not going to pay.\nPlease register first!";
-      cb(null, returnMessage);
-      return;
-    }
+  User.findOne({id: toUserID}, (err, toUserContent) => {
 
-    User.findOne({id: toUserID}, (err, toUserContent) => {
-      if (toUserContent === null || toUserContent === undefined ) {
-        console.log("to UserContent was " + JSON.stringify(toUserContent));
-        returnMessage = formatUser(toUserID) +
-          " had no registered address, so not going to pay.\nPlease register first!";
-        cb(null, returnMessage)
+    // if there was no address to pay
+    if (toUserContent === null || toUserContent === undefined ) {
+      console.log("to UserContent was " + JSON.stringify(toUserContent));
+      returnMessage = formatUser(toUserID) +
+        locale_message.cannot_pay
+      cb(null, returnMessage)
 
+      User.update({id: userId},
+        {$inc: {pendingBalance: amount}},
+        (result) => cb(null, result)
+      )
+
+    // if there is address registered
+    } else {
+
+      // check if all paybackAddresses has been used.
+      let [address, updatedContent, replyMessage] =
+        extractUnusedAddress(toUserContent);
+      debug("going to pay to " + address);
+      debug("of user " + updatedContent);
+      if (!address){
+        cb(new Error(formatUser(toUserID) + " had no registered address! so not going to pay"), null)
       } else {
 
-        // check if all paybackAddresses has been used.
-        let [address, updatedContent, replyMessage] =
-          extractUnusedAddress(toUserContent);
-        debug("going to pay to " + address);
-        debug("of user " + updatedContent);
-        if (!address){
-          cb(new Error(formatUser(toUserID) + " had no registered address! so not going to pay"), null)
-        } else {
-
-          returnMessage = replyMessage +
-            " payed to " + formatUser(toUserID)
-          bitcoindclient.sendToAddress(address,
-            amount,
-            Txmessage,
-            "this is comment."
-          )
-            .then(() => {
-              updatedContent.totalpaybacked += amount
-              updatedContent.save()
-            })
-            .then(() => cb(null, returnMessage))
-            .catch((err) => cb(err, null))
-        }
+        returnMessage = replyMessage +
+          " payed to " + formatUser(toUserID)
+        bitcoindclient.sendToAddress(address,
+          amount,
+          Txmessage,
+          "this is comment."
+        )
+          .then(() => {
+            updatedContent.totalpaybacked += amount
+            updatedContent.save()
+          })
+          .then(() => cb(null, returnMessage))
+          .catch((err) => cb(err, null))
       }
-    })
+    }
   })
 }
 
