@@ -9,8 +9,7 @@ const QRCode = require('qrcode');
 const fs = require('fs');
 const path = require('path');
 
-debug("config is")
-debug(config)
+console.log("config is", config)
 
 // bitcoin
 const BitcoindClient = require("bitcoin-core");
