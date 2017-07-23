@@ -9,6 +9,16 @@ const QRCode = require('qrcode');
 const fs = require('fs');
 const path = require('path');
 
+// import message object according to lang setting.
+let locale_message;
+if (config.lang === "en"){
+  locale_message = require("./locale/english");
+} else if (config.lang === "ja"){
+  locale_message = require('./locale/japanese');
+} else {
+  throw new Error("must specify MESSAGE_LANG environment variable either to `en` or `ja` !!")
+}
+
 console.log("config is", config)
 
 // bitcoin
@@ -265,20 +275,7 @@ function inSatoshi(BTC) {
   return parseFloat((btc * 100000000).toFixed(0));
 }
 
-const message_to_BTC_map = {
-  ":bitcoin:": 0.0001,
-  "感謝": 0.0001,
-  "ありがと": 0.0001,
-  "thanks": 0.0001,
-  "どうも": 0.0001,
-  ":pray:": 0.0001,
-  ":okimochi:": 0.001,
-  "気持ち": 0.0001,
-  "きもち": 0.0001,
-  ":thankyou1:": 0.0001,
-  ":+1:": 0.00001,
-}
-
+const message_to_BTC_map = locale_message.message_to_BTC_map;
 const thxMessages = Object.keys(message_to_BTC_map);
 const userIdPattern = /<@([A-Z\d]+)>/ig;
 const formatUser = (user) => `<@${user}>`
@@ -622,6 +619,8 @@ controller.hears(`tip ${userIdPattern.source} ${amountPattern.source}(.*)`, ["di
   const Txmessage = message.match[3] || "no message";
   if (isNaN(amount)){
     return bot.reply(message, "please give amount of BTC in number !");
+  } else if (config.MAX_TIP_AMOUNT < amount){
+    return bot.reply(message, "amount must be equal to or lower than " + config.MAX_TIP_AMOUNT);
   }
   if (message.user === toPayUser){
     return bot.reply(message, "can not pay to your self !!")
@@ -655,31 +654,6 @@ controller.hears('^rate$', ['direct_mention', 'direct_message'], (bot, message) 
 
 // help
 controller.hears("help", ["direct_mention", "direct_message"], (bot, message) => {
-  let usage = `
-  \`\`\`
-  # show @users bitcoin deposit address
-  - @okimochi-bitcoin deposit
-
-  # register the address for getting paied
-  - @okimochi-bitcoin register
-
-  # show this help
-  - @okimochi-bitcoin help
-
-  # show BTC-JPY rate
-  - @okimochi-bitcoin rate
-
-  # tip intentionally ... message will be included as Tx message for bitcoin
-  - @okimochi-bitcoin tip @user <BTC amount> <message>
-
-  # show ranking for deposited amount and the amount payed to registered Address
-  - @okimochi-bitcoin ranking
-
-  # :bitcoin: や :okimochi: などのリアクションを押すと自動的に支払われるよ！
-  # 将来的には誰かが「ありがとう」などの言葉を発した時にも自動でtipする予定！
-  #
-  \`\`\`
-  `;
-  bot.reply(message, usage);
+  bot.reply(message, locale_message.help);
 });
 

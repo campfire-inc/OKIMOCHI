@@ -24,14 +24,21 @@ const SLACK_DEBUG = (process.env.NODE_ENV === "development") ? true : false
 module.exports = {
   adminPassword: "hoge",
   mongoUri: mongoUri,
+
   botconfig: {
     clientId: process.env.SLACK_CLIENT_ID ||"2154447482.200385943586",
     clientSecret: process.env.SLACK_CLIENT_SECRET,
     scopes: ['bot']
   },
-
   TOKEN: TOKEN,
   SLACK_DEBUG: SLACK_DEBUG,
+  botUsername: "okimochi-bitcoin",
+  iconUrl: "http://3.bp.blogspot.com/-LE-WPdZd5j4/UzoZuyc49QI/AAAAAAAAesw/4EU0zMlH_E4/s800/gold_kinkai_nobebou.png",
+  icon_emoji: process.env.EMOJI || ":moneybag:",
+  webhook_url: process.env.WEBHOOK_URL,
+  default_channel: process.env.DEFAULT_CHANNEL || "#okimochi-test",
+
+  lang: process.env.MESSAGE_LANG || "en",
 
   bitcoin: {
     network: network,
@@ -42,11 +49,7 @@ module.exports = {
     timeout: 30000
   },
 
-  botUsername: "okimochi-bitcoin",
-  iconUrl: "http://3.bp.blogspot.com/-LE-WPdZd5j4/UzoZuyc49QI/AAAAAAAAesw/4EU0zMlH_E4/s800/gold_kinkai_nobebou.png",
-  icon_emoji: process.env.EMOJI || ":moneybag:",
-  webhook_url: process.env.WEBHOOK_URL,
-  default_channel: process.env.DEFAULT_CHANNEL || "#okimochi-test",
+  MAX_TIP_AMOUNT: 0.1,
 
   plotly: {
     api_key: process.env.PLOTLY_API_KEY,
