@@ -63,8 +63,10 @@ module.exports = {
   cannot_pay: ` had no registered address, so the tip will be in \`pendingBalance\`,
   Please do the following!
   1. check your \`pendingBalance\` by \`@okimochi-bitcoin pendingBalance\`
-  2. withdrow your balance to your address by \`@okimochi-bitcoin withdrow\`
+  2. withdraw your balance to your address by \`@okimochi-bitcoin withdraw\`
   3. (optional) register your own address by \`@okimochi-bitcoin register\` to automatically pay to this address from next time.
     * It is possible to register multiple address by \`register\` by separating by \\\n
-  `
+  `,
+
+  pendingBalance: "the amount you can withdraw is "
 }

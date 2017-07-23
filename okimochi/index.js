@@ -572,14 +572,18 @@ function smartPay(fromUserID, toUserID, amount, Txmessage, cb) {
   User.findOne({id: toUserID}, (err, toUserContent) => {
 
     // if there was no address to pay
-    if (toUserContent === null || toUserContent === undefined ) {
+    if (toUserContent === null ||
+        toUserContent === undefined ||
+        toUserContent.paybackAddresses === [] ||
+        toUserContent.paybackAddresses === undefined) {
       console.log("to UserContent was " + JSON.stringify(toUserContent));
       returnMessage = formatUser(toUserID) +
         locale_message.cannot_pay
       cb(null, returnMessage)
 
-      User.update({id: userId},
+      User.update({id: toUserId},
         {$inc: {pendingBalance: amount}},
+        {upsert: true},
         (result) => cb(null, result)
       )
 
@@ -632,6 +636,21 @@ controller.hears(`tip ${userIdPattern.source} ${amountPattern.source}(.*)`, ["di
       if (err) {bot.reply(message, err.toString())} else {bot.reply(message, msg)}
     });
 })
+
+// show pending balance
+controller.hears(`pendingBalane`, ["direct_mention", "direct_message"], (bot, message) => {
+  User.findOneAndUpdate({id: message.user}, {id: message.user}, (err, content) => {
+    if (err) throw err;
+    bot.reply(message, locale_message.pendingBalane + content.pendingBalance)
+  })
+})
+
+
+// withdraw from pendingBalane
+controller.hears(`withdraw`, ["direct_mention", "direct_message"], (bot, message) => {
+  bot.reply(message, "未実装...")
+})
+
 
 // ranking
 controller.hears(`ranking`, ['mention', 'direct_mention', 'direct_message'], (bot, message) => {
