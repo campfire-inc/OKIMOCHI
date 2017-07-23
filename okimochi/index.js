@@ -313,7 +313,7 @@ let bot = controller.spawn({
 });
 
 bot.configureIncomingWebhook({
-  url: "https://hooks.slack.com/services/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"
+  url: config.webhook_url
 });
 
 // from id (e.g. U2FG58SDR) => to information used in this bot (mostly by plotting ranking)
