@@ -68,5 +68,13 @@ module.exports = {
     * It is possible to register multiple address by \`register\` by separating by \\\n
   `,
 
-  pendingBalance: "the amount you can withdraw is "
+  pendingBalance: "the amount you can withdraw is %s BTC",
+  withdraw: {
+    Ask: "How much do you want to retrieve?",
+    amountMustBeNumber: "amount must be Number (BTC) !",
+    notEnoughPendingBalance: `you can'not withdraw more than your pending balance!
+  	please check it by \`@okimochi-bitcoin pendingBalance\` `,
+    pasteAddress: "please paste your bitcoin address to send.",
+    successfulPayment: 'sent!'
+  },
 }

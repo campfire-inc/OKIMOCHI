@@ -69,5 +69,13 @@ module.exports = {
     * \`register\` で登録する場合は、可能なら改行で区切って複数登録しておくことをお勧めします。
   `,
 
-  pendingBalance: "あなたが引き出せる金額は "
+  pendingBalance: "あなたが引き出せる金額は %s BTCです",
+  withdraw: {
+    Ask: "いくら引き出しますか？",
+    amountMustBeNumber: "BTCの額を半角数字で入力してください！",
+    notEnoughPendingBalance: `あなたが引き出せる額を超えています！
+      最大額は \`@okimochi-bitcoin pendingBalance\` で確認できます！`,
+    pasteAddress: "送金先ビットコインアドレスを貼り付けてください",
+    successfulPayment: "送金しました！",
+  },
 }
