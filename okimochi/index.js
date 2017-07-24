@@ -563,7 +563,7 @@ function smartPay(fromUserID, toUserID, amount, Txmessage, cb) {
 
       // pend payment when there is no registered address.
       if (!address){
-        User.update({id: toUserId},
+        User.update({id: toUserID},
           {$inc: {pendingBalance: amount}},
           {upsert: true})
         cb(new Error(formatUser(toUserID) + locale_message.cannot_pay), null)
