@@ -534,53 +534,50 @@ controller.on(['reaction_added'], (bot, message) => {
 })
 
 /*
- * function to mangae all payment done by this bot.
+ * function to mangae all payments done by this bot.
  */
 function smartPay(fromUserID, toUserID, amount, Txmessage, cb) {
-  debug("paying from " + fromUserID);
-  debug("paying to " + toUserID);
+  debug("paying from ", fromUserID);
+  debug("paying to ", toUserID);
   if (fromUserID === toUserID){
     return cb(null, "");
   }
 
   let returnMessage = "";
-  User.findOneAndUpdate({id: toUserID}, {id: toUserID}, {upsert: true}, (err, toUserContent) => {
+  User.findOneAndUpdate({id: toUserID},
+    {id: toUserID},
+    { upsert: true, new: true, runValidators: true},
+    (err, toUserContent) => {
+    if (err) throw err;
 
-    // if there is no address to pay
-    if (toUserContent === null ||
-        toUserContent === undefined) {
-      console.log("to UserContent was " + JSON.stringify(toUserContent));
 
-    // if there is address registered
+  // if there is address registered
+    // check if all paybackAddresses has been used.
+    let [address, updatedContent, replyMessage] =
+      extractUnusedAddress(toUserContent);
+    debug("going to pay to " + address);
+    debug("of user " + updatedContent);
+
+    // pend payment when there is no registered address.
+    if (!address){
+      toUserContent.pendingBalance += amount
+      toUserContent.save()
+      cb(new Error(formatUser(toUserID) + locale_message.cannot_pay), null)
+
     } else {
-      // check if all paybackAddresses has been used.
-      let [address, updatedContent, replyMessage] =
-        extractUnusedAddress(toUserContent);
-      debug("going to pay to " + address);
-      debug("of user " + updatedContent);
-
-      // pend payment when there is no registered address.
-      if (!address){
-        User.update({id: toUserID},
-          {$inc: {pendingBalance: amount}},
-          {upsert: true})
-        cb(new Error(formatUser(toUserID) + locale_message.cannot_pay), null)
-
-      } else {
-        returnMessage = replyMessage +
-          " payed to " + formatUser(toUserID)
-        bitcoindclient.sendToAddress(address,
-          amount,
-          Txmessage,
-          "this is comment."
-        )
-          .then(() => {
-            updatedContent.totalpaybacked += amount
-            updatedContent.save()
-          })
-          .then(() => cb(null, returnMessage))
-          .catch((err) => cb(err, null))
-      }
+      returnMessage = replyMessage +
+        " payed to " + formatUser(toUserID)
+      bitcoindclient.sendToAddress(address,
+        amount,
+        Txmessage,
+        "this is comment."
+      )
+        .then(() => {
+          updatedContent.totalpaybacked += amount
+          updatedContent.save()
+        })
+        .then(() => cb(null, returnMessage))
+        .catch((err) => cb(err, null))
     }
   })
 }
