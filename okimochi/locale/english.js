@@ -68,6 +68,9 @@ module.exports = {
     * It is possible to register multiple address by \`register\` by separating by \\\n
   `,
 
+  allPaybackAddressUsed: "warning: all addresses has been used.\n" +
+      "So using the one we used before!\n" +
+      "Please register the new address for the sake of fungibility! \n",
   pendingBalance: "the amount you can withdraw is %s BTC",
   withdraw: {
     Ask: "How much do you want to retrieve?",

@@ -179,9 +179,7 @@ function extractUnusedAddress(userContent){
   if (!paybackAddresses || paybackAddresses.length === 0){
     address = null
   } else if (paybackAddresses.every((a) => a.used)){
-    replyMessage += "warning: all addresses has been used.\n" +
-      "So using the one we used before!\n" +
-      "Please register the new address for the sake of fungibility! \n"
+    replyMessage += locale_message.allPaybackAddressUsed
     address = paybackAddresses.pop().address
   } else {
     addressIndex = paybackAddresses.findIndex((e) => !e.used)

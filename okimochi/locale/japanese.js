@@ -68,7 +68,10 @@ module.exports = {
   3. \`@okimochi-bitcoin register\` でビットコインアドレスを登録することで、次回から自動でここに送金（任意）
     * \`register\` で登録する場合は、可能なら改行で区切って複数登録しておくことをお勧めします。
   `,
-
+  allPaybackAddressUsed: `注意: registerされたアドレスが全て使用済みになりました。
+  fungibility確保のため、アドレスはトランザクションごとに使い分けることが奨励されています。
+  気が向いたら、多めに登録しておきましょう。
+`,
   pendingBalance: "あなたが引き出せる金額は %s BTCです",
   withdraw: {
     Ask: "いくら引き出しますか？",
