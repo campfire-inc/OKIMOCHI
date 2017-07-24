@@ -367,7 +367,7 @@ let UserSchema = new Schema({
       used: {type: Boolean, default: false}
     }
   ],
-  totalPaybacked: {type: Number, default: 0},
+  totalPaybacked: {type: Number, default: 0}, // pendingBalance + amount payed directry.
   pendingBalance: {type: Number, default: 0}
 })
 
@@ -561,6 +561,7 @@ function smartPay(fromUserID, toUserID, amount, Txmessage, cb) {
     // pend payment when there is no registered address.
     if (!address){
       toUserContent.pendingBalance += amount
+      toUserContent.totalPaybacked += amount
       toUserContent.save()
       cb(new Error(formatUser(toUserID) + locale_message.cannot_pay), null)
 
@@ -573,7 +574,7 @@ function smartPay(fromUserID, toUserID, amount, Txmessage, cb) {
         "this is comment."
       )
         .then(() => {
-          updatedContent.totalpaybacked += amount
+          updatedContent.totalPaybacked += amount
           updatedContent.save()
         })
         .then(() => cb(null, returnMessage))
