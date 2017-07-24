@@ -80,6 +80,10 @@ make_task_def(){
         {
           "name": "BITCOIND_PASSWORD",
           "value": "%s"
+        },
+        {
+          "name": "MESSAGE_LANG",
+          "value": "ja"
         }
         ],
         "logConfiguration": {
