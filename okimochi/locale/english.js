@@ -72,6 +72,14 @@ module.exports = {
       "So using the one we used before!\n" +
       "Please register the new address for the sake of fungibility! \n",
   pendingBalance: "the amount you can withdraw is %s BTC",
+  deposit: {
+    msg_with_qrcode: "Please deposit to this address (or QRcode if you prefer)",
+   file_comment: "this is a same address with the one shown above."
+  },
+  register: {
+    beg: "please paste your bitcoin address separated by \\n of %s",
+    success: "successfully registered address as %s's!"
+  },
   withdraw: {
     Ask: "How much do you want to retrieve?",
     amountMustBeNumber: "amount must be Number (BTC) !",

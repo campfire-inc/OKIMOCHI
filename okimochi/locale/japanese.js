@@ -73,6 +73,14 @@ module.exports = {
   気が向いたら、多めに登録しておきましょう。
 `,
   pendingBalance: "あなたが引き出せる金額は %s BTCです",
+  deposit: {
+    msg_with_qrcode: "このアドレスに振り込んでください（QRコードも同じアドレスです）",
+   file_comment: "同じアドレスのQRコード表現です"
+  },
+  register: {
+    beg: "%sのBTCアドレスを入力してください（改行を入れて複数可）",
+    success: "%sの支払先アドレスを登録しました！"
+  },
   withdraw: {
     Ask: "いくら引き出しますか？",
     amountMustBeNumber: "BTCの額を半角数字で入力してください！",

@@ -400,22 +400,18 @@ controller.hears(`deposit`, ["direct_mention", "direct_message", "mention"], (bo
       QRCode.toFile(tmpfile, address, (err) => {
         if (err) throw err;
 
-        const msg_with_qrcode = {
-          'text': "Please deposit to this address (by qrcode if you prefer.)",
-        };
-
         bot.api.files.upload({
           file: fs.createReadStream(tmpfile),
           filename: "please_pay_to_this_address" + ".png",
           title: address + ".png",
-          initial_comment: "this is a same address with the one shown above.",
+          initial_comment: locale_message.deposit.filecomment,
           channels: message.channel
         }, (err, res) => {
           if (err) bot.reply(err)
           debug("result is ", res);
         })
 
-        bot.reply(message, msg_with_qrcode)
+        bot.reply(message, locale_message.deposit.msg_with_qrcode)
         bot.reply(message, address)
       })
       return address
@@ -435,13 +431,13 @@ controller.hears('register', ["direct_mention", "direct_message"], (bot, message
     if (err) {
       throw err
     }
-    convo.ask("please paste your bitcoin address (separated by \\n) of " + config.bitcoin.network, (response, convo) => {
+    convo.ask(util.format(locale_message.register.beg, config.bitcoin.network), (response, convo) => {
       let ps = [];
       for (let address of response.text.split("\n")) {
         ps.push(PromiseSetAddressToUser(message.user, address))
       }
       Promise.all(ps)
-        .then(() => convo.say("successfully registered address as " + formatUser(message.user) + "'s !"))
+        .then(() => convo.say(util.format(locale_message.register.success, formatUser(message.user))))
         .then(() => convo.next())
         .catch((err) => {convo.say(err.toString())}).then(() => {convo.next()})
     })
