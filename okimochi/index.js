@@ -442,7 +442,6 @@ controller.hears('register', ["direct_mention", "direct_message"], (bot, message
       for (let address of response.text.split("\n")) {
         ps.push(PromiseSetAddressToUser(message.user, address))
       }
-      debug(ps)
       Promise.all(ps)
         .then(() => convo.say("successfully registered address as " + formatUser(message.user) + "'s !"))
         .then(() => convo.next())
