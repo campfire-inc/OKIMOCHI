@@ -239,7 +239,7 @@ function PromisegetUserBalance(userid){
           return Promise.all(
             validAddresses.map((a) => {
               debug("address validation result is ", a);
-              return bitcoindclient.getReceivedByAddress(a.address)
+              return bitcoindclient.getReceivedByAddress(a.address, 0)
             })
           )
         })
