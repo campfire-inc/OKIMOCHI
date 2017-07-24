@@ -8,6 +8,7 @@ const plotly = require('plotly')(config.plotly.account_name, config.plotly.api_k
 const QRCode = require('qrcode');
 const fs = require('fs');
 const path = require('path');
+const util = require('util');
 
 // import message object according to lang setting.
 let locale_message;
@@ -165,8 +166,10 @@ function PromiseSetAddressToUser(userId, address){
  * from users information. choose unused paybackAddress Preferentially.
  * And mark that Address as "used". and returns updated info and address to use.
  * @param {Object} userContent
- * @return {Array} first address for using as paying back. Second updated user info
- *  and third is String for bot to speak
+ * @return {Array}
+ *  1. first is the address for using as paying back tx.(null if no address registered.)
+ *  2. Second is updated user info.
+ *  3. And third is String for bot to speak
  */
 function extractUnusedAddress(userContent){
   let paybackAddresses = userContent.paybackAddresses
@@ -366,7 +369,8 @@ let UserSchema = new Schema({
       used: {type: Boolean, default: false}
     }
   ],
-  totalPaybacked: {type: Number, default: 0}
+  totalPaybacked: {type: Number, default: 0},
+  pendingBalance: {type: Number, default: 0}
 })
 
 const User = mongoose.model('User', UserSchema);
@@ -557,57 +561,55 @@ controller.on(['reaction_added'], (bot, message) => {
   }
 })
 
-
+/*
+ * function to mangae all payment done by this bot.
+ */
 function smartPay(fromUserID, toUserID, amount, Txmessage, cb) {
   debug("paying from " + fromUserID);
   debug("paying to " + toUserID);
   if (fromUserID === toUserID){
     return cb(null, "");
   }
-  let returnMessage = "";
-  User.findOne({ id: fromUserID }, (err, fromUserContent) => {
-    if (fromUserContent === null || fromUserContent === undefined){
-      console.log("fromUserContent was " + JSON.stringify(fromUserContent));
-      returnMessage = formatUser(fromUserID) +
-        " had no registered address, so not going to pay.\nPlease register first!";
-      cb(null, returnMessage);
-      return;
-    }
 
-    User.findOne({id: toUserID}, (err, toUserContent) => {
-      if (toUserContent === null || toUserContent === undefined ) {
-        console.log("to UserContent was " + JSON.stringify(toUserContent));
-        returnMessage = formatUser(toUserID) +
-          " had no registered address, so not going to pay.\nPlease register first!";
-        cb(null, returnMessage)
+  let returnMessage = "";
+  User.findOneAndUpdate({id: toUserID}, {id: toUserID}, {upsert: true}, (err, toUserContent) => {
+
+    // if there is no address to pay
+    if (toUserContent === null ||
+        toUserContent === undefined) {
+      console.log("to UserContent was " + JSON.stringify(toUserContent));
+
+    // if there is address registered
+    } else {
+      // check if all paybackAddresses has been used.
+      let [address, updatedContent, replyMessage] =
+        extractUnusedAddress(toUserContent);
+      debug("going to pay to " + address);
+      debug("of user " + updatedContent);
+
+      // pend payment when there is no registered address.
+      if (!address){
+        User.update({id: toUserId},
+          {$inc: {pendingBalance: amount}},
+          {upsert: true})
+        cb(new Error(formatUser(toUserID) + locale_message.cannot_pay), null)
 
       } else {
-
-        // check if all paybackAddresses has been used.
-        let [address, updatedContent, replyMessage] =
-          extractUnusedAddress(toUserContent);
-        debug("going to pay to " + address);
-        debug("of user " + updatedContent);
-        if (!address){
-          cb(new Error(formatUser(toUserID) + " had no registered address! so not going to pay"), null)
-        } else {
-
-          returnMessage = replyMessage +
-            " payed to " + formatUser(toUserID)
-          bitcoindclient.sendToAddress(address,
-            amount,
-            Txmessage,
-            "this is comment."
-          )
-            .then(() => {
-              updatedContent.totalpaybacked += amount
-              updatedContent.save()
-            })
-            .then(() => cb(null, returnMessage))
-            .catch((err) => cb(err, null))
-        }
+        returnMessage = replyMessage +
+          " payed to " + formatUser(toUserID)
+        bitcoindclient.sendToAddress(address,
+          amount,
+          Txmessage,
+          "this is comment."
+        )
+          .then(() => {
+            updatedContent.totalpaybacked += amount
+            updatedContent.save()
+          })
+          .then(() => cb(null, returnMessage))
+          .catch((err) => cb(err, null))
       }
-    })
+    }
   })
 }
 
@@ -630,6 +632,47 @@ controller.hears(`tip ${userIdPattern.source} ${amountPattern.source}(.*)`, ["di
       if (err) {bot.reply(message, err.toString())} else {bot.reply(message, msg)}
     });
 })
+
+// show pending balance
+controller.hears(`pendingBalance`, ["direct_mention", "direct_message"], (bot, message) => {
+  User.findOneAndUpdate({id: message.user}, {id: message.user}, (err, content) => {
+    if (err) throw err;
+    bot.reply(message, util.format(locale_message.pendingBalance, content.pendingBalance))
+  })
+})
+
+
+// withdraw from pendingBalance
+controller.hears(`withdraw`, ["direct_mention", "direct_message"], (bot, message) => {
+  bot.startConversation(message, (err, convo) => {
+    if (err) throw err;
+    User.findOneAndUpdate({id: message.user},
+      {id: message.user},
+      {upsert: true}, (err, content) => {
+        if (err) throw err;
+        convo.ask(locale_message.withdraw.Ask, (response, convo) => {
+          let amount = 0
+          debug("response was", response)
+            amount = Number(response.text)
+          if (isNaN(amount)) {
+            convo.say(locale_message.withdraw.amountMustBeNumber);
+            convo.next();
+          } else if (amount > content.pendingBalance) {
+            convo.say(locale_message.withdraw.notEnoughPendingBalance)
+            convo.next();
+          } else {
+            convo.ask(locale_message.withdraw.pasteAddress, (response, convo) => {
+              bitcoindclient.sendToAddress(response.text, amount)
+                .then((response) => convo.say(locale_message.withdraw.successfulPayment))
+                .catch((err) => convo.say(err))
+              convo.next();
+            })
+          }
+        });
+      })
+  })
+})
+
 
 // ranking
 controller.hears(`ranking`, ['mention', 'direct_mention', 'direct_message'], (bot, message) => {
