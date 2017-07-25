@@ -110,14 +110,14 @@ async function PromisePlotRankingChart(){
   }
 
   const layout = {
-    title: 'okimochi-ranking',
+    title: 'OKIMOCHI ranking',
     xaxis: {
-      title: "the amount deposited",
+      title: locale_message.ranking.xaxis,
       showgrid: false,
       zeroline: false
     },
     yaxis: {
-      title: "the amount of OKIMOCHI",
+      title: locale_message.ranking.yaxis,
       showline: false
     },
     autosize: false,

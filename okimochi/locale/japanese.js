@@ -72,6 +72,11 @@ module.exports = {
   fungibility確保のため、アドレスはトランザクションごとに使い分けることが奨励されています。
   気が向いたら、多めに登録しておきましょう。
 `,
+  ranking:{
+    xaxis: "depositした量",
+    yaxis: "受け取った量",
+  },
+
   pendingBalance: "あなたが引き出せる金額は %s BTCです",
   deposit: {
     msg_with_qrcode: "このアドレスに振り込んでください（QRコードも同じアドレスです）",

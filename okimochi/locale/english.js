@@ -71,7 +71,14 @@ module.exports = {
   allPaybackAddressUsed: "warning: all addresses has been used.\n" +
       "So using the one we used before!\n" +
       "Please register the new address for the sake of fungibility! \n",
+
+  ranking:{
+    xaxis: "deposit amount",
+    yaxis: "payback amount",
+  },
+
   pendingBalance: "the amount you can withdraw is %s BTC",
+
   deposit: {
     msg_with_qrcode: "Please deposit to this address (or QRcode if you prefer)",
    file_comment: "this is a same address with the one shown above."
