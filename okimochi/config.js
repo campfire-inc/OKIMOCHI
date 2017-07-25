@@ -40,6 +40,8 @@ module.exports = {
 
   lang: process.env.MESSAGE_LANG || "en",
 
+
+  btc_network: network,
   bitcoindclient: new BitcoindClient({
     network: network,
     username: process.env.BITCOIND_USERNAME || 'slackbot',

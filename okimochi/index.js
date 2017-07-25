@@ -314,7 +314,6 @@ let UserInfoMap = {};
 
 bot.api.users.list({}, (err, res) => {
   if (err) throw err;
-  logger.debug("bot.api.users.list result is ", res)
   if (!res.ok) {throw new Error("failed to call slack `users_list` api")}
   res = res.members;
   for (i = 0, size = res.length; i < size; ++i){
@@ -430,7 +429,7 @@ controller.hears('register', ["direct_mention", "direct_message"], (bot, message
     if (err) {
       throw err
     }
-    convo.ask(util.format(locale_message.register.beg, config.bitcoin.network), (response, convo) => {
+    convo.ask(util.format(locale_message.register.beg, config.btc_network), (response, convo) => {
       let ps = [];
       for (let address of response.text.split("\n")) {
         ps.push(PromiseSetAddressToUser(message.user, address))
