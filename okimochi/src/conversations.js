@@ -27,20 +27,20 @@ module.exports = {
     {
       pattern: /[\.\d]+/,
       callback: (response, convo) => {
-	let amount = Number(response.text);
-        if (amount > content.pendingBalance) {
+	    let amount = Number(response.text);
+          if (amount > content.pendingBalance) {
             convo.say(locale_message.withdraw.notEnoughPendingBalance)
             convo.repeat();
             convo.next();
-        } else {
-          logger.debug("amount was number! And its ", amount)
-          convo.next()
-          convo.ask(locale_message.withdraw.pasteAddress, (response, convo) => {
-            bitcoindclient.sendToAddress(response.text, amount)
-              .then((response) => convo.say(locale_message.withdraw.successfulPayment))
-              .catch((err) => convo.say(err))
-              .then(() =>convo.next());
-          convo.say(locale_message.withdraw.sent);
+          } else {
+            logger.debug("amount was number! And its ", amount)
+            convo.next()
+            convo.ask(locale_message.withdraw.pasteAddress, (response, convo) => {
+              bitcoindclient.sendToAddress(response.text, amount)
+                .then((response) => convo.say(locale_message.withdraw.successfulPayment))
+                .catch((err) => convo.say(err))
+                .then(() =>convo.next());
+            convo.say(locale_message.withdraw.sent);
           })
         }
       }

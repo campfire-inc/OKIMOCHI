@@ -538,7 +538,7 @@ function smartPay(fromUserID, toUserID, amount, Txmessage, cb) {
   let returnMessage = "";
   User.findOneAndUpdate({id: toUserID},
     {id: toUserID},
-    { upsert: true, new: true, runValidators: true},
+    { upsert: true, runValidators: true, new: true, setDefaultsOnInsert: true},
     (err, toUserContent) => {
     if (err) throw err;
 
@@ -547,9 +547,10 @@ function smartPay(fromUserID, toUserID, amount, Txmessage, cb) {
     // check if all paybackAddresses has been used.
     let [address, updatedContent, replyMessage] =
       extractUnusedAddress(toUserContent);
+    logger.debug("result of extractUnusedAddress was ", address, updatedContent, replyMessage);
     // pend payment when there is no registered address.
     if (!address){
-      toUserContent.pendingBalance += amount
+      toUserContent.pendingBalance = toUserContent.pendingBalance + amount;
       toUserContent.totalPaybacked += amount
       toUserContent.save()
       cb(new Error(formatUser(toUserID) + locale_message.cannot_pay), null)
@@ -591,7 +592,7 @@ controller.hears(`tip ${userIdPattern.source} ${amountPattern.source}(.*)`, ["di
   }
   smartPay(message.user, toPayUser, amount, Txmessage,
     (err, msg) => {
-      if (err) {bot.reply(message, err.stack)} else {bot.reply(message, msg)}
+      if (err) {bot.reply(message, err.toString())} else {bot.reply(message, msg)}
     });
 })
 
