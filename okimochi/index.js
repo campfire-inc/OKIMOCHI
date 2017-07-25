@@ -1,5 +1,4 @@
 require('dotenv').config({path: '../.env'});
-const winston = require('winston');
 const Botkit = require("botkit");
 const config = require("./config");
 const debug = require('debug')('okimochi');
@@ -282,19 +281,16 @@ const userIdPattern = /<@([A-Z\d]+)>/ig;
 const formatUser = (user) => `<@${user}>`
 const amountPattern = /([\d\.]*)/ig;
 
-// slackbot settings.
+// logger
+const logger = require(path.join(__dirname, "src", "logger"))
 
+
+// lackbot settings.
 let controller = Botkit.slackbot({
   clientId: config.botconfig.clientId,
   clientSecret: config.botconfig.clientSecret,
   scopes: ['bot'],
-  logger: new winston.Logger({
-    levels: winston.config.syslog.levels,
-    transports: [
-      new (winston.transports.Console)(),
-      new (winston.transports.File)({ filename: './okimochi.log'})
-    ]
-  })
+  logger: logger
 }).configureSlackApp(
   config.botconfig
 );
@@ -318,7 +314,7 @@ let UserInfoMap = {};
 
 bot.api.users.list({}, (err, res) => {
   if (err) throw err;
-  debug("bot.api.users.list result is ", res)
+  logger.debug("bot.api.users.list result is ", res)
   if (!res.ok) {throw new Error("failed to call slack `users_list` api")}
   res = res.members;
   for (i = 0, size = res.length; i < size; ++i){
@@ -328,7 +324,7 @@ bot.api.users.list({}, (err, res) => {
     }
     UserInfoMap[res[i]["id"]] = { "name": res[i]["name"], "team": res[i]["team_id"], "color": res[i]["color"]}
   }
-  debug("UserInfoMap is ", UserInfoMap);
+  logger.debug("UserInfoMap is ", UserInfoMap);
 });
 
 if (process.env.NODE_ENV === "production"){
@@ -439,7 +435,7 @@ controller.hears('register', ["direct_mention", "direct_message"], (bot, message
       Promise.all(ps)
         .then(() => convo.say(util.format(locale_message.register.success, formatUser(message.user))))
         .then(() => convo.next())
-        .catch((err) => {convo.say(err.toString())}).then(() => {convo.next()})
+        .catch((err) => {convo.say(err.stack)}).then(() => {convo.next()})
     })
   })
 })
@@ -551,9 +547,6 @@ function smartPay(fromUserID, toUserID, amount, Txmessage, cb) {
     // check if all paybackAddresses has been used.
     let [address, updatedContent, replyMessage] =
       extractUnusedAddress(toUserContent);
-    debug("going to pay to " + address);
-    debug("of user " + updatedContent);
-
     // pend payment when there is no registered address.
     if (!address){
       toUserContent.pendingBalance += amount
@@ -562,6 +555,9 @@ function smartPay(fromUserID, toUserID, amount, Txmessage, cb) {
       cb(new Error(formatUser(toUserID) + locale_message.cannot_pay), null)
 
     } else {
+      debug("going to pay to " + address);
+      debug("of user " + updatedContent);
+
       returnMessage = replyMessage +
         " payed to " + formatUser(toUserID)
       bitcoindclient.sendToAddress(address,
@@ -595,7 +591,7 @@ controller.hears(`tip ${userIdPattern.source} ${amountPattern.source}(.*)`, ["di
   }
   smartPay(message.user, toPayUser, amount, Txmessage,
     (err, msg) => {
-      if (err) {bot.reply(message, err.toString())} else {bot.reply(message, msg)}
+      if (err) {bot.reply(message, err.stack)} else {bot.reply(message, msg)}
     });
 })
 
@@ -614,7 +610,8 @@ controller.hears(`withdraw`, ["direct_mention", "direct_message"], (bot, message
     if (err) throw err;
     User.findOneAndUpdate({id: message.user},
       {id: message.user},
-      {upsert: true}, (err, content) => {
+      { upsert: true, new: true, runValidators: true},
+      (err, content) => {
         if (err) throw err;
         convo.ask(locale_message.withdraw.Ask, (response, convo) => {
           let amount = 0
@@ -627,11 +624,12 @@ controller.hears(`withdraw`, ["direct_mention", "direct_message"], (bot, message
             convo.say(locale_message.withdraw.notEnoughPendingBalance)
             convo.next();
           } else {
+            logger.debug("amount was number! And its ", amount)
             convo.ask(locale_message.withdraw.pasteAddress, (response, convo) => {
               bitcoindclient.sendToAddress(response.text, amount)
                 .then((response) => convo.say(locale_message.withdraw.successfulPayment))
                 .catch((err) => convo.say(err))
-              convo.next();
+                .then(() =>convo.next());
             })
           }
         });
@@ -648,7 +646,7 @@ controller.hears(`ranking`, ['mention', 'direct_mention', 'direct_message'], (bo
       bot.reply(message, msg.url)
       console.log("finished plotting!")
     })
-    .catch(err => bot.reply(message, err.toString()))
+    .catch(err => bot.reply(message, err.stack))
 })
 
 // rate
