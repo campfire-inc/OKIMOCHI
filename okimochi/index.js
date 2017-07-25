@@ -437,7 +437,7 @@ controller.hears('register', ["direct_mention", "direct_message"], (bot, message
       Promise.all(ps)
         .then(() => convo.say(util.format(locale_message.register.success, formatUser(message.user))))
         .then(() => convo.next())
-        .catch((err) => {convo.say(err.stack)}).then(() => {convo.next()})
+        .catch((err) => {convo.say(err.toString())}).then(() => {convo.next()})
     })
   })
 })
