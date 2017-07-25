@@ -86,6 +86,7 @@ module.exports = {
     notEnoughPendingBalance: `you can'not withdraw more than your pending balance!
   	please check it by \`@okimochi-bitcoin pendingBalance\` `,
     pasteAddress: "please paste your bitcoin address to send.",
-    successfulPayment: 'sent!'
+    successfulPayment: 'sent!',
+    sent: "accepted! I will try to send Tx in a moment ... "
   },
 }

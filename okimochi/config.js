@@ -1,5 +1,5 @@
 let mongoUri;
-
+const BitcoindClient = require('bitcoin-core');
 const network = process.env.BITCOIND_NETWORK || 'testnet';
 
 if (process.env.MONGO_PORT_27017_TCP_ADDR){
@@ -40,19 +40,19 @@ module.exports = {
 
   lang: process.env.MESSAGE_LANG || "en",
 
-  bitcoin: {
+  bitcoindclient: new BitcoindClient({
     network: network,
     username: process.env.BITCOIND_USERNAME || 'slackbot',
     password: process.env.BITCOIND_PASSWORD || 'bitcoin-tipper',
     host: process.env.BITCOIND_PORT_8333_TCP_ADDR ||
       process.env.BITCOIND_URI || "localhost",
     timeout: 30000
-  },
+  }),
 
   MAX_TIP_AMOUNT: 0.1,
 
   plotly: {
     api_key: process.env.PLOTLY_API_KEY,
     account_name: process.env.PLOTLY_API_USER
-  }
+  },
 }

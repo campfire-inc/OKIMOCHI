@@ -88,5 +88,6 @@ module.exports = {
       最大額は \`@okimochi-bitcoin pendingBalance\` で確認できます！`,
     pasteAddress: "送金先ビットコインアドレスを貼り付けてください",
     successfulPayment: "送金しました！",
+    sent: "送金を受け付けました。自動で送金を試みます。"
   },
 }

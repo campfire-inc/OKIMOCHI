@@ -8,6 +8,7 @@ const QRCode = require('qrcode');
 const fs = require('fs');
 const path = require('path');
 const util = require('util');
+const MyConvos = require(path.join(__dirname, "src", "conversations"))
 
 // import message object according to lang setting.
 let locale_message;
@@ -22,8 +23,7 @@ if (config.lang === "en"){
 console.log("config is", config)
 
 // bitcoin
-const BitcoindClient = require("bitcoin-core");
-const bitcoindclient = new BitcoindClient(config.bitcoin);
+const bitcoindclient = config.bitcoindclient;
 
 // functions
 
@@ -606,33 +606,14 @@ controller.hears(`pendingBalance`, ["direct_mention", "direct_message"], (bot, m
 
 // withdraw from pendingBalance
 controller.hears(`withdraw`, ["direct_mention", "direct_message"], (bot, message) => {
-  bot.startConversation(message, (err, convo) => {
+  bot.startConversationInThread(message, (err, convo) => {
     if (err) throw err;
     User.findOneAndUpdate({id: message.user},
       {id: message.user},
       { upsert: true, new: true, runValidators: true},
       (err, content) => {
         if (err) throw err;
-        convo.ask(locale_message.withdraw.Ask, (response, convo) => {
-          let amount = 0
-          debug("response was", response)
-            amount = Number(response.text)
-          if (isNaN(amount)) {
-            convo.say(locale_message.withdraw.amountMustBeNumber);
-            convo.next();
-          } else if (amount > content.pendingBalance) {
-            convo.say(locale_message.withdraw.notEnoughPendingBalance)
-            convo.next();
-          } else {
-            logger.debug("amount was number! And its ", amount)
-            convo.ask(locale_message.withdraw.pasteAddress, (response, convo) => {
-              bitcoindclient.sendToAddress(response.text, amount)
-                .then((response) => convo.say(locale_message.withdraw.successfulPayment))
-                .catch((err) => convo.say(err))
-                .then(() =>convo.next());
-            })
-          }
-        });
+        convo.ask(locale_message.withdraw.Ask, MyConvos.getwithdrawConvo(content));
       })
   })
 })
