@@ -85,7 +85,8 @@ module.exports = {
   },
   register: {
     beg: "please paste your bitcoin address separated by \\n of %s",
-    success: "successfully registered address as %s's!"
+    success: "successfully registered address as %s's!",
+    notValid: 'please enter valid address !'
   },
   withdraw: {
     Ask: "How much do you want to retrieve?",

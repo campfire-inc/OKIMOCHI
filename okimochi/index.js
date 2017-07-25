@@ -155,7 +155,7 @@ function PromiseSetAddressToUser(userId, address){
         {upsert: true, 'new': true}, (res) => {resolve(res)})
         resolve()
       } else {
-        reject(new Error('please enter valid address !'))
+        reject(new Error(locale_message.register.notValid))
       }
     })
   })

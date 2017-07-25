@@ -84,7 +84,8 @@ module.exports = {
   },
   register: {
     beg: "%sのBTCアドレスを入力してください（改行を入れて複数可）",
-    success: "%sの支払先アドレスを登録しました！"
+    success: "%sの支払先アドレスを登録しました！",
+    notValid: "有効なビットコインアドレスを入力してください！"
   },
   withdraw: {
     Ask: "いくら引き出しますか？",
