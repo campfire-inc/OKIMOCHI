@@ -395,12 +395,15 @@ controller.hears(`deposit`, ["direct_mention", "direct_message", "mention"], (bo
       const tmpfile = path.join('/tmp', address + ".png")
       QRCode.toFile(tmpfile, address, (err) => {
         if (err) throw err;
+        controller.logger.debug("tmpfile is ", tmpfile)
+        controller.logger.debug("message is ", locale_message.deposit.filecomment)
+        controller.logger.debug("channel is ", message.channel)
 
         bot.api.files.upload({
           file: fs.createReadStream(tmpfile),
           filename: "please_pay_to_this_address" + ".png",
           title: address + ".png",
-          initial_comment: locale_message.deposit.filecomment,
+          initial_comment: locale_message.deposit.file_comment,
           channels: message.channel
         }, (err, res) => {
           if (err) bot.reply(err)

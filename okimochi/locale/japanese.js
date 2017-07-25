@@ -75,7 +75,7 @@ module.exports = {
   pendingBalance: "あなたが引き出せる金額は %s BTCです",
   deposit: {
     msg_with_qrcode: "このアドレスに振り込んでください（QRコードも同じアドレスです）",
-   file_comment: "同じアドレスのQRコード表現です"
+    file_comment: "同じアドレスのQRコード表現です"
   },
   register: {
     beg: "%sのBTCアドレスを入力してください（改行を入れて複数可）",
