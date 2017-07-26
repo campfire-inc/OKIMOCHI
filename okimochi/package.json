@@ -8,7 +8,7 @@
     "url": "git://github.com/campfire-inc/OKIMOCHI"
   },
   "scripts": {
-    "test": "nyc mocha test/test_pots.js",
+    "test": "nyc mocha test/test_locale.js",
     "start": "node index.js"
   },
   "keywords": [
