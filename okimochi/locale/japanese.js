@@ -1,4 +1,9 @@
+const path = require('path');
 const util = require('util');
+const lib = require(path.join(__dirname, '..', 'src', 'lib'));
+
+const inSatoshi = lib.inSatoshi;
+const btc2jpy = lib.btc2jpy;
 
 const gratitude_to_BTC_map = {
   "感謝": 0.0001,
@@ -10,13 +15,38 @@ const gratitude_to_BTC_map = {
 };
 
 const emoji_to_BTC_map = {
-  ":bitcoin:": 0.0001,
-  ":pray:": 0.0001,
-  ":okimochi:": 0.001,
-  ":thankyou1:": 0.0001,
-  ":+1:": 0.00001,
-  ":bow:": 0.0001
+  ":bitcoin:": 0.0005,
+  ":pray:": 0.0005,
+  ":okimochi:": 0.003,
+  ":thankyou1:": 0.0005,
+  ":+1:": 0.0001,
+  ":bow:": 0.0005,
+  ":congratulations:": 0.0005,
+  ":100:": lib.jpy2btc(100),
+  ":azaas:": 0.001,
+  ":bitoko:": 0.001,
+  ":dekiru:": 0.0001,
+  ":ga-sas:": 0.0001,
+  ":hayai:": 0.0001,
+  ":kami-taiou:": 0.0006,
+  ":kawaii:": 0.0001,
+  ":kekkon:": 0.0001,
+  ":kawaii:": 0.0001,
+  ":sugoi:": 0.0001,
+  ":suki:": 0.0001,
+  ":suko:": 0.0001,
+  ":yoi:": 0.0001,
+  ":you_know:": 0.0005,
+  ":yuunou:": 0.0001,
+  ":zass:": 0.0005,
 };
+
+let emoji_info = []
+for (k of Object.keys(emoji_to_BTC_map)){
+  let btc = emoji_to_BTC_map[k]
+  emoji_info.push([k, btc + "BTC", inSatoshi(btc) + "Satoshi", btc2jpy(btc) + "円"])
+}
+
 
 module.exports = {
   help: util.format(`
@@ -61,7 +91,7 @@ module.exports = {
   \`\`\`
 
   %s
-  `, Object.keys(emoji_to_BTC_map).join("\n")),
+  `, emoji_info.join("\n")),
 
   message_to_BTC_map: Object.assign(gratitude_to_BTC_map, emoji_to_BTC_map),
   cannot_pay: ` はビットコインアドレスを登録していないので、支払いはOKIMOCHI内で保留しています！
