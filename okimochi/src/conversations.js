@@ -42,7 +42,7 @@ module.exports = {
                   content.save();
                   convo.say(locale_message.withdraw.successfulPayment)
                 })
-                .catch((err) => convo.say(err))
+                .catch((err) => convo.say(err.toString()))
                 .then(() =>convo.next());
             convo.say(locale_message.withdraw.sent);
           })
