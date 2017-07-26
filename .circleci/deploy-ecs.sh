@@ -35,7 +35,7 @@ make_task_def(){
         },
         {
           "name": "NODE_ENV",
-          "value": "development"
+          "value": "production"
         },
         {
           "name": "SLACK_CLIENT_ID",

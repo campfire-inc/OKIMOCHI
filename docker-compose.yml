@@ -34,6 +34,7 @@ services:
     command:
       -printtoconsole
       -rest
+      -txconfirmtarget=20
       -${BITCOIND_NETWORK}
       -server
       -rpcuser=${BITCOIND_USERNAME}
