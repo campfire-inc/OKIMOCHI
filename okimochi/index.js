@@ -2,13 +2,14 @@ require('dotenv').config({path: '../.env'});
 const Botkit = require("botkit");
 const config = require("./config");
 const debug = require('debug')('okimochi');
-const sync_request = require('sync-request');
 const plotly = require('plotly')(config.plotly.account_name, config.plotly.api_key);
 const QRCode = require('qrcode');
 const fs = require('fs');
 const path = require('path');
 const util = require('util');
 const MyConvos = require(path.join(__dirname, "src", "conversations"))
+const getRateJPY = require(path.join(__dirname, "src", "lib")).getRateJPY;
+
 
 // import message object according to lang setting.
 let locale_message;
@@ -25,18 +26,6 @@ console.log("config is", config)
 // bitcoin
 const bitcoindclient = config.bitcoindclient;
 
-// functions
-
-/*
-function PromiseGetBitcoindBalance(){
-  return new Promise((resolve, reject) => {
-    bitcoindclient.getBalance((err, result) => {
-      if (err) reject(err);
-      resolve(result);
-    })
-  })
-}
-*/
 
 function PromiseGetAllUsersDeposit(){
   return new Promise((resolve, reject) => {
@@ -260,31 +249,6 @@ function PromisegetUserBalance(userid){
     })
 }
 
-
-
-function getRateJPY() {
-  const rate_api_url = 'https://coincheck.com/api/exchange/orders/rate?order_type=buy&pair=btc_jpy&amount=1';
-  let response = sync_request('GET', rate_api_url);
-  let rate;
-  if (response.statusCode == 200) {
-    rate = Math.round(JSON.parse(response.body).rate);
-    return rate;
-  }
-}
-
-
-function jpy2btc(jpyAmount) {
-  let rate = getRateJPY();
-  return jpyAmount * 1.0 / rate;
-}
-
-function inBTC(satoshi) {
-  return (satoshi / 100000000.0).toFixed(4);
-}
-
-function inSatoshi(BTC) {
-  return parseFloat((btc * 100000000).toFixed(0));
-}
 
 const message_to_BTC_map = locale_message.message_to_BTC_map;
 const thxMessages = Object.keys(message_to_BTC_map);

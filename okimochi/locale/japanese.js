@@ -1,4 +1,9 @@
+const path = require('path');
 const util = require('util');
+const lib = require(path.join(__dirname, '..', 'src', 'lib'));
+
+const inSatoshi = lib.inSatoshi;
+const btc2jpy = lib.btc2jpy;
 
 const gratitude_to_BTC_map = {
   "感謝": 0.0001,
@@ -17,6 +22,13 @@ const emoji_to_BTC_map = {
   ":+1:": 0.00001,
   ":bow:": 0.0001
 };
+
+let emoji_info = []
+for (k of Object.keys(emoji_to_BTC_map)){
+  let btc = emoji_to_BTC_map[k]
+  emoji_info.push([k, btc + "BTC", inSatoshi(btc) + "Satoshi", btc2jpy(btc) + "円"])
+}
+
 
 module.exports = {
   help: util.format(`
@@ -61,7 +73,7 @@ module.exports = {
   \`\`\`
 
   %s
-  `, Object.keys(emoji_to_BTC_map).join("\n")),
+  `, emoji_info.join("\n")),
 
   message_to_BTC_map: Object.assign(gratitude_to_BTC_map, emoji_to_BTC_map),
   cannot_pay: ` はビットコインアドレスを登録していないので、支払いはOKIMOCHI内で保留しています！
