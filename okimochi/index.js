@@ -553,7 +553,7 @@ async function smartPay(fromUserID, toUserID, amount, Txmessage) {
 
   // can not pay to yourself
   if (fromUserID === toUserID){
-    return cb(null, "");
+    throw new Error("tried to send to yourself!");
   }
 
   const PendingSum = await promisegetPendingSum();
