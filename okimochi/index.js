@@ -27,6 +27,17 @@ const bitcoindclient = config.bitcoindclient;
 
 // functions
 
+/*
+function PromiseGetBitcoindBalance(){
+  return new Promise((resolve, reject) => {
+    bitcoindclient.getBalance((err, result) => {
+      if (err) reject(err);
+      resolve(result);
+    })
+  })
+}
+*/
+
 function PromiseGetAllUsersDeposit(){
   return new Promise((resolve, reject) => {
     User.find({} , ["id"], {sort: {'id': 1}}, (err, ids) => {
@@ -610,6 +621,14 @@ controller.hears(`pendingBalance`, ["direct_mention", "direct_message"], (bot, m
     if (err) throw err;
     bot.reply(message, util.format(locale_message.pendingBalance, content.pendingBalance))
   })
+})
+
+
+// show total balance
+controller.hears(`totalBalance`, ["direct_mention", "direct_message"], (bot, message) => {
+  Promise.all([promisegetPendingSum(), bitcoindclient.getBalance()])
+    .then((sums) => sums[1] - sums[0])
+    .then((balance) => bot.reply(message, util.format(locale_message.totalBalance, balance)))
 })
 
 

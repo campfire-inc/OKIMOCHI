@@ -39,6 +39,9 @@ module.exports = {
   ## 改行を挟めば複数登録できるので多めに登録しておくと吉
   - @okimochi-bitcoin register
 
+  # depositされ、まだ誰にも支払われていない額の合計
+  - @okimochi-bitcoin totalBalance
+
   # 現在のBTC-JPYの換算レートを表示
   - @okimochi-bitcoin rate
 
@@ -73,6 +76,7 @@ module.exports = {
   気が向いたら、多めに登録しておきましょう。
 `,
   needMoreDeposit: "depositされた額が底をついたため、支払えません :(",
+  totalBalance: "壺に残っている額は現在%s BTCです。",
   ranking:{
     xaxis: "depositした量",
     yaxis: "受け取った量",
