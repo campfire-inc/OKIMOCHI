@@ -1,6 +1,6 @@
 const winston = require("winston");
 
-const logLevel = (process.env.NODE_ENV === "development") ? 'debug' : 'info';
+const logLevel = (process.env.NODE_ENV === "development") ? 'info' : 'info';
 
 const logger = new winston.Logger({
   level: logLevel,

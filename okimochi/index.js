@@ -27,6 +27,17 @@ const bitcoindclient = config.bitcoindclient;
 
 // functions
 
+/*
+function PromiseGetBitcoindBalance(){
+  return new Promise((resolve, reject) => {
+    bitcoindclient.getBalance((err, result) => {
+      if (err) reject(err);
+      resolve(result);
+    })
+  })
+}
+*/
+
 function PromiseGetAllUsersDeposit(){
   return new Promise((resolve, reject) => {
     User.find({} , ["id"], {sort: {'id': 1}}, (err, ids) => {
@@ -500,82 +511,89 @@ controller.on(['reaction_added'], (bot, message) => {
 
     // 支払い
     const amount = message_to_BTC_map[emoji]
-    smartPay(message.user, message.item_user, amount, emoji,
-      (err, msg) => {
-        if (err) {
+    smartPay(message.user, message.item_user, amount, emoji)
+      .then((msg) => {
 
-          bot.sendWebhook({
-            text: "had following error when sending to " + formatUser(message.item_user) +
-              " from " + formatUser(message.user) + " by " + emoji  + " \n\n" + err.toString(),
-            channel: config.default_channel,
-            icon_emoji: config.icon_emoji
-          }, (err, res) => {
-            if (err) throw err;
-          })
+        debug("msg was " + msg)
+        bot.sendWebhook({
+          text: msg,
+          channel: config.default_channel,
+          icon_emoji: config.icon_emoji
+        }, (err, res) => {
+          if (err) throw err;
+        })
+      })
+      .catch((err)  => {
 
-        } else {
-          debug("msg was " + msg)
-          bot.sendWebhook({
-            text: msg,
-            channel: config.default_channel,
-            icon_emoji: config.icon_emoji
-          }, (err, res) => {
-            if (err) throw err;
-          })
-        }
-    })
+        bot.sendWebhook({
+          text: "had following error when sending to " + formatUser(message.item_user) +
+          " from " + formatUser(message.user) + " by " + emoji  + " \n\n" + err.toString(),
+          channel: config.default_channel,
+          icon_emoji: config.icon_emoji
+        }, (err, res) => {
+          if (err) throw err;
+        })
+      })
   }
 })
+
+
+async function promisegetPendingSum(){
+  const PendingList = await PromiseGetAllUserPayback();
+  return PendingList.reduce((a, b) => a + b, 0);
+}
+
 
 /*
  * function to mangae all payments done by this bot.
  */
-function smartPay(fromUserID, toUserID, amount, Txmessage, cb) {
+async function smartPay(fromUserID, toUserID, amount, Txmessage) {
   debug("paying from ", fromUserID);
   debug("paying to ", toUserID);
+
+  // can not pay to yourself
   if (fromUserID === toUserID){
     return cb(null, "");
   }
 
+  const PendingSum = await promisegetPendingSum();
+  const totalBalance = await bitcoindclient.getBalance();
+  if (PendingSum > totalBalance || amount > totalBalance){
+    throw new Error(locale_message.needMoreDeposit);
+  };
+
   let returnMessage = "";
-  User.findOneAndUpdate({id: toUserID},
+  toUserContent = await User.findOneAndUpdate({id: toUserID},
     {id: toUserID},
-    { upsert: true, runValidators: true, new: true, setDefaultsOnInsert: true},
-    (err, toUserContent) => {
-    if (err) throw err;
+    { upsert: true, runValidators: true, new: true, setDefaultsOnInsert: true})
 
+  // check if all paybackAddresses has been used.
+  let [address, updatedContent, replyMessage] =
+    extractUnusedAddress(toUserContent);
+  logger.debug("result of extractUnusedAddress was ", address, updatedContent, replyMessage);
 
-  // if there is address registered
-    // check if all paybackAddresses has been used.
-    let [address, updatedContent, replyMessage] =
-      extractUnusedAddress(toUserContent);
-    logger.debug("result of extractUnusedAddress was ", address, updatedContent, replyMessage);
-    // pend payment when there is no registered address.
-    if (!address){
-      toUserContent.pendingBalance = toUserContent.pendingBalance + amount;
-      toUserContent.totalPaybacked += amount
-      toUserContent.save()
-      cb(new Error(formatUser(toUserID) + locale_message.cannot_pay), null)
+  // pend payment when there is no registered address.
+  if (!address){
+    toUserContent.pendingBalance = toUserContent.pendingBalance + amount;
+    toUserContent.totalPaybacked += amount
+    toUserContent.save()
+    throw new Error(formatUser(toUserID) + locale_message.cannot_pay)
 
-    } else {
-      debug("going to pay to " + address);
-      debug("of user " + updatedContent);
+  } else {
+    debug("going to pay to " + address);
+    debug("of user " + updatedContent);
 
-      returnMessage = replyMessage +
-        " payed to " + formatUser(toUserID)
-      bitcoindclient.sendToAddress(address,
-        amount,
-        Txmessage,
-        "this is comment."
-      )
-        .then(() => {
-          updatedContent.totalPaybacked += amount
-          updatedContent.save()
-        })
-        .then(() => cb(null, returnMessage))
-        .catch((err) => cb(err, null))
+    returnMessage = replyMessage +
+      " payed to " + formatUser(toUserID)
+    try {
+      const result = await bitcoindclient.sendToAddress(address, amount, Txmessage, "this is comment.");
+    } catch (e) {
+      throw e
     }
-  })
+    updatedContent.totalPaybacked += amount
+    updatedContent.save()
+    return returnMessage
+  }
 }
 
 // tip intentionally
@@ -592,10 +610,9 @@ controller.hears(`tip ${userIdPattern.source} ${amountPattern.source}(.*)`, ["di
   if (message.user === toPayUser){
     return bot.reply(message, "can not pay to your self !!")
   }
-  smartPay(message.user, toPayUser, amount, Txmessage,
-    (err, msg) => {
-      if (err) {bot.reply(message, err.toString())} else {bot.reply(message, msg)}
-    });
+  smartPay(message.user, toPayUser, amount, Txmessage)
+    .then((msg) => {bot.reply(message, msg)})
+    .catch((err) => {bot.reply(message, err.toString())})
 })
 
 // show pending balance
@@ -604,6 +621,14 @@ controller.hears(`pendingBalance`, ["direct_mention", "direct_message"], (bot, m
     if (err) throw err;
     bot.reply(message, util.format(locale_message.pendingBalance, content.pendingBalance))
   })
+})
+
+
+// show total balance
+controller.hears(`totalBalance`, ["direct_mention", "direct_message"], (bot, message) => {
+  Promise.all([promisegetPendingSum(), bitcoindclient.getBalance()])
+    .then((sums) => sums[1] - sums[0])
+    .then((balance) => bot.reply(message, util.format(locale_message.totalBalance, balance)))
 })
 
 
