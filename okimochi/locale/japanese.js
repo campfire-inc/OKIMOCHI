@@ -72,6 +72,7 @@ module.exports = {
   fungibility確保のため、アドレスはトランザクションごとに使い分けることが奨励されています。
   気が向いたら、多めに登録しておきましょう。
 `,
+  needMoreDeposit: "depositされた額が底をついたため、支払えません :(",
   ranking:{
     xaxis: "depositした量",
     yaxis: "受け取った量",
