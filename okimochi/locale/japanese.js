@@ -15,12 +15,30 @@ const gratitude_to_BTC_map = {
 };
 
 const emoji_to_BTC_map = {
-  ":bitcoin:": 0.0001,
-  ":pray:": 0.0001,
-  ":okimochi:": 0.001,
-  ":thankyou1:": 0.0001,
-  ":+1:": 0.00001,
-  ":bow:": 0.0001
+  ":bitcoin:": 0.0005,
+  ":pray:": 0.0005,
+  ":okimochi:": 0.003,
+  ":thankyou1:": 0.0005,
+  ":+1:": 0.0001,
+  ":bow:": 0.0005,
+  ":congratulations:": 0.0005,
+  ":100:": lib.jpy2btc(100),
+  ":azaas:": 0.001
+  ":bitoco:": 0.001,
+  ":dekiru:": 0.0001,
+  ":ga-sas:": 0.0001,
+  ":hayai:": 0.0001
+  ":kami-taiou:": 0.0006,
+  ":kawaii:": 0.0001,
+  ":kekkon:": 0.0001,
+  ":kawaii:": 0.0001,
+  ":sugoi:": 0.0001,
+  ":suki:": 0.0001,
+  ":suko:": 0.0001,
+  ":yoi:": 0.0001,
+  ":you_knou:": 0.0005,
+  ":yuunou:": 0.0001,
+  ":zass:": 0.0005,
 };
 
 let emoji_info = []
