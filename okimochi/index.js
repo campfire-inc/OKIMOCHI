@@ -273,7 +273,8 @@ let controller = Botkit.slackbot({
 
 let bot = controller.spawn({
   token: config.TOKEN,
-  debug: config.SLACK_DEBUG
+  debug: config.SLACK_DEBUG,
+  retry: 1000
 }).startRTM((err) => {
   if (err) {
     throw new Error(err);
@@ -283,6 +284,10 @@ let bot = controller.spawn({
 bot.configureIncomingWebhook({
   url: config.webhook_url
 });
+
+controller.on('rtm_reconnect_failed',function(bot) {
+  console.log('\n\n*** '+moment().format() + ' ** Unable to automatically reconnect to rtm after a closed conection.')
+})
 
 // from id (e.g. U2FG58SDR) => to information used in this bot (mostly by plotting ranking)
 let UserInfoMap = {};
