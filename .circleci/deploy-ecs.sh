@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -ux
+set -u
 
 readonly VERSION="1.0"
 
@@ -18,116 +18,137 @@ make_task_def(){
         "name": "%s",
         "image": "%s.dkr.ecr.%s.amazonaws.com/%s:%s",
         "essential": true,
-        "memory": 400,
-        "cpu": 1000,
+        "memory": 1500,
+        "cpu": 500,
         "portMappings": [
           {
             "containerPort": 3000,
-            "hostPort": 3000
+            "hostPort": 80
           }
         ],
         "links": [
-          "bitcoind:bitcoind",
           "mongo:mongo"
         ],
         "environment": [{
           "name": "TOKEN",
           "value": "%s"
-        }]
+        },
+        {
+          "name": "NODE_ENV",
+          "value": "production"
+        },
+        {
+          "name": "SLACK_CLIENT_ID",
+          "value": "%s"
+        },
+        {
+          "name": "SLACK_CLIENT_SECRET",
+          "value": "%s"
+        },
+        {
+          "name": "EMOJI",
+          "value": "%s"
+        },
+        {
+          "name": "WEBHOOK_URL",
+          "value": "%s"
+        },
+        {
+          "name": "DEFAULT_CHANNEL",
+          "value": "%s"
+        },
+        {
+          "name": "PLOTLY_API_KEY",
+          "value": "%s"
+        },
+        {
+          "name": "PLOTLY_API_USER",
+          "value": "%s"
+        },
+        {
+          "name": "BITCOIND_NETWORK",
+          "value": "mainnet"
+        },
+        {
+          "name": "BITCOIND_URI",
+          "value": "54.92.98.67"
+        },
+        {
+          "name": "BITCOIND_USERNAME",
+          "value": "%s"
+        },
+        {
+          "name": "BITCOIND_PASSWORD",
+          "value": "%s"
+        },
+        {
+          "name": "MESSAGE_LANG",
+          "value": "ja"
+        }
+        ],
+        "logConfiguration": {
+        "logDriver": "awslogs",
+          "options": {
+            "awslogs-group": "okimochi-loggroup",
+            "awslogs-region": "ap-northeast-1",
+            "awslogs-stream-prefix": "okimochi-log"
+          }
+        }
       },
 
 
       {
-        "memory": 200,
+        "memory": 400,
         "portMappings": [
-            {
-              "hostPort": 27017,
-              "containerPort": 27017,
-              "protocol": "tcp"
-            },
-            {
-              "hostPort": 28017,
-              "containerPort": 28017,
-              "protocol": "tcp"
-            }
+          {
+            "hostPort": 27017,
+            "containerPort": 27017,
+            "protocol": "tcp"
+          },
+          {
+            "hostPort": 28017,
+            "containerPort": 28017,
+            "protocol": "tcp"
+          }
         ],
         "essential": true,
         "entryPoint": [
-                "mongod",
-                "--dbpath=/data/db"
-            ],
-            "mountPoints": [
-                {
-                    "containerPath": "/data/db",
-                    "sourceVolume": "userdb"
-                }
-            ],
-            "name": "mongo",
-            "image": "mongo:3.4.5",
-            "cpu": 400
-        },
-
-         {
-            "portMappings": [
-                {
-                    "hostPort": 8332,
-                    "containerPort": 8332,
-                    "protocol": "tcp"
-                },
-                {
-                    "hostPort": 8333,
-                    "containerPort": 8333,
-                    "protocol": "tcp"
-                },
-                {
-                    "hostPort": 18332,
-                    "containerPort": 18332,
-                    "protocol": "tcp"
-                },
-                {
-                    "hostPort": 18333,
-                    "containerPort": 18333,
-                    "protocol": "tcp"
-                }
-            ],
-            "essential": true,
-            "entryPoint": [
-                "bitcoind",
-                "-printtoconsole",
-                "-rest",
-                "-testnet",
-                "-server",
-                "-rpcallowip=172.0.0.0/8",
-                "-rpcuser=slackbot",
-                "-rpcpassword=bitcoin-tipper"
-            ],
-            "mountPoints": [
-                {
-                    "containerPath": "/home/bitcoin/.bitcoin",
-                    "sourceVolume": "bitcoind"
-                }
-            ],
-            "name": "bitcoind",
-            "image": "seegno/bitcoind:0.14.2-alpine",
-            "cpu": 640,
-            "memoryReservation": 3000
+          "mongod",
+          "--dbpath=/data/db"
+        ],
+        "mountPoints": [
+          {
+            "containerPath": "/data/db",
+            "sourceVolume": "userdb"
+          }
+        ],
+        "name": "mongo",
+        "image": "mongo:3.4.5",
+        "cpu": 300,
+        "logConfiguration": {
+          "logDriver": "awslogs",
+          "options": {
+            "awslogs-group": "okimochi-loggroup",
+            "awslogs-region": "ap-northeast-1",
+            "awslogs-stream-prefix": "mongo-log"
+          }
         }
+      }
+
 ]'
 
 	task_def=$(printf "$task_template" ${AWS_ECS_TASKDEF_NAME} \
-      $AWS_ACCOUNT_ID ${AWS_DEFAULT_REGION} ${AWS_ECR_REP_NAME} $CIRCLE_SHA1 ${TOKEN})
+      $AWS_ACCOUNT_ID ${AWS_DEFAULT_REGION} ${AWS_ECR_REP_NAME} \
+      $CIRCLE_SHA1 ${TOKEN} ${SLACK_CLIENT_ID} ${SLACK_CLIENT_SECRET} \
+      ${EMOJI} ${WEBHOOK_URL} ${DEFAULT_CHANNEL} \
+      ${PLOTLY_API_KEY} ${PLOTLY_API_USER} \
+      ${BITCOIND_USERNAME} ${BITCOIND_PASSWORD} )
     volume_def='[
     {
       "host": {
         "sourcePath": "/daba/db"
       },
       "name": "userdb"
-    },
-    {
-      "host": {
-        "sourcePath": "/bitcoind"
-      },
-      "name": "bitcoind"
     }
   ]'
 
