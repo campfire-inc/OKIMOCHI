@@ -1,13 +1,19 @@
 const winston = require("winston");
 
-const logLevel = (process.env.NODE_ENV === "development") ? 'info' : 'info';
+const logLevel = (process.env.NODE_ENV === "development") ? 'debug' : 'info';
 
-const logger = new winston.Logger({
-  level: logLevel,
-  transports: [
-    new (winston.transports.Console)({colorize: true, timestamp: true}),
-    // new (winston.transports.File)({ filename: './okimochi.log'})
-  ]
+winston.loggers.add("okimochi", {
+  console: {
+    level: logLevel,
+    colorize: true,
+    label : "okimochi-logger"
+  }
 })
 
-module.exports = logger;
+winston.loggers.add('botkit', {
+  console: {
+    level: "info",
+    colorize: false,
+  }
+})
+
