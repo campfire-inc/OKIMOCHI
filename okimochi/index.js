@@ -10,6 +10,11 @@ const util = require('util');
 const MyConvos = require(path.join(__dirname, "src", "conversations"))
 const getRateJPY = require(path.join(__dirname, "src", "lib")).getRateJPY;
 
+// logger
+require(path.join(__dirname, "src", "logger.js"));
+const winston = require('winston');
+const logger = winston.loggers.get('okimochi');
+
 
 // import message object according to lang setting.
 let locale_message;
@@ -256,16 +261,13 @@ const userIdPattern = /<@([A-Z\d]+)>/ig;
 const formatUser = (user) => `<@${user}>`
 const amountPattern = /([\d\.]*)/ig;
 
-// logger
-const logger = require(path.join(__dirname, "src", "logger"))
-
 
 // lackbot settings.
 let controller = Botkit.slackbot({
   clientId: config.botconfig.clientId,
   clientSecret: config.botconfig.clientSecret,
   scopes: ['bot'],
-  logger: logger
+  logger: winston.loggers.get('botkit')
 }).configureSlackApp(
   config.botconfig
 );
@@ -303,8 +305,8 @@ bot.api.users.list({}, (err, res) => {
     }
     UserInfoMap[res[i]["id"]] = { "name": res[i]["name"], "team": res[i]["team_id"], "color": res[i]["color"]}
   }
-  logger.debug("UserInfoMap is ", UserInfoMap);
 });
+
 
 if (process.env.NODE_ENV === "production"){
   bot.sendWebhook({
@@ -421,55 +423,6 @@ controller.hears('register', ["direct_mention", "direct_message"], (bot, message
     })
   })
 })
-/*
-// pay by gratitude
-
-const patternize = (msg) => String.raw`(.*)(${msg})(.*)`;
-const paypattern = thxMessages.map(patternize);
-
-controller.hears(paypattern, ["direct_mention", "direct_message", "ambient"], (bot, message) => {
-  const before = message.match[1];
-  const thxMessage = message.match[2]
-  const after = message.match[3];
-
-  if ((userIdPattern.test(before) === false) && (userIdPattern.test(after) === false)) {
-    bot.reply(message, "not going to pay since there was no user in the message");
-    return
-  }
-半分独り言です。
-  let bfuser = before.match(userIdPattern)
-  let afuser = after.match(userIdPattern)
-  console.log("bfuser is " + bfuser + " and afuser is " + afuser);
-  let usernames = [bfuser, afuser].filter((v) => v !== null)
-  console.log("usernames be fore concat are " + usernames)
-  usernames = Array.prototype.concat.apply([], usernames) // flatten
-    .map((u) => u.replace(/@|<|>/g, ""))
-  console.log("going to pay " + usernames);
-
-  for(let u of usernames){
-    controller.storage.users.get(u, (err, content) => {
-      if (err) {
-        throw new Error("no username in entry "+ err)
-      }
-      if (content === null || !content.address){
-        controller.logger.info("content was " + JSON.stringify(content));
-        controller.storage.users.save({id: u}, (err) => {
-          return bot.reply(message, u + "had no registered address, so not going to pay");
-        })
-      }else{
-        controller.logger.info("content is " + content);
-        const paybackAddress = content.address.pop();
-        console.log("payback address is " + paybackAddress)
-        bitcoindclient.sendToAddress(paybackAddress,
-          message_to_BTC_map[thxMessage],
-          "this is comment.",
-          u)
-        return bot.reply(message, "payed to " + formatUser(u) )
-      }
-    })
-  }
-});
-*/
 
 // tip by reaction
 controller.on(['reaction_added'], (bot, message) => {
@@ -482,26 +435,22 @@ controller.on(['reaction_added'], (bot, message) => {
     const amount = message_to_BTC_map[emoji]
     smartPay(message.user, message.item_user, amount, emoji)
       .then((msg) => {
+        PromiseOpenPrivateChannel(message.item_user)
+          .then((channel) => {
+            message.channel  = channel
+            bot.reply(message, msg)
 
-        debug("msg was " + msg)
-        bot.sendWebhook({
-          text: msg,
-          channel: config.default_channel,
-          icon_emoji: config.icon_emoji
-        }, (err, res) => {
-          if (err) throw err;
-        })
+            debug("msg was " + msg)
+          })
       })
       .catch((err)  => {
+        PromiseOpenPrivateChannel(message.user)
+          .then((channel) => {
+            message.channel  = channel
+            bot.reply(message, err.toString())
 
-        bot.sendWebhook({
-          text: "had following error when sending to " + formatUser(message.item_user) +
-          " from " + formatUser(message.user) + " by " + emoji  + " \n\n" + err.toString(),
-          channel: config.default_channel,
-          icon_emoji: config.icon_emoji
-        }, (err, res) => {
-          if (err) throw err;
-        })
+            debug("err was " + err)
+          })
       })
   }
 })
@@ -515,6 +464,8 @@ async function promisegetPendingSum(){
 
 /*
  * function to mangae all payments done by this bot.
+ * throws error when the bot has to reply to sender.
+ * returns string when the bot has to reply to receiver
  */
 async function smartPay(fromUserID, toUserID, amount, Txmessage) {
   debug("paying from ", fromUserID);
@@ -546,7 +497,7 @@ async function smartPay(fromUserID, toUserID, amount, Txmessage) {
     toUserContent.pendingBalance = toUserContent.pendingBalance + amount;
     toUserContent.totalPaybacked += amount
     toUserContent.save()
-    throw new Error(formatUser(toUserID) + locale_message.cannot_pay)
+    return util.format(locale_message.cannot_pay, formatUser(fromUserID), amount)
 
   } else {
     debug("going to pay to " + address);
@@ -565,6 +516,15 @@ async function smartPay(fromUserID, toUserID, amount, Txmessage) {
   }
 }
 
+function PromiseOpenPrivateChannel(user){
+  return new Promise((resolve,reject) => {
+    bot.api.im.open({"user": user}, (err, res) => {
+      if (err) reject(err);
+      if (!res.ok) reject(err);
+      resolve(res.channel.id);
+    })
+ });
+}
 // tip intentionally
 controller.hears(`tip ${userIdPattern.source} ${amountPattern.source}(.*)`, ["direct_mention", "direct_message"], (bot, message) => {
   controller.logger.debug("whole match pattern was " + message.match[0]);
@@ -580,8 +540,22 @@ controller.hears(`tip ${userIdPattern.source} ${amountPattern.source}(.*)`, ["di
     return bot.reply(message, "can not pay to your self !!")
   }
   smartPay(message.user, toPayUser, amount, Txmessage)
-    .then((msg) => {bot.reply(message, msg)})
-    .catch((err) => {bot.reply(message, err.toString())})
+    .then((msg) => {
+      PromiseOpenPrivateChannel(toPayUser)
+        .then((channel) => {
+          bot.reply(message, locale_message.tell_payment_success_to_tipper)
+          message.channel  = channel
+          bot.reply(message, msg)
+        })
+    })
+    .catch((err) => {
+      PromiseOpenPrivateChannel(message.user)
+        .then((channel) => {
+          message.channel  = channel
+          bot.reply(message, msg)
+        })
+      bot.reply(message, err.toString())
+    })
 })
 
 // show pending balance
