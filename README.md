@@ -12,7 +12,7 @@ It consists of 3 containers
 2. `mongo` ... mongodb which contains user information
 3. `bitcoind` ... bitcoind
 
-## How to run 3 containers all in local
+## How to run all 3 containers in local
 
 ```
 cp .env_example .env # modify .env with your own slack bot token
