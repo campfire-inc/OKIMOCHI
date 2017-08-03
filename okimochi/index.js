@@ -299,7 +299,7 @@ bot.api.users.list({}, (err, res) => {
   if (!res.ok) {throw new Error("failed to call slack `users_list` api")}
   res = res.members;
   for (i = 0, size = res.length; i < size; ++i){
-    if (res[i]["is_bot"]) continue;
+    if (res[i]["is_bot"] || res[i]["id"] === "USLACKBOT") continue;
     if (i === 1){
       console.log("first user's info is ", res[i])
     }
