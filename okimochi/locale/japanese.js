@@ -94,12 +94,15 @@ module.exports = {
   `, emoji_info.join("\n")),
 
   message_to_BTC_map: Object.assign(gratitude_to_BTC_map, emoji_to_BTC_map),
-  cannot_pay: ` はビットコインアドレスを登録していないので、支払いはOKIMOCHI内で保留しています！
-  ビットコインを本当にあなたのものにしたい場合は以下の手順を踏んでください！
+  cannot_pay: `%sから%sBTCのOKIMOCHIをもらいました！
+  が、ビットコインアドレスを登録していないので、支払いはOKIMOCHI内で保留しています。
+  ビットコインを本当にあなたのものにしたい場合は以下の手順を踏んでください。
   1. \`@okimochi-bitcoin pendingBalance \` で保留されているビットコインの額を確認
   2. \`@okimochi-bitcoin withdraw\` で自身のビットコインアドレスに送金
   3. \`@okimochi-bitcoin register\` でビットコインアドレスを登録することで、次回から自動でここに送金（任意）
     * \`register\` で登録する場合は、可能なら改行で区切って複数登録しておくことをお勧めします。
+
+  \`@okimochi-bitcoin help\` でより詳しい情報が手に入ります。
   `,
   allPaybackAddressUsed: `注意: registerされたアドレスが全て使用済みになりました。
   fungibility確保のため、アドレスはトランザクションごとに使い分けることが奨励されています。
@@ -111,7 +114,7 @@ module.exports = {
     xaxis: "depositした量",
     yaxis: "受け取った量",
   },
-
+  tell_payment_success_to_tipper: "tipしました！",
   pendingBalance: "あなたが引き出せる金額は %s BTCです",
   deposit: {
     msg_with_qrcode: "このアドレスに振り込んでください（QRコードも同じアドレスです）",

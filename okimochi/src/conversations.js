@@ -1,6 +1,6 @@
 const path = require("path")
 const config = require(path.join(__dirname, "..", "config"));
-const logger = require("./logger");
+const logger = require("winston");
 const bitcoindclient = config.bitcoindclient;
 
 // import message object according to lang setting.
@@ -33,7 +33,6 @@ module.exports = {
             convo.repeat();
             convo.next();
           } else {
-            logger.debug("amount was number! And its ", amount)
             convo.next()
             convo.ask(locale_message.withdraw.pasteAddress, (response, convo) => {
               bitcoindclient.sendToAddress(response.text, amount)

@@ -73,12 +73,15 @@ module.exports = {
   `, emoji_info.join("\n")),
 
   message_to_BTC_map: Object.assign(gratitude_to_BTC_map, emoji_to_BTC_map),
-  cannot_pay: ` had no registered address, so the tip will be in \`pendingBalance\`,
+  cannot_pay: `you got tip from %s. The amount is %s BTC.
+  but you had no registered address, so the tip will be in \`pendingBalance\`,
   Please do the following!
   1. check your \`pendingBalance\` by \`@okimochi-bitcoin pendingBalance\`
   2. withdraw your balance to your address by \`@okimochi-bitcoin withdraw\`
   3. (optional) register your own address by \`@okimochi-bitcoin register\` to automatically pay to this address from next time.
     * It is possible to register multiple address by \`register\` by separating by \\\n
+
+  try \`@okimochi-bitcoin help\` to see detailed info.
   `,
 
   allPaybackAddressUsed: "warning: all addresses has been used.\n" +
@@ -92,7 +95,7 @@ module.exports = {
   },
 
   pendingBalance: "the amount you can withdraw is %s BTC",
-
+  tell_payment_success_to_tipper: "tipped!",
   deposit: {
     msg_with_qrcode: "Please deposit to this address (or QRcode if you prefer)",
    file_comment: "this is a same address with the one shown above."
