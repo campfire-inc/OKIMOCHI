@@ -520,7 +520,9 @@ function PromiseOpenPrivateChannel(user){
   return new Promise((resolve,reject) => {
     bot.api.im.open({"user": user}, (err, res) => {
       if (err) reject(err);
-      if (!res.ok) reject(err);
+      logger.info("result for im.open is ", res);
+      if (!res.ok) reject(new Error("could not open private channel by api!"));
+      if (!res.cheannel) reject(new Error("there was no private channel to open!"))
       resolve(res.channel.id);
     })
  });
