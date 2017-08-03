@@ -34,23 +34,29 @@ const bitcoindclient = config.bitcoindclient;
 
 function PromiseGetAllUsersDeposit(){
   return new Promise((resolve, reject) => {
-    User.find({} , ["id"], {sort: {'id': 1}}, (err, ids) => {
+    User.find({} , ["id", "totalPaybacked"], {sort: {'id': 1}}, (err, ids) => {
       if (err) reject(err);
       if (ids === undefined) reject(new Error("couldn't find undefined! "));
       debug("ids are ", ids)
       let ps = [];
       for (let i = 0, size = ids.length; i<size; ++i) {
-        console.log("id is " + ids[i])
+        debug("id is ", ids[i])
         ps.push(PromisegetUserBalance(ids[i].id))
       }
 
       Promise.all(ps).then((balances) => {
         let result = [];
         for (let i = 0, size = ids.length; i<size; ++i) {
-          result.push({userid: ids[i].id,
-                       x: balances[i],
-                       team: UserInfoMap[ids[i].id].team,
-                       name: UserInfoMap[ids[i].id].name})
+          if (!UserInfoMap[ids[i].id]) continue;
+          let id = ids[i].id
+          result.push({
+            id: id,
+            balance: balances[i],
+            color: UserInfoMap[id].color,
+            team: UserInfoMap[id].team || "no team",
+            name: UserInfoMap[id].name,
+            totalPaybacked: ids[i].totalPaybacked
+          })
         }
         resolve(result)
       })
@@ -59,26 +65,29 @@ function PromiseGetAllUsersDeposit(){
   })
 }
 
-
-function PromiseGetAllUserPayback(){
+/*
+function PromiseGetAllUserPayback(userinfos){
   return new Promise((resolve, reject) => {
-    User.find({}, ["totalPaybacked"], { sort: { 'id': 1 }}, (err, numbers) => {
+    User.find({}, ["id", "totalPaybacked"], { sort: { 'id': 1 }}, (err, contents) => {
       if (err) reject(err);
+      const PaybackedMap = contents.map(c => { return {c.id: c.totalPaybacked}})
+      result = userinfos.map(info => Object.assign(info, PaybackedMap[info.]))
       resolve(numbers.map((content) => content.totalPaybacked));
     })
   })
 }
+*/
 
-
-function makeTraceForPlotly(userinfos, hue){
+function makeTraceForPlotly(userinfo, hue){
+  debug("makeing trace from", userinfo)
   return {
-    x: userinfos.map((info) => info.x),
-    y: userinfos.map((info) => info.y),
-    name: 'ranking',
-    text: userinfos.map((info) => info.name),
+    x: userinfo.balance,
+    y: userinfo.totalPaybacked,
+    text: [userinfo.name],
     mode: "markers",
+    name: userinfo.name,
     marker: {
-      color: "hsv(" + hue + ", 100, 100)",
+      color: userinfo.color,
       size: 20,
       line: {
         color: "white",
@@ -98,20 +107,9 @@ async function PromisePlotRankingChart(){
     throw e
   }
 
-  let y = await PromiseGetAllUserPayback()
-  for (i=0, size=userinfos.length; i<size ;++i){
-    userinfos[i].y = y[i]
-  }
-
-  debug("each users infos are ", userinfos);
-  teamSet = new Set(userinfos.map(info => info.team))
-
   let data = [];
-  let hue = 0
-  for (t of teamSet){
-    hue = (hue + 210) % 360
-    let teamMemberInfo = userinfos.filter((info) => info.team === t);
-    data.push(makeTraceForPlotly(teamMemberInfo, hue));
+  for (u of userinfos){
+    data.push(makeTraceForPlotly(u));
   }
 
   const layout = {
@@ -224,7 +222,7 @@ function PromiseFindUser(userid){
 function PromisegetUserBalance(userid){
   return PromiseFindUser(userid)
     .then((content) => {
-      debug("content is " + content)
+      debug("content is ", content)
 
       content = content.toObject()
       return content.depositAddresses
@@ -303,7 +301,10 @@ bot.api.users.list({}, (err, res) => {
     if (i === 1){
       console.log("first user's info is ", res[i])
     }
-    UserInfoMap[res[i]["id"]] = { "name": res[i]["name"], "team": res[i]["team_id"], "color": res[i]["color"]}
+    UserInfoMap[res[i]["id"]] = { "name": res[i]["name"],
+      "team": res[i]["team_id"],
+      "color": res[i]["color"] || "#000000",
+    }
   }
 });
 
