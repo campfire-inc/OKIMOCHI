@@ -1,6 +1,7 @@
 const path = require('path');
 const util = require('util');
 const lib = require(path.join(__dirname, '..', 'src', 'lib'));
+const config = require(path.join(__dirname, '..', 'config'))
 
 const inSatoshi = lib.inSatoshi;
 const btc2jpy = lib.btc2jpy;
@@ -49,60 +50,60 @@ for (k of Object.keys(emoji_to_BTC_map)){
 
 
 module.exports = {
-  help: util.format(`
+  help: `
   \`\`\`
   # このhelpメッセージを表示
-  - @okimochi-bitcoin help
+  - ${config.APP_NAME} help
 
   # ビットコインをbotにデポジットするためのアドレスを表示
   ## （※ユーザーごとにデポジット額をカウントするので、自分で呼び出したアドレスに振り込むと良い）
-  - @okimochi-bitcoin deposit
+  - ${config.APP_NAME} deposit
 
   # 支払い保留中のビットコインの額を確認(registerすれば不要)
-  - @okimochi-bitcoin pendingBalance
+  - ${config.APP_NAME} pendingBalance
 
   # 支払い保留中のビットコインの引き出し(registerすれば不要)
-  - @okimochi-bitcoin withdraw
+  - ${config.APP_NAME} withdraw
 
   # 自身のアドレスの登録
   ## このコマンドの後にbotが振込先アドレスを聞いてくるので、貼り付けると自動で振り込まれる
   ## 改行を挟めば複数登録できるので多めに登録しておくと吉
-  - @okimochi-bitcoin register
+  - ${config.APP_NAME} register
 
   # depositされ、まだ誰にも支払われていない額の合計
-  - @okimochi-bitcoin totalBalance
+  - ${config.APP_NAME} totalBalance
 
   # 現在のBTC-JPYの換算レートを表示
-  - @okimochi-bitcoin rate
+  - ${config.APP_NAME} rate
 
   # 金額を指定してtip
   ## メッセージはなくても良い。（bitcoinのトランザクションメッセージになる）
-  - @okimochi-bitcoin tip @user <BTC amount> <message>
+  - ${config.APP_NAME} tip @user <BTC amount> <message>
 
   # ランキングの表示
   ## 1. このbotにデポジットした額
   ## 2. そこから受け取った額
   ## を、チームごとに色分けして表示する。
-  - @okimochi-bitcoin ranking
+  - ${config.APP_NAME} ranking
 
 
   :bitcoin: や :okimochi: などのリアクションを押すと自動的に支払われるよ！
   反応するボタンは以下
   \`\`\`
 
-  %s
-  `, emoji_info.join("\n")),
+  ${emoji_info.join("\n")}
+  `,
 
   message_to_BTC_map: Object.assign(gratitude_to_BTC_map, emoji_to_BTC_map),
-  cannot_pay: `%sから%sBTCのOKIMOCHIをもらいました！
-  が、ビットコインアドレスを登録していないので、支払いはOKIMOCHI内で保留しています。
+  cannot_pay: `%sから%sBTCのOKIMOCHIをもらいました！` +
+  `が、ビットコインアドレスを登録していないので、支払いはOKIMOCHI内で保留しています。
   ビットコインを本当にあなたのものにしたい場合は以下の手順を踏んでください。
-  1. \`@okimochi-bitcoin pendingBalance \` で保留されているビットコインの額を確認
-  2. \`@okimochi-bitcoin withdraw\` で自身のビットコインアドレスに送金
-  3. \`@okimochi-bitcoin register\` でビットコインアドレスを登録することで、次回から自動でここに送金（任意）
+  1. \`${config.APP_NAME} pendingBalance \` で保留されているビットコインの額を確認
+  2. \`${config.APP_NAME} withdraw\` で自身のビットコインアドレスに送金
+  3. \`${config.APP_NAME} register\` でビットコインアドレスを登録することで、次回から自動でここに送金（任意）
     * \`register\` で登録する場合は、可能なら改行で区切って複数登録しておくことをお勧めします。
 
-  \`@okimochi-bitcoin help\` でより詳しい情報が手に入ります。
+  \`${config.APP_NAME} help\` でより詳しい情報が手に入ります。
   `,
   allPaybackAddressUsed: `注意: registerされたアドレスが全て使用済みになりました。
   fungibility確保のため、アドレスはトランザクションごとに使い分けることが奨励されています。
@@ -129,7 +130,7 @@ module.exports = {
     Ask: "いくら引き出しますか？",
     amountMustBeNumber: "BTCの額を半角数字で入力してください！",
     notEnoughPendingBalance: `あなたが引き出せる額を超えています！
-      最大額は \`@okimochi-bitcoin pendingBalance\` で確認できます！`,
+      最大額は \`${config.APP_NAME} pendingBalance\` で確認できます！`,
     pasteAddress: "送金先ビットコインアドレスを貼り付けてください",
     successfulPayment: "送金しました！",
     sent: "送金を受け付けました。自動で送金を試みます。"

@@ -528,6 +528,7 @@ function PromiseOpenPrivateChannel(user){
     })
  });
 }
+
 // tip intentionally
 controller.hears(`tip ${userIdPattern.source} ${amountPattern.source}(.*)`, ["direct_mention", "direct_message"], (bot, message) => {
   controller.logger.debug("whole match pattern was " + message.match[0]);

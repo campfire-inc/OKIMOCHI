@@ -1,6 +1,6 @@
-const util = require('util');
 const path = require('path');
 const lib = require(path.join(__dirname, '..', 'src', 'lib'));
+const config = require(path.join(__dirname, '..', 'config'));
 
 const inSatoshi = lib.inSatoshi;
 const btc2jpy = lib.btc2jpy;
@@ -28,7 +28,7 @@ for (k of Object.keys(emoji_to_BTC_map)){
 
 
 module.exports = {
-  help: util.format(`
+  help: `
   \`\`\`
   # What is this bot?
   This is a bot to enable team members to tip each other.
@@ -41,47 +41,47 @@ module.exports = {
 
 
   # show this help
-  - @okimochi-bitcoin help
+  - ${config.APP_NAME} help
 
   # show @users bitcoin deposit address
-  - @okimochi-bitcoin deposit
+  - ${config.APP_NAME} deposit
 
   # show users received amount pending inside this bot.
-  - @okimochi-bitcoin pendingBalance
+  - ${config.APP_NAME} pendingBalance
 
   # withdrow from your pending balance.
-  - @okimochi-bitcoin withdrow
+  - ${config.APP_NAME} withdrow
 
   # register the address for getting paied automatically.
-  - @okimochi-bitcoin register
+  - ${config.APP_NAME} register
 
   # show BTC-JPY rate
-  - @okimochi-bitcoin rate
+  - ${config.APP_NAME} rate
 
   # tip intentionally ... message will be included as Tx message for bitcoin
-  - @okimochi-bitcoin tip @user <BTC amount> <message>
+  - ${config.APP_NAME} tip @user <BTC amount> <message>
 
   # show ranking for deposited amount and the amount payed to registered Address
-  - @okimochi-bitcoin ranking
+  - ${config.APP_NAME} ranking
 
   this bot will tip automatically when someone showed his gratitude by
   action button.
   below is a list of actions that okimochi will react.
   \`\`\`
-  %s
+  ${emoji_info.join("\n")}
 
-  `, emoji_info.join("\n")),
+  `,
 
   message_to_BTC_map: Object.assign(gratitude_to_BTC_map, emoji_to_BTC_map),
   cannot_pay: `you got tip from %s. The amount is %s BTC.
   but you had no registered address, so the tip will be in \`pendingBalance\`,
   Please do the following!
-  1. check your \`pendingBalance\` by \`@okimochi-bitcoin pendingBalance\`
-  2. withdraw your balance to your address by \`@okimochi-bitcoin withdraw\`
-  3. (optional) register your own address by \`@okimochi-bitcoin register\` to automatically pay to this address from next time.
+  1. check your \`pendingBalance\` by \`${config.APP_NAME} pendingBalance\`
+  2. withdraw your balance to your address by \`${config.APP_NAME} withdraw\`
+  3. (optional) register your own address by \`${config.APP_NAME} register\` to automatically pay to this address from next time.
     * It is possible to register multiple address by \`register\` by separating by \\\n
 
-  try \`@okimochi-bitcoin help\` to see detailed info.
+  try \`${config.APP_NAME} help\` to see detailed info.
   `,
 
   allPaybackAddressUsed: "warning: all addresses has been used.\n" +
@@ -109,7 +109,7 @@ module.exports = {
     Ask: "How much do you want to retrieve?",
     amountMustBeNumber: "amount must be Number (BTC) !",
     notEnoughPendingBalance: `you can'not withdraw more than your pending balance!
-  	please check it by \`@okimochi-bitcoin pendingBalance\` `,
+  	please check it by \`${config.APP_NAME} pendingBalance\` `,
     pasteAddress: "please paste your bitcoin address to send.",
     successfulPayment: 'sent!',
     sent: "accepted! I will try to send Tx in a moment ... "
