@@ -43,7 +43,6 @@ services:
       -datadir=/home/bitcoin/.bitcoin
       -dbcache=500
       -rpcthreads=8
-      -reindex-chainstate
       -assumevalid=00000000000000000026c661d175ef328e415e834e62f3d316382e9f3d24e44e
   mongo:
     restart: always
