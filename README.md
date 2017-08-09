@@ -17,7 +17,7 @@ Slack AppsとWebhook URLを <a href="https://api.slack.com/app://api.slack.com/a
 Slack <a href="https://slack.com/apps/manage/A0F7YS25R-bots">Botの管理ページ</a> からAdd Configurationをクリックします。
 `Client ID` `Client Secret` `Verification Token` `Webhook URL` `API Token` をメモ
 - Protlyのアカウント作成・API keyの発行  
-ビットコインの獲得数などランキング化するための作図アプリ <a href="https://plot.ly">Plotly</a> のアカウントを作成し、API Keyを発行する。  
+ビットコインの獲得ランキングなどを図化するための作図アプリ <a href="https://plot.ly">Plotly</a> のアカウントを作成し、API Keyを発行する。  
 `API Key` `username` をメモ
 - インフラ準備  
 - Gitをinstallし、Repositoryをclone  
