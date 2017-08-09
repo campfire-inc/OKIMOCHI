@@ -1,3 +1,83 @@
+# OKIMOCHI (English follows Japanese)
+日頃の感謝の気持ちを、少額のビットコインという形にして、Slack上の従業員同士で送り合えるbotアプリケーション。
+
+## OKIMOCHI開発の背景
+事務所への配送業者の来訪に席の配置の関係で特定の社員が応対をする。給湯室の片付けを気付いた社員が行う。特別な事ではなく業務とも言えないけれど、従業員のささやかな善意や気遣いで企業や事務所の運営が成り立っているケースが多々あります。そのような善意へのありがとうという感謝の気持ちに加え、少額のビットコインの送付ができるSlackbotが「OKIMOCHI」です。
+
+## 使い方イメージ
+<img src="https://user-images.githubusercontent.com/15523894/29129736-bfd4d8c4-7d62-11e7-9cff-7175160324bb.png" width="500px">
+
+1. 送付の原資となるビットコインを入金する（会社の福利厚生用の資金を纒めて入金するような形を想定しています）※ 原資となるビットコインは利用者の誰から入金されても同じwalletに入金されます。
+2. 送付のトリガーとなる指定のスタンプや指定コマンドを入力して送金する。
+3. 一定のビットコインが貯まったら、指定した外部のビットコインウォレットへ引き出す。※その他の詳しい使い方はヘルプコマンドにて参照頂けます。
+
+## 導入方法
+- Slack Appsの作成/Webhook URLを発行  
+Slack AppsとWebhook URLを <a href="https://api.slack.com/app://api.slack.com/apps">slack API</a>にて作成  
+`Client ID` `Client Secret` `Verification Token` `OAuth Access Token` `Webhook URL` をメモ
+- Protlyのアカウント作成・API keyの発行  
+ビットコインの獲得数などランキング化するための作図アプリ <a href="https://plot.ly">Plotly</a> のアカウントを作成し、API Keyを発行する。  
+`API Key` `username` をメモ
+- インフラ準備(AWSの場合）  
+- Gitをinstallし、Repositoryをclone  
+- 環境変数を更新  
+.env_exampleをコピーし、環境変数を設定
+```
+cp .env_example .env # modify .env with your own slack bot token
+```
+
+| 変数名             | 内容                                                              |
+|:-------------------|:------------------------------------------------------------------|
+| SLACK_CLIENT_ID    | Slack `Client ID` を入力                                          |
+| SLACK_CLIENT_SECRET| Slack `Client Secret` を入力                                      |
+| VERIFICATION_TOKEN | Slack `Verification Token` を入力                                 |
+| EMOJI              | Slack Botのアイコンを設定                                         |
+| TOKEN              | Slack `OAuth Access Token` を入力                                 |
+| WEBHOOK_URL        | Slack `Webhook URL` を入力                                        |
+| DEFAULT_CHANNEL    | デフォルトのSlackチャンネルを入力                                 |
+| ADMIN_USERNAME     | 管理者となるSlack ユーザ名を入力                                  |
+| BITCOIND_HOST_DIR  | ブロックチェーンや秘密鍵などの格納先。フォルトは `~/.bitcoin`     |
+| BITCOIND_URI       | 既にbitcoindサーバをお持ちの場合、URIを入力                       |
+| BITCOIND_USERNAME  | 既にbitcoindサーバをお持ちの場合、USERNAMEを入力                  |
+| BITCOIND_PASSWORD  | 既にbitcoindサーバをお持ちの場合、PASSWORDを入力                  |
+| BITCOIND_NETWORK   | 本番用の場合は `mainnet` 、試験用の場合は `testnet`               |
+| PLOTLY_API_KEY     | Plotlyの `API Key` を入力                                         |
+| PLOTLY_API_USER    | Plotlyの `username` を入力                                        |
+| MESSAGE_LANG       | 日本語と英語を用意。日本語は `ja` 、英語は `en`                   |
+
+- Docker環境の構築、dokcer-compose up（bitcoindの同期に約10時間程度必要）  
+```
+docker network create -d bridge --subnet 172.0.0.0/24 --gateway 172.0.0.1 okimochi-network
+COMPOSE_HTTP_TIMEOUT=45000 docker-compose up —build
+```
+- 稼働確認  
+
+## CAMPFIREでの試験導入結果
+CAMPFIREでは社内における試験を実施し、1週間で●●件の「OKIMOCHI」が送られました。
+試験概要は以下の通りです。  
+- 試験期間 : 2017年7月25日 〜 2017年8月11日
+- 参加従業員数 : 
+- tip数（トランザクション数）：200件
+- 1度の送付金額(botの設定で可変) : 約30円
+- ビットコインの原資 : 約60,000円
+
+## 開発への参加方法
+ソースコードのコメント、GitHub のイシューやプルリクエストでは、日本語か英語を使用して下さい。
+- ローカルでのセットアップ  
+```
+cp .env_example .env
+# 環境変数を設定後
+docker network create -d bridge --subnet 172.0.0.0/24 --gateway 172.0.0.1 okimochi-network
+COMPOSE_HTTP_TIMEOUT=45000 docker-compose up --build
+```
+- 今後の想定ToDo  
+作者側で想定しているToDoは、以下となります。  
+[TODO](https://github.com/campfire-inc/OKIMOCHI/issues/1)
+
+## ライセンス
+MIT © CAMPFIRE and Joe Miyamoto
+
+
 # OKIMOCHI
 
 An user-friendly micro payment platform working as a slack bot.
