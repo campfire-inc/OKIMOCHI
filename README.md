@@ -14,11 +14,12 @@
 ## 導入方法
 - Slack Appsの作成/Webhook URLを発行  
 Slack AppsとWebhook URLを <a href="https://api.slack.com/app://api.slack.com/apps">slack API</a>にて作成  
-`Client ID` `Client Secret` `Verification Token` `OAuth Access Token` `Webhook URL` をメモ
+Slack <a href="https://slack.com/apps/manage/A0F7YS25R-bots">Botの管理ページ</a> からAdd Configurationをクリックします。
+`Client ID` `Client Secret` `Verification Token` `Webhook URL` `API Token` をメモ
 - Protlyのアカウント作成・API keyの発行  
 ビットコインの獲得数などランキング化するための作図アプリ <a href="https://plot.ly">Plotly</a> のアカウントを作成し、API Keyを発行する。  
 `API Key` `username` をメモ
-- インフラ準備(AWSの場合）  
+- インフラ準備  
 - Gitをinstallし、Repositoryをclone  
 - 環境変数を更新  
 .env_exampleをコピーし、環境変数を設定
@@ -32,7 +33,7 @@ cp .env_example .env # modify .env with your own slack bot token
 | SLACK_CLIENT_SECRET| Slack `Client Secret` を入力                                      |
 | VERIFICATION_TOKEN | Slack `Verification Token` を入力                                 |
 | EMOJI              | Slack Botのアイコンを設定                                         |
-| TOKEN              | Slack `OAuth Access Token` を入力                                 |
+| TOKEN              | Slack Botの`API Token` を入力                                     |
 | WEBHOOK_URL        | Slack `Webhook URL` を入力                                        |
 | DEFAULT_CHANNEL    | デフォルトのSlackチャンネルを入力                                 |
 | ADMIN_USERNAME     | 管理者となるSlack ユーザ名を入力                                  |
@@ -51,6 +52,12 @@ docker network create -d bridge --subnet 172.0.0.0/24 --gateway 172.0.0.1 okimoc
 COMPOSE_HTTP_TIMEOUT=45000 docker-compose up —build
 ```
 - 稼働確認  
+```
+# Slack チャンネルにて@okimochiを招待
+/invite @okimochi
+# 使い方をリクエスト
+@okimochi help
+```
 
 ## CAMPFIREでの試験導入結果
 CAMPFIREでは社内における試験を実施し、1週間で●●件の「OKIMOCHI」が送られました。
