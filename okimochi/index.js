@@ -65,18 +65,19 @@ function PromiseGetAllUsersDeposit(){
   })
 }
 
-/*
+
 function PromiseGetAllUserPayback(userinfos){
   return new Promise((resolve, reject) => {
     User.find({}, ["id", "totalPaybacked"], { sort: { 'id': 1 }}, (err, contents) => {
       if (err) reject(err);
-      const PaybackedMap = contents.map(c => { return {c.id: c.totalPaybacked}})
-      result = userinfos.map(info => Object.assign(info, PaybackedMap[info.]))
-      resolve(numbers.map((content) => content.totalPaybacked));
+      let result = [];
+      for (c of contents){
+        result.push(c.toObject().totalPaybacked)
+      }
+      resolve(result);
     })
   })
 }
-*/
 
 function makeTraceForPlotly(userinfo, hue){
   debug("makeing trace from", userinfo)
@@ -521,9 +522,9 @@ function PromiseOpenPrivateChannel(user){
   return new Promise((resolve,reject) => {
     bot.api.im.open({"user": user}, (err, res) => {
       if (err) reject(err);
-      logger.info("result for im.open is ", res);
+      logger.info("result for im.open is " + JSON.stringify(res));
       if (!res.ok) reject(new Error("could not open private channel by api!"));
-      if (!res.cheannel) reject(new Error("there was no private channel to open!"))
+      if (!res.channel) reject(new Error("there was no private channel to open!"))
       resolve(res.channel.id);
     })
  });
@@ -556,7 +557,7 @@ controller.hears(`tip ${userIdPattern.source} ${amountPattern.source}(.*)`, ["di
       PromiseOpenPrivateChannel(message.user)
         .then((channel) => {
           message.channel  = channel
-          bot.reply(message, msg)
+          bot.reply(message, err.stack)
         })
       bot.reply(message, err.toString())
     })
