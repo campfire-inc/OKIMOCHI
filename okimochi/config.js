@@ -32,7 +32,7 @@ module.exports = {
   },
   TOKEN: TOKEN,
   SLACK_DEBUG: SLACK_DEBUG,
-  APP_NAME: process.env.APP_NAME || "okimochi-bitcoin",
+  APP_NAME: process.env.APP_NAME || "@okimochi-bitcoin",
   iconUrl: "http://3.bp.blogspot.com/-LE-WPdZd5j4/UzoZuyc49QI/AAAAAAAAesw/4EU0zMlH_E4/s800/gold_kinkai_nobebou.png",
   icon_emoji: process.env.EMOJI || ":moneybag:",
   webhook_url: process.env.WEBHOOK_URL,
