@@ -1,4 +1,4 @@
-# OKIMOCHI (English follows Japanese)
+# OKIMOCHI see [here](doc/english_readme.md) for English manual
 日頃の感謝の気持ちを、少額のビットコインという形にして、Slack上の従業員同士で送り合えるbotアプリケーション。
 
 ## OKIMOCHI開発の背景
@@ -10,6 +10,7 @@
 1. 送付の原資となるビットコインを入金する（会社の福利厚生用の資金を纒めて入金するような形を想定しています）※ 原資となるビットコインは利用者の誰から入金されても同じwalletに入金されます。
 2. 送付のトリガーとなる指定のスタンプや指定コマンドを入力して送金する。
 3. 一定のビットコインが貯まったら、指定した外部のビットコインウォレットへ引き出す。※その他の詳しい使い方はヘルプコマンドにて参照頂けます。  
+
 __※このアプリケーションは各利用者の善意に基づいております。二人以上の利用者が結託した場合、デポジットした資金を盗むことができます。（自分から自分に対する送金は不可だが、お互いに送金し合うことでデポジットの資金を盗むことが可能）預け金の合計は小額にとどめ、信頼できる仲間内のチームで使用してください！__
 
 
@@ -86,50 +87,3 @@ COMPOSE_HTTP_TIMEOUT=45000 docker-compose up --build
 
 ## ライセンス
 MIT © CAMPFIRE and Joe Miyamoto
-
-
-# OKIMOCHI
-
-An user-friendly micro payment platform working as a slack bot.
-
-## What is OKIMOCHI?
-
-It consists of 3 containers
-
-1. `okimochi` ... app itself
-2. `mongo` ... mongodb which contains user information
-3. `bitcoind` ... bitcoind
-
-2 and 3 are optional, you can specify your own bitcoind instance by configuring `BITCOIND_URI` environment variable  in `.env`
-
-## How to run all 3 containers in local
-
-```
-cp .env_example .env # modify .env with your own slack bot token
-```
-
-there are lots of environment variable you can configure, but the one most importtant is `TOKEN`,
-which you can get when you register bot uesr into your team.
-Or otherwise you can get when you register your app from `Authentication` in the buttom of [this page](https://api.slack.com/web).
-
-see document for [detailed explanation](./doc/env.md) about environment variable.
-
-```
-docker network create -d bridge --subnet 172.0.0.0/24 --gateway 172.0.0.1 okimochi-network
-docker-compose --build up
-```
-
-## use remote bitcoind.
-
-please edit `BITCOIND_URI`, `BITCOIND_USERNAME`, `BITCOIND_PASSWORD`, in `.env`,
-check there is no inconsistency in `docker-compose.yml`,
-and run
-
-```
-docker-compose up --build mongo okimochi
-```
-
-## How to contribute
-
-see [TODO](https://github.com/campfire-inc/OKIMOCHI/issues/1)
-and give a PR to develop branch.
