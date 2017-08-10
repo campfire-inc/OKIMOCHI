@@ -1,4 +1,4 @@
-# OKIMOCHI see [here](doc/english_readme.md) for English manual
+# OKIMOCHI (see [here](doc/english_readme.md) for English manual)
 日頃の感謝の気持ちを、少額のビットコインという形にして、Slack上の従業員同士で送り合えるbotアプリケーション。
 
 ## OKIMOCHI開発の背景
