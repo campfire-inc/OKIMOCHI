@@ -87,4 +87,4 @@ COMPOSE_HTTP_TIMEOUT=45000 docker-compose up --build
 [TODO](https://github.com/campfire-inc/OKIMOCHI/issues/1)
 
 ## ライセンス
-[MIT](https://opensource.org/licenses/MIT) © CAMPFIRE and Joe Miyamoto
+[MIT](./LICENSE) © CAMPFIRE and Joe Miyamoto
