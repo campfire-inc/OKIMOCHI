@@ -86,7 +86,7 @@ module.exports = {
 
   allPaybackAddressUsed: "warning: all addresses has been used.\n" +
       "So using the one we used before!\n" +
-      "Please register the new address for the sake of fungibility! \n",
+      "Please register the new address for the sake of security! \n",
   needMoreDeposit: "you have consumed all depositted amount! please deposit more.",
   totalBalance: "%s BTC left as deposited amount!",
   ranking:{

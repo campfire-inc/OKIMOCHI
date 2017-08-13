@@ -106,7 +106,7 @@ module.exports = {
   \`${config.APP_NAME} help\` でより詳しい情報が手に入ります。
   `,
   allPaybackAddressUsed: `注意: registerされたアドレスが全て使用済みになりました。
-  fungibility確保のため、アドレスはトランザクションごとに使い分けることが奨励されています。
+  セキュリティ確保のため、アドレスはトランザクションごとに使い分けることが奨励されています。
   気が向いたら、多めに登録しておきましょう。
 `,
   needMoreDeposit: "depositされた額が底をついたため、支払えません :(",
