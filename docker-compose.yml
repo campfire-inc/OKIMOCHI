@@ -35,7 +35,7 @@ services:
       -printtoconsole
       -rest
       -txconfirmtarget=28
-      -fallbackfee=0.000006
+      -fallbackfee=0.000009
       -${BITCOIND_NETWORK}
       -server
       -rpcuser=${BITCOIND_USERNAME}
