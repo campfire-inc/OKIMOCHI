@@ -508,7 +508,7 @@ async function smartPay(fromUserID, toUserID, amount, Txmessage) {
     returnMessage = replyMessage +
       " payed to " + formatUser(toUserID)
     try {
-      const result = await bitcoindclient.sendToAddress(address, amount, Txmessage, "this is comment.");
+      const result = await bitcoindclient.sendToAddress(address, amount, Txmessage, "this is comment.", true);
     } catch (e) {
       throw e
     }

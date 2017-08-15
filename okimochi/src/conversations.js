@@ -35,7 +35,7 @@ module.exports = {
           } else {
             convo.next()
             convo.ask(locale_message.withdraw.pasteAddress, (response, convo) => {
-              bitcoindclient.sendToAddress(response.text, amount)
+              bitcoindclient.sendToAddress(response.text, amount, "", "", true)
                 .then((response) => {
                   content.pendingBalance -= amount;
                   content.save();
