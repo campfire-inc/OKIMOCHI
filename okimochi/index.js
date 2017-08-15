@@ -495,24 +495,29 @@ async function smartPay(fromUserID, toUserID, amount, Txmessage) {
   logger.debug("result of extractUnusedAddress was ", address, updatedContent, replyMessage);
 
   // pend payment when there is no registered address.
-  if (!address){
+  if (!address || amount + toUserContent.pendingBalance < config.minimumTxAmount){
     toUserContent.pendingBalance = toUserContent.pendingBalance + amount;
     toUserContent.totalPaybacked += amount
     toUserContent.save()
-    return util.format(locale_message.cannot_pay, formatUser(fromUserID), amount)
-
+    if (!address){
+      return util.format(locale_message.cannot_pay, formatUser(fromUserID), amount)
+    } else if (amount < config.minimumTxAmount) {
+      return util.format(locale_message.pendingSmallTx, formatUser(fromUserID), amount)
+    }
   } else {
+    const amountToPay = amount + toUserContent.pendingBalance
     debug("going to pay to " + address);
     debug("of user " + updatedContent);
 
     returnMessage = replyMessage +
       " payed to " + formatUser(toUserID)
     try {
-      const result = await bitcoindclient.sendToAddress(address, amount, Txmessage, "this is comment.", true);
+      const result = await bitcoindclient.sendToAddress(address, amountToPay, Txmessage, "this is comment.", true);
     } catch (e) {
       throw e
     }
     updatedContent.totalPaybacked += amount
+    updatedContent.pendingBlance -= amountToPay
     updatedContent.save()
     return returnMessage
   }

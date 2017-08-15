@@ -109,6 +109,12 @@ module.exports = {
   セキュリティ確保のため、アドレスはトランザクションごとに使い分けることが奨励されています。
   気が向いたら、多めに登録しておきましょう。
 `,
+  pendingSmallTx: `%sから%sBTCのOKIMOCHIをもらいました！
+が、小額の支払いだったので、支払いはOKIMOCHI内で保留しています。
+\`${config.APP_NAME} register\` してあれば、保留している額が域値を超えた時に自動で発行されます。
+あなたの保留中の額は \`${config.APP_NAME} pendingBalance\` で確認できます。
+域値は${config.minimumTxAmount}です。
+  `,
   needMoreDeposit: "depositされた額が底をついたため、支払えません :(",
   totalBalance: "壺に残っている額は現在%s BTCです。",
   ranking:{
@@ -133,6 +139,8 @@ module.exports = {
       最大額は \`${config.APP_NAME} pendingBalance\` で確認できます！`,
     pasteAddress: "送金先ビットコインアドレスを貼り付けてください",
     successfulPayment: "送金しました！",
-    sent: "送金を受け付けました。自動で送金を試みます。"
+    sent: "送金を受け付けました。自動で送金を試みます。",
+    amountLessThanThreshold: `トランザクションの最低金額は${config.minimumTxAmount}
+に設定されています！もう少し貯まるまで待ちましょう :) `
   },
 }

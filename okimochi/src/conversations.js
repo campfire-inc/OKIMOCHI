@@ -28,7 +28,10 @@ module.exports = {
       pattern: /[\.\d]+/,
       callback: (response, convo) => {
 	    let amount = Number(response.text);
-          if (amount > content.pendingBalance) {
+          if (amount < config.minimumTxAmount) {
+            convo.say(locale_message.withdraw.amountLessThanThreshold)
+            convo.next()
+          } else if (amount > content.pendingBalance) {
             convo.say(locale_message.withdraw.notEnoughPendingBalance)
             convo.repeat();
             convo.next();

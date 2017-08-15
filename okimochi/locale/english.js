@@ -87,6 +87,11 @@ module.exports = {
   allPaybackAddressUsed: "warning: all addresses has been used.\n" +
       "So using the one we used before!\n" +
       "Please register the new address for the sake of security! \n",
+pendingSmallTx: `you got tip from %s, amount is  %sBTC.
+It was too small amount to send Tx, so payment has been pending inside this bot.
+if you have been registered your address by \`${config.APP_NAME} register\`, this bot will automatically send Tx when your pendingBalance has exceed the threshold.
+The threshold is now set to ${config.minimumTxAmount}, and the pendingBalance can be seen by \`${config.APP_NAME} pendingBalance\` .
+  `,
   needMoreDeposit: "you have consumed all depositted amount! please deposit more.",
   totalBalance: "%s BTC left as deposited amount!",
   ranking:{
@@ -112,6 +117,7 @@ module.exports = {
   	please check it by \`${config.APP_NAME} pendingBalance\` `,
     pasteAddress: "please paste your bitcoin address to send.",
     successfulPayment: 'sent!',
-    sent: "accepted! I will try to send Tx in a moment ... "
+    sent: "accepted! I will try to send Tx in a moment ... ",
+    amountLessThanThreshold: `Sorry! Tx have to be bigger than ${config.minimumTxAmount}! wait until you gather more!`
   },
 }
