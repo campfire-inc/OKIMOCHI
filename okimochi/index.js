@@ -457,14 +457,17 @@ controller.on(['reaction_added'], (bot, message) => {
   }
 })
 
-
+/**
+ * Promise to return the total amount of pendingBalance
+ * for all users
+ * */
 async function promisegetPendingSum(){
   const PendingList = await PromiseGetAllUserPayback();
   return PendingList.reduce((a, b) => a + b, 0);
 }
 
 
-/*
+/**
  * function to mangae all payments done by this bot.
  * throws error when the bot has to reply to sender.
  * returns string when the bot has to reply to receiver
@@ -479,8 +482,8 @@ async function smartPay(fromUserID, toUserID, amount, Txmessage) {
   }
 
   const PendingSum = await promisegetPendingSum();
-  const totalBalance = await bitcoindclient.getBalance();
-  if (PendingSum > totalBalance || amount > totalBalance){
+  const totalBitcoindBalance = await bitcoindclient.getBalance();
+  if (totalBitcoindBalance - pendingSum < amount){
     throw new Error(locale_message.needMoreDeposit);
   };
 
