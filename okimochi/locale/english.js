@@ -92,7 +92,8 @@ It was too small amount to send Tx, so payment has been pending inside this bot.
 if you have been registered your address by \`${config.APP_NAME} register\`, this bot will automatically send Tx when your pendingBalance has exceed the threshold.
 The threshold is now set to ${config.minimumTxAmount}, and the pendingBalance can be seen by \`${config.APP_NAME} pendingBalance\` .
   `,
-  needMoreDeposit: "you have consumed all depositted amount! please deposit more.",
+  needMoreDeposit: `There is no way to pay since OKIMOCHI is now empty :(
+waiting for someone to deposit :)`,
   totalBalance: "%s BTC left as deposited amount!",
   ranking:{
     xaxis: "deposit amount",

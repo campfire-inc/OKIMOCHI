@@ -115,7 +115,8 @@ module.exports = {
 あなたの保留中の額は \`${config.APP_NAME} pendingBalance\` で確認できます。
 域値は${config.minimumTxAmount}です。
   `,
-  needMoreDeposit: "depositされた額が底をついたため、支払えません :(",
+  needMoreDeposit: `depositされた額が底をついたため、支払えません :(
+\`${config.APP_NAME} deposit\` でデポジットしてくれると嬉しいな :) `,
   totalBalance: "壺に残っている額は現在%s BTCです。",
   ranking:{
     xaxis: "depositした量",
