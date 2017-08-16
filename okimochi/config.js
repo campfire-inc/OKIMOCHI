@@ -51,7 +51,7 @@ module.exports = {
     timeout: 30000
   }),
 
-  MAX_TIP_AMOUNT: 0.1,
+  MAX_TIP_AMOUNT: 0.01,
   minimumTxAmount: 0.005,
 
   plotly: {

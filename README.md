@@ -67,7 +67,7 @@ COMPOSE_HTTP_TIMEOUT=45000 docker-compose up —build
 
 ## その他設定項目
 
-### 反応する対象のボタン
+### 反応する対象のボタンとその金額
 
 `okimochi/locale/*.js` の `emoji_to_BTC_map` を編集してください。
 
