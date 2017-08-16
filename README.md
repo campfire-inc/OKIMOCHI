@@ -27,7 +27,8 @@ Slack <a href="https://slack.com/apps/manage/A0F7YS25R-bots">Botの管理ペー�
 - インフラ準備  
 - Gitをinstallし、Repositoryをclone  
 - 環境変数を更新  
-.env_exampleをコピーし、環境変数を設定
+`.env_example`をコピーし、環境変数を設定
+
 ```
 cp .env_example .env # modify .env with your own slack bot token
 ```
@@ -63,6 +64,20 @@ COMPOSE_HTTP_TIMEOUT=45000 docker-compose up —build
 # 使い方をリクエスト
 @okimochi help
 ```
+
+## その他設定項目
+
+### 反応する対象のボタン
+
+`okimochi/locale/*.js` の `emoji_to_BTC_map` を編集してください。
+
+### 最低トランザクション金額の設定
+
+`okimochi/config.js` の `minimumTxAmount` を設定してください。
+
+### `tip` 時の最大金額
+
+`okimochi/config.js` の `MAX_TIP_AMOUNT ` を設定してください。
 
 ## CAMPFIREでの試験導入結果
 CAMPFIREでは社内における試験を実施し、1週間で約100件の「OKIMOCHI」が送られました。
