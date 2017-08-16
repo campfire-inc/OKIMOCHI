@@ -481,7 +481,7 @@ async function smartPay(fromUserID, toUserID, amount, Txmessage) {
     throw new Error("tried to send to yourself!");
   }
 
-  const PendingSum = await promisegetPendingSum();
+  const pendingSum = await promisegetPendingSum();
   const totalBitcoindBalance = await bitcoindclient.getBalance();
   if (totalBitcoindBalance - pendingSum < amount){
     throw new Error(locale_message.needMoreDeposit);
