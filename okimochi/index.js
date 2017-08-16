@@ -565,9 +565,9 @@ controller.hears(`tip ${userIdPattern.source} ${amountPattern.source}(.*)`, ["di
       PromiseOpenPrivateChannel(message.user)
         .then((channel) => {
           message.channel  = channel
-          bot.reply(message, err.stack)
+          bot.reply(message, err.toString())
         })
-      bot.reply(message, err.toString())
+      .catch(() => bot.reply(message, err.toString()))
     })
 })
 
