@@ -52,7 +52,7 @@ module.exports = {
   }),
 
   MAX_TIP_AMOUNT: 0.01,
-  minimumTxAmount: 0.005,
+  minimumTxAmount: 0.003,
 
   plotly: {
     api_key: process.env.PLOTLY_API_KEY,
