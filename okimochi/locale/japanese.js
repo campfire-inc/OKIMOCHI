@@ -45,7 +45,7 @@ const emoji_to_BTC_map = {
 let emoji_info = []
 for (k of Object.keys(emoji_to_BTC_map)){
   let btc = emoji_to_BTC_map[k]
-  emoji_info.push([k, btc + "BTC", inSatoshi(btc) + "Satoshi", btc2jpy(btc) + "円"])
+  emoji_info.push([k, btc + "BTC", inSatoshi(btc) + "Satoshi", Math.round(btc2jpy(btc)) + "円"])
 }
 
 
