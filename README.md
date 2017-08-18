@@ -79,6 +79,11 @@ COMPOSE_HTTP_TIMEOUT=45000 docker-compose up —build
 
 `okimochi/config.js` の `MAX_TIP_AMOUNT ` を設定してください。
 
+## ホストマシンの推奨スペック
+
+* Memory ... 3GB
+* Storage ... 160GB( `BITCOIND_HOST_DIR` で指定するブロックチェーンデータ容量) + 2GB (ユーザーデータベース)
+
 ## CAMPFIREでの試験導入結果
 CAMPFIREでは社内における試験を実施し、1週間で約100件の「OKIMOCHI」が送られました。
 試験概要は以下の通りです。  
