@@ -8,7 +8,7 @@
     "url": "git://github.com/campfire-inc/OKIMOCHI"
   },
   "scripts": {
-    "test": "nyc mocha test/test_locale.js",
+    "test": "NODE_ENV=test nyc mocha",
     "start": "node index.js"
   },
   "keywords": [
@@ -35,6 +35,7 @@
     "winston": "^2.3.1"
   },
   "devDependencies": {
+    "botkit-mock": "^0.1.2",
     "chai": "^4.0.2",
     "mocha": "^3.4.2",
     "nyc": "^11.0.3"
