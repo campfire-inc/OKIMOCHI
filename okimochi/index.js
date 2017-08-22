@@ -460,7 +460,7 @@ async function smartPay(fromUserID, toUserID, amount, Txmessage) {
       return util.format(locale_message.pendingSmallTx, formatUser(fromUserID), amount)
     }
   } else {
-    const amountToPay = amount + toUserContent.pendingBalance
+    const amountToPay = amount + Number(toUserContent.pendingBalance)
     debug("going to pay to " + address);
     debug("of user " + updatedContent);
 
