@@ -8,13 +8,13 @@ const fs = require('fs');
 const path = require('path');
 const util = require('util');
 const MyConvos = require(path.join(__dirname, "src", "conversations"))
-const getRateJPY = require(path.join(__dirname, "src", "lib")).getRateJPY;
+const getRateJPY = require(path.join(__dirname, "src", "lib")).getRateJPY
+const { User } = require(path.join(__dirname, 'src', 'db'))
 
 // logger
 require(path.join(__dirname, "src", "logger.js"));
 const winston = require('winston');
 const logger = winston.loggers.get('okimochi');
-
 
 // import message object according to lang setting.
 let locale_message;
@@ -320,54 +320,6 @@ if (process.env.NODE_ENV === "production"){
   })
 }
 
-// database initialization
-const mongoose = require("mongoose");
-mongoose.Promise = global.Promise
-mongoose.connect(config.mongoUri, {
-  useMongoClient: true,
-  autoReconnect: true
-})
-  .then((db) => {return db.once('open', () => {
-    console.log("db is open!")
-  })})
-  .catch((err) => {throw err})
-
-
-const Schema = mongoose.Schema,
-  ObjectId = Schema.ObjectId;
-
-let UserSchema = new Schema({
-  _id: ObjectId,
-  id: String,
-  depositAddresses: [String],
-  paybackAddresses: [
-    {
-      address: String,
-      used: {type: Boolean, default: false}
-    }
-  ],
-  totalPaybacked: {type: Number, default: 0}, // pendingBalance + amount payed directry.
-  pendingBalance: {type: Number, default: 0}
-})
-
-const User = mongoose.model('User', UserSchema);
-
-mongoose.connection.on( 'connected', function(){
-    console.log('connected.');
-});
-
-mongoose.connection.on( 'error', function(err){
-    console.log( 'failed to connect a mongo db : ' + err );
-});
-
-// mongoose.disconnect() を実行すると、disconnected => close の順番でコールされる
-mongoose.connection.on( 'disconnected', function(){
-    console.log( 'disconnected.' );
-});
-
-mongoose.connection.on( 'close', function(){
-    console.log( 'connection closed.' );
-});
 
 // deposit
 controller.hears(`deposit`, ["direct_mention", "direct_message", "mention"], (bot, message) => {
