@@ -3,8 +3,6 @@ const path = require('path')
 const locale_message = require('../../config').locale_message
 const debug = require('debug')
 
-console.log("locale_message is", locale_message)
-
 module.exports = (controller) => {
   controller.hears('help', ['direct_mention', 'direct_message'], (bot, message) => {
     bot.reply(message, locale_message.help);

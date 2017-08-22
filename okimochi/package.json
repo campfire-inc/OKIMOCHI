@@ -8,8 +8,8 @@
     "url": "git://github.com/campfire-inc/OKIMOCHI"
   },
   "scripts": {
-    "test": "NODE_ENV=test nyc mocha",
-    "start": "node index.js"
+    "test": "nyc mocha",
+    "start": "if test \"$NODE_ENV\" = \"test\"; then nyc mocha; else node index.js; fi"
   },
   "keywords": [
     "slack",
