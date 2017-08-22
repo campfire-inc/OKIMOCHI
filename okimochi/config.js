@@ -21,6 +21,18 @@ if (process.env.NODE_ENV === "development") {
 
 const SLACK_DEBUG = (process.env.NODE_ENV === "development") ? true : false
 
+// import message object according to lang setting.
+const lang = process.env.MESSAGE_LANG || "en"
+
+let locale_message
+if (lang === "en") {
+  locale_message = require("./locale/english")
+} else if (lang === "ja") {
+  locale_message = require('./locale/japanese')
+} else {
+  throw new Error("must specify MESSAGE_LANG environment variable either to `en` or `ja` !!")
+}
+
 module.exports = {
   adminPassword: "hoge",
   mongoUri: mongoUri,
@@ -38,8 +50,7 @@ module.exports = {
   webhook_url: process.env.WEBHOOK_URL,
   default_channel: process.env.DEFAULT_CHANNEL || "#okimochi-test",
 
-  lang: process.env.MESSAGE_LANG || "en",
-
+  locale_message: locale_message,
 
   btc_network: network,
   bitcoindclient: new BitcoindClient({

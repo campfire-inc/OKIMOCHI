@@ -16,20 +16,11 @@ require(path.join(__dirname, "src", "logger.js"));
 const winston = require('winston');
 const logger = winston.loggers.get('okimochi');
 
-// import message object according to lang setting.
-let locale_message;
-if (config.lang === "en"){
-  locale_message = require("./locale/english");
-} else if (config.lang === "ja"){
-  locale_message = require('./locale/japanese');
-} else {
-  throw new Error("must specify MESSAGE_LANG environment variable either to `en` or `ja` !!")
-}
-
+const locale_message = config.locale_message
 console.log("config is", config)
 
 // bitcoin
-const bitcoindclient = config.bitcoindclient;
+const bitcoindclient = config.bitcoindclient
 
 
 function PromiseGetAllUsersDeposit(){
@@ -577,17 +568,4 @@ controller.hears('^rate$', ['direct_mention', 'direct_message'], (bot, message) 
 });
 
 // help
-controller.hears("help", ["direct_mention", "direct_message"], (bot, message) => {
-  bot.reply(message, locale_message.help);
-  const exp_file = "okimochi_explanation.png";
-  bot.api.files.upload({
-    file: fs.createReadStream(path.join(__dirname, "static", "images", exp_file)),
-    filename: exp_file,
-    title: exp_file,
-    channels: message.channel
-  }, (err, res) => {
-    if (err) bot.reply(err)
-    debug("result is ", res);
-  })
-});
-
+require('./src/handlers/help')(controller)
