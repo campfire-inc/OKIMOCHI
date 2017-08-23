@@ -5,7 +5,7 @@ services:
     image: joemphilips/okimochi:latest
     env_file: .env
     environment:
-      NODE_ENV: development
+      NODE_ENV: production
     command: node index.js
     extra_hosts:
       - "mongo:${MONGO_URI}"
