@@ -1,0 +1,54 @@
+version: '2'
+services:
+  okimochi:
+    build: ./okimochi
+    image: joemphilips/okimochi:latest
+    env_file: .env
+    command: npm start
+    extra_hosts:
+      - "mongo:${MONGO_URI}"
+      - "bitcoind:182.0.0.3"
+    environment:
+      - NODE_ENV=test
+      - MONGO_URI=182.0.0.4
+    networks:
+      ci:
+        ipv4_address: 182.0.0.2
+    tty: true
+    stdin_open: true
+    depends_on:
+      - bitcoind
+      - mongo
+  bitcoind:
+    image: seegno/bitcoind:0.14.2-alpine
+    networks:
+      ci:
+        ipv4_address: 182.0.0.3
+    ports:
+      - "8332:8332"
+      - "8333:8333"
+      - "18332:18332"
+      - "18333:18333"
+      - "18444:18444"
+    command:
+      -printtoconsole
+      -rest
+      -txconfirmtarget=20
+      -regtest
+      -server
+      -rpcuser=${BITCOIND_USERNAME}
+      -rpcpassword=${BITCOIND_PASSWORD}
+      -rpcallowip=182.0.0.0/8
+  mongo:
+    restart: always
+    image: mongo
+    networks:
+      ci:
+        ipv4_address: 182.0.0.4
+    command:
+      --dbpath=/data/db
+      --rest
+
+networks:
+  ci:
+    external: true

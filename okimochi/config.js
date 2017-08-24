@@ -1,16 +1,18 @@
-let mongoUri;
+let mongoBaseUri
 const BitcoindClient = require('bitcoin-core');
 const network = process.env.BITCOIND_NETWORK || 'testnet';
 
 if (process.env.MONGO_PORT_27017_TCP_ADDR){
-  mongoUri =  `mongodb://${process.env.MONGO_PORT_27017_TCP_ADDR}:27017/` + network;
+  mongoBaseUri =  `mongodb://${process.env.MONGO_PORT_27017_TCP_ADDR}:27017/`
 } else if (process.env.mongo) {
-  mongoUri = `mongodb://${process.env.mongo}:27017/` + network;
+  mongoBaseUri = `mongodb://${process.env.mongo}:27017/`
 } else if(process.env.MONGO_URI ){
-  mongoUri = `mongodb://${process.env.MONGO_URI}:27017/` + network ;
+  mongoBaseUri = `mongodb://${process.env.MONGO_URI}:27017/`
 } else {
-  mongoUri = `mongodb://localhost:27017/` + network;
+  mongoBaseUri = `mongodb://localhost:27017/`
 }
+
+const mongoUri = mongoBaseUri + network
 
 let TOKEN = "";
 if (process.env.NODE_ENV === "development") {
@@ -35,6 +37,7 @@ if (lang === "en") {
 
 module.exports = {
   adminPassword: "hoge",
+  mongoBaseUri: mongoBaseUri,
   mongoUri: mongoUri,
 
   botconfig: {

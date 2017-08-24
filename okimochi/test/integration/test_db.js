@@ -2,19 +2,22 @@ const assert = require('assert')
 const { UserSchema, PromiseSetAddresstoUser } = require('../../src/db')
 const Mongoose = require('mongoose').Mongoose
 const mongoose = new Mongoose()
+const config = require("../../config")
+const mongoBaseUri = config.mongoBaseUri
+
 
 const testUser = mongoose.model('User', UserSchema)
 
 describe('test setting address to user', () => {
   before((done) => {
-    mongoose.connect('mongodb://localhost/testDB', { useMongoClient: true }, (err) => {done(err)})
+    mongoose.connect(mongoBaseUri + 'testDB', { useMongoClient: true }, (err) => {if (err) throw err})
     const db = mongoose.connection
     db.once('open', () => {done()})
   })
 
   it('User document can be created from id', (done) => {
     const validUser = new testUser({id: "hoge user ID"})
-    validUser.save(done)
+    validUser.save().than(done())
   })
 
   it('User document can not be created with invalid address', (done) => {

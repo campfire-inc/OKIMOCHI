@@ -29,11 +29,11 @@ jobs:
       - run:
           name: build okimochi docker image
           command: |
-            touch .env && docker-compose build okimochi --tag okimochi:temp
+            docker-compose build okimochi --tag okimochi:temp
       - run:
           name: Run integration test by docker compose
           command: |
-            NODE_ENV=test docker-compose run okimochi
+            ./test.sh
       # deploy
       - run:
           name: register to ecr and deploy to ecs
