@@ -27,10 +27,6 @@ jobs:
       - setup_remote_docker
 
       - run:
-          name: build okimochi docker image
-          command: |
-            docker-compose build okimochi --tag okimochi:temp
-      - run:
           name: Run integration test by docker compose
           command: |
             ./test.sh
