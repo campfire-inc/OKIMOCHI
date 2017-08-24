@@ -98,7 +98,7 @@ make_task_def(){
 
 
       {
-        "memory": 400,
+        "memory": 800,
         "portMappings": [
           {
             "hostPort": 27017,

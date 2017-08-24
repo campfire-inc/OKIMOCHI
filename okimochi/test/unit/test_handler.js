@@ -10,7 +10,7 @@ describe('Help Controller Tests', () => {
     helpHandler(this.controller)
   })
 
-  it('shout return help message when user asked for help', () => {
+  it('bot should return help message when user asked for help', () => {
     return this.bot.usersInput(
       [
         {
