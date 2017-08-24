@@ -32,8 +32,8 @@ jobs:
             ./test.sh
 
       - run:
-        name: build docker image for okimochi only.
-        command: |
+          name: build docker image for okimochi only.
+          command: |
             docker build okimochi -f okimochi/Dockerfile --tag okimochi:temp
 
       # deploy
