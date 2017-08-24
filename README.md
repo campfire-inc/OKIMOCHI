@@ -101,7 +101,8 @@ CAMPFIREでは社内における試験を実施し、1週間で約100件の「OK
 cp .env_example .env
 # 環境変数を設定後
 docker network create -d bridge --subnet 172.0.0.0/24 --gateway 172.0.0.1 okimochi-network # 3つのdockerコンテナが走るネットワークの作成
-docker-compose up -d bitcoind mongo # アプリの後ろで走るコンテナをバックグラウンドで走らせる
+docker-compose up -d bitcoind mongo # アプリの後ろで走るコンテナをバックグラウンドで走らせる。
+# bitcoindの初回同期にはかなり時間がかかるので、同期状況を見たい場合は-dオプションなしでフォアグラウンドでの実行をおすすめします。
 COMPOSE_HTTP_TIMEOUT=45000 docker-compose up --build okimochi # アプリ本体を立ち上げる
 ```
 - 今後の想定ToDo  
