@@ -34,24 +34,24 @@ Slack <a href="https://slack.com/apps/manage/A0F7YS25R-bots">Botの管理ペー�
 cp .env_example .env # modify .env with your own slack bot token
 ```
 
-| 変数名             | 内容                                                                     |
-|:-------------------|:-------------------------------------------------------------------------|
-| SLACK_CLIENT_ID    | Slack `Client ID` を入力                                                 |
-| SLACK_CLIENT_SECRET| Slack `Client Secret` を入力                                             |
-| VERIFICATION_TOKEN | Slack `Verification Token` を入力                                        |
-| EMOJI              | Slack Botのアイコンを設定                                                |
-| TOKEN              | Slack Botの`API Token` を入力                                            |
-| WEBHOOK_URL        | Slack `Webhook URL` を入力                                               |
-| DEFAULT_CHANNEL    | デフォルトのSlackチャンネルを入力                                        |
-| ADMIN_USERNAME     | 管理者となるSlack ユーザ名を入力                                         |
-| BITCOIND_HOST_DIR  | ブロックチェーンや秘密鍵などの格納先。デフォルトは `~/.bitcoin`          |
-| BITCOIND_URI       | 既にbitcoindサーバをお持ちの場合、URIを入力                              |
-| BITCOIND_USERNAME  | 既にbitcoindサーバをお持ちの場合、USERNAMEを入力。新規の場合、任意の文字列を入力           |
-| BITCOIND_PASSWORD  | 既にbitcoindサーバをお持ちの場合、PASSWORDを入力。新規の場合、任意の文字列を入力           |
-| BITCOIND_NETWORK   | 本番用の場合は `mainnet` 、試験用の場合は `testnet`                      |
-| PLOTLY_API_KEY     | Plotlyの `API Key` を入力                                                |
-| PLOTLY_API_USER    | Plotlyの `username` を入力                                               |
-| MESSAGE_LANG       | 日本語と英語を用意。日本語は `ja` 、英語は `en`                          |
+| 変数名               | 内容                                                                                                               |
+| :------------------- | :-------------------------------------------------------------------------                                         |
+| SLACK_CLIENT_ID      | Slack `Client ID` を入力                                                                                           |
+| SLACK_CLIENT_SECRET  | Slack `Client Secret` を入力                                                                                       |
+| VERIFICATION_TOKEN   | Slack `Verification Token` を入力                                                                                  |
+| EMOJI                | Slack Botのアイコンを設定                                                                                          |
+| TOKEN                | Slack Botの`API Token` を入力                                                                                      |
+| WEBHOOK_URL          | Slack `Webhook URL` を入力                                                                                         |
+| DEFAULT_CHANNEL      | デフォルトのSlackチャンネルを入力                                                                                  |
+| ADMIN_USERNAME       | 管理者となるSlack ユーザ名を入力                                                                                   |
+| BITCOIND_HOST_DIR    | ブロックチェーンや秘密鍵などの格納先。デフォルトは `~/.bitcoin`                                                    |
+| BITCOIND_URI         | 既にbitcoindサーバをお持ちの場合、URIを入力                                                                        |
+| BITCOIND_USERNAME    | 既にbitcoindサーバをお持ちの場合、USERNAMEを入力。新規の場合、任意の文字列を入力(十分長くて推測できないものを推奨) |
+| BITCOIND_PASSWORD    | 既にbitcoindサーバをお持ちの場合、PASSWORDを入力。新規の場合、任意の文字列を入力(十分長くて推測できないものを推奨) |
+| BITCOIND_NETWORK     | 本番用の場合は `mainnet` 、試験用の場合は `testnet`                                                                |
+| PLOTLY_API_KEY       | Plotlyの `API Key` を入力                                                                                          |
+| PLOTLY_API_USER      | Plotlyの `username` を入力                                                                                         |
+| MESSAGE_LANG         | 日本語と英語を用意。日本語は `ja` 、英語は `en`                                                                    |
 
 - Docker環境の構築、dokcer-compose up（bitcoindの同期に約10時間程度必要）  
 ```
@@ -100,8 +100,9 @@ CAMPFIREでは社内における試験を実施し、1週間で約100件の「OK
 ```
 cp .env_example .env
 # 環境変数を設定後
-docker network create -d bridge --subnet 172.0.0.0/24 --gateway 172.0.0.1 okimochi-network
-COMPOSE_HTTP_TIMEOUT=45000 docker-compose up --build
+docker network create -d bridge --subnet 172.0.0.0/24 --gateway 172.0.0.1 okimochi-network # 3つのdockerコンテナが走るネットワークの作成
+docker-compose up -d bitcoind mongo # アプリの後ろで走るコンテナをバックグラウンドで走らせる
+COMPOSE_HTTP_TIMEOUT=45000 docker-compose up --build okimochi # アプリ本体を立ち上げる
 ```
 - 今後の想定ToDo  
 作者側で想定しているToDoは、以下となります。  
