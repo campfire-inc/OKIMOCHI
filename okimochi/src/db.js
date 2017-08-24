@@ -1,4 +1,5 @@
 const config = require('../config')
+const bitcoindclient = config.bitcoindclient
 
 // database initialization
 const mongoose = require("mongoose");
@@ -13,17 +14,33 @@ mongoose.connect(config.mongoUri, {
   .catch((err) => {throw err})
 
 
+const BTCaddressValidator = {
+  validator: (v) => {
+    return new Promise((resolve, reject) => {
+      bitcoindclient.validateAddress(v)
+        .then((res) => {
+          if (res.isvalid) {
+            resolve(false)
+         } else {
+           reject()
+         }
+      })
+    })
+  },
+  message: 'btc address is not correct!'
+}
+
 const Schema = mongoose.Schema,
   ObjectId = Schema.ObjectId;
 
 let UserSchema = new Schema({
   _id: ObjectId,
   id: String,
-  depositAddresses: [String],
+  depositAddresses: [{ type: String, validate: BTCaddressValidator }],
   paybackAddresses: [
     {
-      address: String,
-      used: {type: Boolean, default: false}
+      address: { type: String, validate: BTCaddressValidator },
+      used: { type: Boolean, default: false },
     }
   ],
   totalPaybacked: {type: Number, default: 0}, // pendingBalance + amount payed directry.
@@ -49,5 +66,28 @@ mongoose.connection.on( 'close', function(){
     console.log( 'connection closed.' );
 });
 
+function PromiseSetAddressToUser(userId, address, UserModel){
+  debug(userId);
+  debug(address)
+  return new Promise((resolve, reject) => {
+  bitcoindclient.validateAddress(address, (err, result) => {
+    debug(err);
+    debug(result);
+    if (err){
+      reject(err)
+    }
+      if (result && result.isvalid){
+        UserModel.update( {id: userId},
+        {$push: {paybackAddresses: {address: address, used: false}}},
+        {upsert: true, 'new': true}, (res) => {resolve(res)})
+        resolve()
+      } else {
+        reject(new Error(locale_message.register.notValid))
+      }
+    })
+  })
+}
 
 module.exports.User = User
+module.exports.UserSchema = UserSchema
+module.exports.PromiseSetAddressToUser = PromiseSetAddressToUser

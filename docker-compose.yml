@@ -4,20 +4,21 @@ services:
     build: ./okimochi
     image: joemphilips/okimochi:latest
     env_file: .env
-    environment:
-      NODE_ENV: production
-    command: node index.js
+    command: npm start
     extra_hosts:
       - "mongo:${MONGO_URI}"
       - "bitcoind:${BITCOIND_URI}"
-    restart: always
-    ports:
-      - "${HOST_PORT}:3000"
+    restart: on-failure
+    environment:
+      - NODE_ENV
     networks:
       okimochi-network:
         ipv4_address: 172.0.0.2
     tty: true
     stdin_open: true
+    depends_on:
+      - bitcoind
+      - mongo
   bitcoind:
     image: seegno/bitcoind:0.14.2-alpine
     volumes:

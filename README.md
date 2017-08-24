@@ -109,5 +109,10 @@ COMPOSE_HTTP_TIMEOUT=45000 docker-compose up --build okimochi # アプリ本体�
 作者側で想定しているToDoは、以下となります。  
 [TODO](https://github.com/campfire-inc/OKIMOCHI/issues/1)
 
+### テストの実行
+
+* ユニットテスト ... `cd okimochi && npm test`
+* 結合テスト&ユニットテスト ... `./test.sh`
+
 ## ライセンス
 [MIT](./LICENSE) © CAMPFIRE and Joe Miyamoto

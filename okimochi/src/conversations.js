@@ -3,15 +3,7 @@ const config = require(path.join(__dirname, "..", "config"));
 const logger = require("winston");
 const bitcoindclient = config.bitcoindclient;
 
-// import message object according to lang setting.
-let locale_message;
-if (config.lang === "en"){
-  locale_message = require(path.join(__dirname, "..", "locale", "english"));
-} else if (config.lang === "ja"){
-  locale_message = require(path.join(__dirname, "..", 'locale', 'japanese'));
-} else {
-  throw new Error("must specify MESSAGE_LANG environment variable either to `en` or `ja` !!")
-}
+const locale_message = config.locale_message
 
 
 module.exports = {
