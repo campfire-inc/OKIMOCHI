@@ -3,14 +3,17 @@ services:
   okimochi:
     build: ./okimochi
     image: joemphilips/okimochi:latest
-    env_file: .env
     command: npm start
     extra_hosts:
-      - "mongo:${MONGO_URI}"
       - "bitcoind:182.0.0.3"
+      - "mongo:182.0.0.4"
     environment:
       - NODE_ENV=test
       - MONGO_URI=182.0.0.4
+      - BITCOIND_URI=182.0.0.3
+      - BITCOIND_USERNAME=testuser
+      - BITCOIND_PASSWORD=testpassword
+      - BITCOIND_NETWORK=regtest
     networks:
       ci:
         ipv4_address: 182.0.0.2
@@ -36,8 +39,8 @@ services:
       -txconfirmtarget=20
       -regtest
       -server
-      -rpcuser=${BITCOIND_USERNAME}
-      -rpcpassword=${BITCOIND_PASSWORD}
+      -rpcuser=testuser
+      -rpcpassword=testpassword
       -rpcallowip=182.0.0.0/8
   mongo:
     restart: always

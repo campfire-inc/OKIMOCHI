@@ -17,7 +17,7 @@ describe('test setting address to user', () => {
 
   it('User document can be created from id', (done) => {
     const validUser = new testUser({id: "hoge user ID"})
-    validUser.save().than(done())
+    validUser.save().then(done())
   })
 
   it('User document can not be created with invalid address', (done) => {
