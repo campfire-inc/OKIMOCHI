@@ -8,7 +8,7 @@
     "url": "git://github.com/campfire-inc/OKIMOCHI"
   },
   "scripts": {
-    "test": "nyc mocha --recursive test/unit",
+    "test": "echo -e 'running unit test \n ' && nyc mocha --recursive test/unit",
     "start": "if test \"$NODE_ENV\" = \"test\"; then nyc mocha --recursive; else node index.js; fi"
   },
   "keywords": [
