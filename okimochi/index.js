@@ -9,7 +9,7 @@ const path = require('path');
 const util = require('util');
 const MyConvos = require(path.join(__dirname, "src", "conversations"))
 const getRateJPY = require(path.join(__dirname, "src", "lib")).getRateJPY
-const { User } = require(path.join(__dirname, 'src', 'db'))
+const { User, PromiseSetAddressToUser } = require(path.join(__dirname, 'src', 'db'))
 
 // logger
 require(path.join(__dirname, "src", "logger.js"));
@@ -130,28 +130,6 @@ async function PromisePlotRankingChart(){
     plotly.plot(data, opts, (err, msg) => {
       if (err) reject(err);
       else resolve(msg);
-    })
-  })
-}
-
-function PromiseSetAddressToUser(userId, address){
-  debug(userId);
-  debug(address)
-  return new Promise((resolve, reject) => {
-  bitcoindclient.validateAddress(address, (err, result) => {
-    debug(err);
-    debug(result);
-    if (err){
-      reject(err)
-    }
-      if (result && result.isvalid){
-        User.update( {id: userId},
-        {$push: {paybackAddresses: {address: address, used: false}}},
-        {upsert: true, 'new': true}, (res) => {resolve(res)})
-        resolve()
-      } else {
-        reject(new Error(locale_message.register.notValid))
-      }
     })
   })
 }
@@ -321,9 +299,6 @@ controller.hears(`deposit`, ["direct_mention", "direct_message", "mention"], (bo
       const tmpfile = path.join('/tmp', address + ".png")
       QRCode.toFile(tmpfile, address, (err) => {
         if (err) throw err;
-        controller.logger.debug("tmpfile is ", tmpfile)
-        controller.logger.debug("message is ", locale_message.deposit.filecomment)
-        controller.logger.debug("channel is ", message.channel)
 
         bot.api.files.upload({
           file: fs.createReadStream(tmpfile),
@@ -341,13 +316,8 @@ controller.hears(`deposit`, ["direct_mention", "direct_message", "mention"], (bo
       })
       return address
     })
-    .then((address) => User.update({ id: message.user },
-        {$push: {depositAddresses: address}},
-        {upsert: true}, () => debug("registered " + address + " as " + 
-          formatUser(message.user) + "'s")))
+    .then((address) => PromiseSetAddressToUser(message.user, address, User))
     .catch((err) => {bot.reply(message, err)})
-
-
 })
 
 // register
@@ -359,7 +329,7 @@ controller.hears('register', ["direct_mention", "direct_message"], (bot, message
     convo.ask(util.format(locale_message.register.beg, config.btc_network), (response, convo) => {
       let ps = [];
       for (let address of response.text.split("\n")) {
-        ps.push(PromiseSetAddressToUser(message.user, address))
+        ps.push(PromiseSetAddressToUser(message.user, address, User))
       }
       Promise.all(ps)
         .then(() => convo.say(util.format(locale_message.register.success, formatUser(message.user))))
