@@ -1,5 +1,5 @@
 const assert = require('assert')
-const { UserSchema, PromiseSetAddresstoUser } = require('../src/db')
+const { UserSchema, PromiseSetAddresstoUser } = require('../../src/db')
 const Mongoose = require('mongoose').Mongoose
 const mongoose = new Mongoose()
 

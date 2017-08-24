@@ -1,7 +1,7 @@
 const Botmock = require('botkit-mock')
-const helpHandler = require('../src/handlers/help')
+const helpHandler = require('../../src/handlers/help')
 const assert = require('assert')
-const locale_message = require('../config').locale_message
+const locale_message = require('../../config').locale_message
 
 describe('Help Controller Tests', () => {
   beforeEach(() => {
