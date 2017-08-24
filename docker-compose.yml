@@ -9,8 +9,6 @@ services:
       - "mongo:${MONGO_URI}"
       - "bitcoind:${BITCOIND_URI}"
     restart: on-failure
-    ports:
-      - "${HOST_PORT}:3000"
     environment:
       - NODE_ENV
     networks:
