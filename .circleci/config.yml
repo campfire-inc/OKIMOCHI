@@ -20,9 +20,9 @@ jobs:
       - setup_remote_docker
 
       - run:
-          name: build docker image for okimochi only.
+          name: Run integration test by docker compose
           command: |
-            docker build okimochi -f okimochi/Dockerfile --tag okimochi:temp
+            NODE_ENV=test docker-compose run okimochi
       # deploy
       - run:
           name: register to ecr and deploy to ecs
