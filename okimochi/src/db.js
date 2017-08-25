@@ -1,4 +1,5 @@
 const config = require('../config')
+const debug = require('debug')
 const bitcoindclient = config.bitcoindclient
 
 // database initialization
@@ -67,12 +68,8 @@ mongoose.connection.on( 'close', function(){
 });
 
 function PromiseSetAddressToUser(userId, address, UserModel){
-  debug(userId);
-  debug(address)
   return new Promise((resolve, reject) => {
   bitcoindclient.validateAddress(address, (err, result) => {
-    debug(err);
-    debug(result);
     if (err){
       reject(err)
     }
