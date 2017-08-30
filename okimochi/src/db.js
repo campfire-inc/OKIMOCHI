@@ -1,6 +1,7 @@
 const config = require('../config')
 const debug = require('debug')
 const bitcoindclient = config.bitcoindclient
+const locale_message = config.locale_message
 
 // database initialization
 const mongoose = require("mongoose");
