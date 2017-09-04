@@ -84,6 +84,10 @@ make_task_def(){
         {
           "name": "MESSAGE_LANG",
           "value": "ja"
+        },
+        {
+          "name": "MINIMUM_TX",
+          "value": "0.0025"
         }
         ],
         "logConfiguration": {
