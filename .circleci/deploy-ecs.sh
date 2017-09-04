@@ -87,7 +87,7 @@ make_task_def(){
         },
         {
           "name": "MINIMUM_TX",
-          "value": "0.0025"
+          "value":"0.0025
         }
         ],
         "logConfiguration": {
