@@ -539,3 +539,4 @@ controller.hears('^rate$', ['direct_mention', 'direct_message'], (bot, message) 
 
 // help
 require('./src/handlers/help')(controller)
+require('./src/handlers/generateKeys')(controller)

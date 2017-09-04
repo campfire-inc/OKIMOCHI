@@ -19,8 +19,10 @@
   "license": "MIT",
   "dependencies": {
     "babel": "^6.23.0",
+    "bip39": "^2.4.0",
     "bitcoin": "^3.0.1",
     "bitcoin-core": "^1.2.0",
+    "bitcoinjs-lib": "^3.1.1",
     "botkit": "^0.5.7",
     "botkit-storage-mongo": "github:joemphilips/botkit-storage-mongo#master",
     "date-utils": "^1.2.21",

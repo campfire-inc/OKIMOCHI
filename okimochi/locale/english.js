@@ -121,4 +121,12 @@ waiting for someone to deposit :)`,
     sent: "accepted! I will try to send Tx in a moment ... ",
     amountLessThanThreshold: `Sorry! Tx have to be bigger than ${config.minimumTxAmount}! wait until you gather more!`
   },
+  generateKeys: {
+    explain: 'generating yoru private key and corresponding address',
+    warn: `caution!: this is just helper for you playing with ${config.APP_NAME} ! be aware that you must generate your own private key in your safe environment if you want to make sure your wallet safe!`,
+    mnemonic: 'your bip39 mnemonic code for master private key',
+    base58: 'base58 of your master private key',
+    wif: 'WIF format for the same private key',
+    address: 'address generated from the private key above'
+  }
 }

@@ -86,6 +86,9 @@ module.exports = {
   ## を、チームごとに色分けして表示する。
   - ${config.APP_NAME} ranking
 
+  # (おまけ)実験用秘密鍵とアドレスの生成
+
+  - ${config.APP_NAME} generateKeys
 
   :bitcoin: や :okimochi: などのリアクションを押すと自動的に支払われるよ！
   反応するボタンは以下
@@ -144,4 +147,12 @@ module.exports = {
     amountLessThanThreshold: `トランザクションの最低金額は${config.minimumTxAmount}
 に設定されています！もう少し貯まるまで待ちましょう :) `
   },
+  generateKeys: {
+    explain: 'あなたの%sの秘密鍵とアドレスを生成します...',
+    warn: `注意！: この機能はあくまで${config.APP_NAME}の機能の実験用です！実際は手元で安全に生成した秘密鍵を利用してください！`,
+    mnemonic: 'あなたの秘密鍵のリカバリーコード',
+    base58: '秘密鍵のbase58エンコーディング',
+    wif: '秘密鍵のwifフォーマット',
+    address: '上の秘密鍵に対応するアドレス'
+  }
 }
