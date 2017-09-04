@@ -52,6 +52,7 @@ cp .env_example .env # modify .env with your own slack bot token
 | PLOTLY_API_KEY       | Plotlyの `API Key` を入力                                                                                          |
 | PLOTLY_API_USER      | Plotlyの `username` を入力                                                                                         |
 | MESSAGE_LANG         | 日本語と英語を用意。日本語は `ja` 、英語は `en`                                                                    |
+| MINIMUM_TX           | この値に達したらトランザクションを初めて発行する（支払いごとに発行しないのは、手数料節約のため）                   |
 
 - Docker環境の構築、dokcer-compose up（bitcoindの同期に約10時間程度必要）  
 ```

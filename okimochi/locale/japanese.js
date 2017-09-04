@@ -1,9 +1,12 @@
+// This module should not require config (to avoid circular dependency problem)
+
 const path = require('path');
 const util = require('util');
 const lib = require(path.join(__dirname, '..', 'src', 'lib'));
 const config = require(path.join(__dirname, '..', 'config'))
 
 const APP_NAME = process.env.APP_NAME || '@okimochi'
+const minimumTxAmount = process.env.MINIMUM_TX || 0.003
 
 const inSatoshi = lib.inSatoshi;
 const btc2jpy = lib.btc2jpy;
@@ -118,7 +121,7 @@ module.exports = {
 が、小額の支払いだったので、支払いはOKIMOCHI内で保留しています。
 \`${APP_NAME} register\` してあれば、保留している額が域値を超えた時に自動で発行されます。
 あなたの保留中の額は \`${APP_NAME} pendingBalance\` で確認できます。
-域値は${config.minimumTxAmount}です。
+域値は${minimumTxAmount}です。
   `,
   needMoreDeposit: `depositされた額が底をついたため、支払えません :(
 \`${APP_NAME} deposit\` でデポジットしてくれると嬉しいな :) `,
@@ -146,7 +149,7 @@ module.exports = {
     pasteAddress: "送金先ビットコインアドレスを貼り付けてください",
     successfulPayment: "送金しました！",
     sent: "送金を受け付けました。自動で送金を試みます。",
-    amountLessThanThreshold: `トランザクションの最低金額は${config.minimumTxAmount}
+    amountLessThanThreshold: `トランザクションの最低金額は${minimumTxAmount}
 に設定されています！もう少し貯まるまで待ちましょう :) `
   },
   generateKeys: {

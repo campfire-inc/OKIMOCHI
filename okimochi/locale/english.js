@@ -1,8 +1,11 @@
+// This module should not require config (to avoid circular dependency problem)
+
 const path = require('path');
 const lib = require(path.join(__dirname, '..', 'src', 'lib'));
 const config = require(path.join(__dirname, '..', 'config'));
 
 const APP_NAME = process.env.APP_NAME || '@okimochi'
+const minimumTxAmount = process.env.MINIMUM_TX || 0.003
 
 const inSatoshi = lib.inSatoshi;
 const btc2jpy = lib.btc2jpy;
@@ -92,7 +95,7 @@ module.exports = {
 pendingSmallTx: `you got tip from %s, amount is  %sBTC.
 It was too small amount to send Tx, so payment has been pending inside this bot.
 if you have been registered your address by \`${APP_NAME} register\`, this bot will automatically send Tx when your pendingBalance has exceed the threshold.
-The threshold is now set to ${config.minimumTxAmount}, and the pendingBalance can be seen by \`${APP_NAME} pendingBalance\` .
+The threshold is now set to ${minimumTxAmount}, and the pendingBalance can be seen by \`${APP_NAME} pendingBalance\` .
   `,
   needMoreDeposit: `There is no way to pay since OKIMOCHI is now empty :(
 waiting for someone to deposit :)`,
@@ -121,7 +124,7 @@ waiting for someone to deposit :)`,
     pasteAddress: "please paste your bitcoin address to send.",
     successfulPayment: 'sent!',
     sent: "accepted! I will try to send Tx in a moment ... ",
-    amountLessThanThreshold: `Sorry! Tx have to be bigger than ${config.minimumTxAmount}! wait until you gather more!`
+    amountLessThanThreshold: `Sorry! Tx have to be bigger than ${minimumTxAmount}! wait until you gather more!`
   },
   generateKeys: {
     explain: 'generating yoru private key and corresponding address',
