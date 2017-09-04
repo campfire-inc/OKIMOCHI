@@ -25,6 +25,9 @@ if (process.env.NODE_ENV === "development") {
 
 const SLACK_DEBUG = (process.env.NODE_ENV === "development") ? true : false
 
+let minimumTxAmount = process.env.MINIMUM_TX || 0.003
+minimumTxAmount = Number(minimumTxAmount)
+
 // import message object according to lang setting.
 const lang = process.env.MESSAGE_LANG || "en"
 
@@ -69,7 +72,7 @@ module.exports = {
   }),
 
   MAX_TIP_AMOUNT: 0.01,
-  minimumTxAmount: process.env.MINIMUM_TX || 0.003,
+  minimumTxAmount: minimumTxAmount,
 
   plotly: {
     api_key: process.env.PLOTLY_API_KEY,

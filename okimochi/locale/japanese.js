@@ -6,7 +6,8 @@ const lib = require(path.join(__dirname, '..', 'src', 'lib'));
 const config = require(path.join(__dirname, '..', 'config'))
 
 const APP_NAME = process.env.APP_NAME || '@okimochi'
-const minimumTxAmount = process.env.MINIMUM_TX || 0.003
+let minimumTxAmount = process.env.MINIMUM_TX || 0.003
+minimumTxAmount = Number(minimumTxAmount)
 
 const inSatoshi = lib.inSatoshi;
 const btc2jpy = lib.btc2jpy;
