@@ -1,6 +1,8 @@
 let mongoBaseUri
 const BitcoindClient = require('bitcoin-core');
 const network = process.env.BITCOIND_NETWORK || 'testnet';
+const bitcoinjs = require('bitcoinjs-lib')
+const bitcoinjsNetwork = network === 'mainnet' ? bitcoinjs.networks.mainnet : bitcoinjs.networks.testnet;
 
 if (process.env.MONGO_PORT_27017_TCP_ADDR){
   mongoBaseUri =  `mongodb://${process.env.MONGO_PORT_27017_TCP_ADDR}:27017/`
@@ -55,6 +57,7 @@ module.exports = {
 
   locale_message: locale_message,
 
+  bitcoinjsNetwork: bitcoinjsNetwork,
   btc_network: network,
   bitcoindclient: new BitcoindClient({
     network: network,
