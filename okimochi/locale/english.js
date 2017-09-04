@@ -123,7 +123,7 @@ waiting for someone to deposit :)`,
   },
   generateKeys: {
     explain: 'generating yoru private key and corresponding address',
-    warn: `caution!: this is just helper for you playing with ${config.APP_NAME} ! be aware that you must generate your own private key in your safe environment if you want to make sure your wallet safe!`,
+    warn: `caution!: this is just helper for you playing with $\`{config.APP_NAME}\` ! be aware that you must generate your own private key in your safe environment if you want to make sure your wallet safe!`,
     mnemonic: 'your bip39 mnemonic code for master private key',
     base58: 'base58 of your master private key',
     wif: 'WIF format for the same private key',
