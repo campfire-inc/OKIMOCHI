@@ -3,6 +3,8 @@ const util = require('util');
 const lib = require(path.join(__dirname, '..', 'src', 'lib'));
 const config = require(path.join(__dirname, '..', 'config'))
 
+const APP_NAME = process.env.APP_NAME || '@okimochi'
+
 const inSatoshi = lib.inSatoshi;
 const btc2jpy = lib.btc2jpy;
 
@@ -53,42 +55,42 @@ module.exports = {
   help: `
   \`\`\`
   # このhelpメッセージを表示
-  - ${config.APP_NAME} help
+  - ${APP_NAME} help
 
   # ビットコインをbotにデポジットするためのアドレスを表示
   ## （※ユーザーごとにデポジット額をカウントするので、自分で呼び出したアドレスに振り込むと良い）
-  - ${config.APP_NAME} deposit
+  - ${APP_NAME} deposit
 
   # 支払い保留中のビットコインの額を確認(registerすれば不要)
-  - ${config.APP_NAME} pendingBalance
+  - ${APP_NAME} pendingBalance
 
   # 支払い保留中のビットコインの引き出し(registerすれば不要)
-  - ${config.APP_NAME} withdraw
+  - ${APP_NAME} withdraw
 
   # 自身のアドレスの登録
   ## このコマンドの後にbotが振込先アドレスを聞いてくるので、貼り付けると自動で振り込まれる
   ## 改行を挟めば複数登録できるので多めに登録しておくと吉
-  - ${config.APP_NAME} register
+  - ${APP_NAME} register
 
   # depositされ、まだ誰にも支払われていない額の合計
-  - ${config.APP_NAME} totalBalance
+  - ${APP_NAME} totalBalance
 
   # 現在のBTC-JPYの換算レートを表示
-  - ${config.APP_NAME} rate
+  - ${APP_NAME} rate
 
   # 金額を指定してtip
   ## メッセージはなくても良い。（bitcoinのトランザクションメッセージになる）
-  - ${config.APP_NAME} tip @user <BTC amount> <message>
+  - ${APP_NAME} tip @user <BTC amount> <message>
 
   # ランキングの表示
   ## 1. このbotにデポジットした額
   ## 2. そこから受け取った額
   ## を、チームごとに色分けして表示する。
-  - ${config.APP_NAME} ranking
+  - ${APP_NAME} ranking
 
   # (おまけ)実験用秘密鍵とアドレスの生成
 
-  - ${config.APP_NAME} generateKeys
+  - ${APP_NAME} generateKeys
 
   :bitcoin: や :okimochi: などのリアクションを押すと自動的に支払われるよ！
   反応するボタンは以下
@@ -101,12 +103,12 @@ module.exports = {
   cannot_pay: `%sから%sBTCのOKIMOCHIをもらいました！` +
   `が、ビットコインアドレスを登録していないので、支払いはOKIMOCHI内で保留しています。
   ビットコインを本当にあなたのものにしたい場合は以下の手順を踏んでください。
-  1. \`${config.APP_NAME} pendingBalance \` で保留されているビットコインの額を確認
-  2. \`${config.APP_NAME} withdraw\` で自身のビットコインアドレスに送金
-  3. \`${config.APP_NAME} register\` でビットコインアドレスを登録することで、次回から自動でここに送金（任意）
+  1. \`${APP_NAME} pendingBalance \` で保留されているビットコインの額を確認
+  2. \`${APP_NAME} withdraw\` で自身のビットコインアドレスに送金
+  3. \`${APP_NAME} register\` でビットコインアドレスを登録することで、次回から自動でここに送金（任意）
     * \`register\` で登録する場合は、可能なら改行で区切って複数登録しておくことをお勧めします。
 
-  \`${config.APP_NAME} help\` でより詳しい情報が手に入ります。
+  \`${APP_NAME} help\` でより詳しい情報が手に入ります。
   `,
   allPaybackAddressUsed: `注意: registerされたアドレスが全て使用済みになりました。
   セキュリティ確保のため、アドレスはトランザクションごとに使い分けることが奨励されています。
@@ -114,12 +116,12 @@ module.exports = {
 `,
   pendingSmallTx: `%sから%sBTCのOKIMOCHIをもらいました！
 が、小額の支払いだったので、支払いはOKIMOCHI内で保留しています。
-\`${config.APP_NAME} register\` してあれば、保留している額が域値を超えた時に自動で発行されます。
-あなたの保留中の額は \`${config.APP_NAME} pendingBalance\` で確認できます。
+\`${APP_NAME} register\` してあれば、保留している額が域値を超えた時に自動で発行されます。
+あなたの保留中の額は \`${APP_NAME} pendingBalance\` で確認できます。
 域値は${config.minimumTxAmount}です。
   `,
   needMoreDeposit: `depositされた額が底をついたため、支払えません :(
-\`${config.APP_NAME} deposit\` でデポジットしてくれると嬉しいな :) `,
+\`${APP_NAME} deposit\` でデポジットしてくれると嬉しいな :) `,
   totalBalance: "壺に残っている額は現在%s BTCです。",
   ranking:{
     xaxis: "depositした量",
@@ -140,7 +142,7 @@ module.exports = {
     Ask: "いくら引き出しますか？",
     amountMustBeNumber: "BTCの額を半角数字で入力してください！",
     notEnoughPendingBalance: `あなたが引き出せる額を超えています！
-      最大額は \`${config.APP_NAME} pendingBalance\` で確認できます！`,
+      最大額は \`${APP_NAME} pendingBalance\` で確認できます！`,
     pasteAddress: "送金先ビットコインアドレスを貼り付けてください",
     successfulPayment: "送金しました！",
     sent: "送金を受け付けました。自動で送金を試みます。",
@@ -149,7 +151,7 @@ module.exports = {
   },
   generateKeys: {
     explain: 'あなたの%sの秘密鍵とアドレスを生成します...',
-    warn: `注意！: この機能はあくまで \`${config.APP_NAME}\` の機能の実験用です！実際は手元で安全に生成した秘密鍵を利用してください！`,
+    warn: `注意！: この機能はあくまで \`${APP_NAME}\` の機能の実験用です！実際は手元で安全に生成した秘密鍵を利用してください！`,
     mnemonic: 'あなたの秘密鍵のリカバリーコード',
     base58: '秘密鍵のbase58エンコーディング',
     wif: '秘密鍵のwifフォーマット',

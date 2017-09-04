@@ -2,6 +2,8 @@ const path = require('path');
 const lib = require(path.join(__dirname, '..', 'src', 'lib'));
 const config = require(path.join(__dirname, '..', 'config'));
 
+const APP_NAME = process.env.APP_NAME || '@okimochi'
+
 const inSatoshi = lib.inSatoshi;
 const btc2jpy = lib.btc2jpy;
 
@@ -41,28 +43,28 @@ module.exports = {
 
 
   # show this help
-  - ${config.APP_NAME} help
+  - ${APP_NAME} help
 
   # show @users bitcoin deposit address
-  - ${config.APP_NAME} deposit
+  - ${APP_NAME} deposit
 
   # show users received amount pending inside this bot.
-  - ${config.APP_NAME} pendingBalance
+  - ${APP_NAME} pendingBalance
 
   # withdrow from your pending balance.
-  - ${config.APP_NAME} withdrow
+  - ${APP_NAME} withdrow
 
   # register the address for getting paied automatically.
-  - ${config.APP_NAME} register
+  - ${APP_NAME} register
 
   # show BTC-JPY rate
-  - ${config.APP_NAME} rate
+  - ${APP_NAME} rate
 
   # tip intentionally ... message will be included as Tx message for bitcoin
-  - ${config.APP_NAME} tip @user <BTC amount> <message>
+  - ${APP_NAME} tip @user <BTC amount> <message>
 
   # show ranking for deposited amount and the amount payed to registered Address
-  - ${config.APP_NAME} ranking
+  - ${APP_NAME} ranking
 
   this bot will tip automatically when someone showed his gratitude by
   action button.
@@ -76,12 +78,12 @@ module.exports = {
   cannot_pay: `you got tip from %s. The amount is %s BTC.
   but you had no registered address, so the tip will be in \`pendingBalance\`,
   Please do the following!
-  1. check your \`pendingBalance\` by \`${config.APP_NAME} pendingBalance\`
-  2. withdraw your balance to your address by \`${config.APP_NAME} withdraw\`
-  3. (optional) register your own address by \`${config.APP_NAME} register\` to automatically pay to this address from next time.
+  1. check your \`pendingBalance\` by \`${APP_NAME} pendingBalance\`
+  2. withdraw your balance to your address by \`${APP_NAME} withdraw\`
+  3. (optional) register your own address by \`${APP_NAME} register\` to automatically pay to this address from next time.
     * It is possible to register multiple address by \`register\` by separating by \\\n
 
-  try \`${config.APP_NAME} help\` to see detailed info.
+  try \`${APP_NAME} help\` to see detailed info.
   `,
 
   allPaybackAddressUsed: "warning: all addresses has been used.\n" +
@@ -89,8 +91,8 @@ module.exports = {
       "Please register the new address for the sake of security! \n",
 pendingSmallTx: `you got tip from %s, amount is  %sBTC.
 It was too small amount to send Tx, so payment has been pending inside this bot.
-if you have been registered your address by \`${config.APP_NAME} register\`, this bot will automatically send Tx when your pendingBalance has exceed the threshold.
-The threshold is now set to ${config.minimumTxAmount}, and the pendingBalance can be seen by \`${config.APP_NAME} pendingBalance\` .
+if you have been registered your address by \`${APP_NAME} register\`, this bot will automatically send Tx when your pendingBalance has exceed the threshold.
+The threshold is now set to ${config.minimumTxAmount}, and the pendingBalance can be seen by \`${APP_NAME} pendingBalance\` .
   `,
   needMoreDeposit: `There is no way to pay since OKIMOCHI is now empty :(
 waiting for someone to deposit :)`,
@@ -115,7 +117,7 @@ waiting for someone to deposit :)`,
     Ask: "How much do you want to retrieve?",
     amountMustBeNumber: "amount must be Number (BTC) !",
     notEnoughPendingBalance: `you can'not withdraw more than your pending balance!
-  	please check it by \`${config.APP_NAME} pendingBalance\` `,
+  	please check it by \`${APP_NAME} pendingBalance\` `,
     pasteAddress: "please paste your bitcoin address to send.",
     successfulPayment: 'sent!',
     sent: "accepted! I will try to send Tx in a moment ... ",
@@ -123,7 +125,7 @@ waiting for someone to deposit :)`,
   },
   generateKeys: {
     explain: 'generating yoru private key and corresponding address',
-    warn: `caution!: this is just helper for you playing with $\`{config.APP_NAME}\` ! be aware that you must generate your own private key in your safe environment if you want to make sure your wallet safe!`,
+    warn: `caution!: this is just helper for you playing with $\`{APP_NAME}\` ! be aware that you must generate your own private key in your safe environment if you want to make sure your wallet safe!`,
     mnemonic: 'your bip39 mnemonic code for master private key',
     base58: 'base58 of your master private key',
     wif: 'WIF format for the same private key',
