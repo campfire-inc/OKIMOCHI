@@ -1,4 +1,4 @@
-
+'use strict'
 /**
  * function to mangae all payments done by this bot.
  * throws error when the bot has to reply to sender.

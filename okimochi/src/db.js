@@ -1,3 +1,4 @@
+'use strict'
 const config = require('../config')
 const debug = require('debug')
 const bitcoindclient = config.bitcoindclient
