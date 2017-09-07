@@ -10,7 +10,7 @@
 
 1. 送付の原資となるビットコインをメインウォレットに入金する（会社の福利厚生用の資金を纒めて入金するような形を想定しています）※ 原資となるビットコインは利用者の誰から入金されても同じウォレットに入金されます。
 2. 送付のトリガーとなる指定のスタンプや指定コマンドを入力して送金する。
-3. 一定のビットコインが貯まったら、指定した外部のビットコインウォレットへ引き出す。※その他の詳しい使い方はヘルプコマンドにて参照頂けます。  
+3. 一定のビットコインが貯まったら、指定した外部のビットコインウォレットへ引き出す。※その他の詳しい使い方はヘルプコマンドにて参照頂けます。
 
 ### 利用上の注意事項
 __このアプリケーションは各利用者の善意に基づいております。二人以上の利用者が結託した場合、メインウォレット内の資金を盗むことができます。（自分から自分に対する送金は不可だが、お互いに送金し合うことでメインウォレット内の資金を盗むことが可能）預け金の合計は小額にとどめ、信頼できる仲間内のチームで使用してください！__
@@ -18,16 +18,16 @@ __このアプリケーションは各利用者の善意に基づいておりま
 
 
 ## 導入方法
-- Slack Appsの作成/Webhook URLを発行  
-Slack AppsとWebhook URLを <a href="https://api.slack.com/app://api.slack.com/apps">slack API</a>にて作成  
-Slack <a href="https://slack.com/apps/manage/A0F7YS25R-bots">Botの管理ページ</a> からAdd Configurationをクリックし、 `API Token` を発行します。  
+- Slack Appsの作成/Webhook URLを発行
+Slack AppsとWebhook URLを <a href="https://api.slack.com/app://api.slack.com/apps">slack API</a>にて作成
+Slack <a href="https://slack.com/apps/manage/A0F7YS25R-bots">Botの管理ページ</a> からAdd Configurationをクリックし、 `API Token` を発行します。
 `Client ID` `Client Secret` `Verification Token` `Webhook URL` `API Token` をメモ
-- Protlyのアカウント作成・API keyの発行  
-ビットコインの獲得ランキングなどを図化するための作図アプリ <a href="https://plot.ly">Plotly</a> のアカウントを作成し、API Keyを発行する。  
+- Protlyのアカウント作成・API keyの発行
+ビットコインの獲得ランキングなどを図化するための作図アプリ <a href="https://plot.ly">Plotly</a> のアカウントを作成し、API Keyを発行する。
 `API Key` `username` をメモ
-- インフラ準備  
-- Gitをinstallし、Repositoryをclone  
-- 環境変数を更新  
+- インフラ準備
+- Gitをinstallし、Repositoryをclone
+- 環境変数を更新
 `.env_example`をコピーし、環境変数を設定
 
 ```
@@ -54,12 +54,12 @@ cp .env_example .env # modify .env with your own slack bot token
 | MESSAGE_LANG         | 日本語と英語を用意。日本語は `ja` 、英語は `en`                                                                    |
 | MINIMUM_TX           | この値に達したらトランザクションを初めて発行する（支払いごとに発行しないのは、手数料節約のため）                   |
 
-- Docker環境の構築、dokcer-compose up（bitcoindの同期に約10時間程度必要）  
+- Docker環境の構築、dokcer-compose up（bitcoindの同期に約10時間程度必要）
 ```
 docker network create -d bridge --subnet 172.0.0.0/24 --gateway 172.0.0.1 okimochi-network
-COMPOSE_HTTP_TIMEOUT=45000 docker-compose up —build
+COMPOSE_HTTP_TIMEOUT=45000 docker-compose up --build
 ```
-- 稼働確認  
+- 稼働確認
 ```
 # Slack チャンネルにて@okimochiを招待
 /invite @okimochi
@@ -88,7 +88,7 @@ COMPOSE_HTTP_TIMEOUT=45000 docker-compose up —build
 
 ## CAMPFIREでの試験導入結果
 CAMPFIREでは社内における試験を実施し、1週間で約100件の「OKIMOCHI」が送られました。
-試験概要は以下の通りです。  
+試験概要は以下の通りです。
 - 試験期間 : 2017年7月25日 〜 2017年8月11日
 - 参加従業員数 : 約40名
 - tip数（トランザクション数）：200件
@@ -97,7 +97,7 @@ CAMPFIREでは社内における試験を実施し、1週間で約100件の「OK
 
 ## 開発への参加方法
 ソースコードのコメント、GitHub のイシューやプルリクエストでは、日本語か英語を使用して下さい。
-- ローカルでのセットアップ  
+- ローカルでのセットアップ
 ```
 cp .env_example .env
 # 環境変数を設定後
@@ -106,8 +106,8 @@ docker-compose up -d bitcoind mongo # アプリの後ろで走るコンテナを
 # bitcoindの初回同期にはかなり時間がかかるので、同期状況を見たい場合は-dオプションなしでフォアグラウンドでの実行をおすすめします。
 COMPOSE_HTTP_TIMEOUT=45000 docker-compose up --build okimochi # アプリ本体を立ち上げる
 ```
-- 今後の想定ToDo  
-作者側で想定しているToDoは、以下となります。  
+- 今後の想定ToDo
+作者側で想定しているToDoは、以下となります。
 [TODO](https://github.com/campfire-inc/OKIMOCHI/issues/1)
 
 ### テストの実行
