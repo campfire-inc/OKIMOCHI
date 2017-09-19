@@ -93,7 +93,7 @@ function PromiseGetAllUserPayback(UserModel){
     UserModel.find({}, ["id", "totalPaybacked"], { sort: { 'id': 1 }}, (err, contents) => {
       if (err) reject(err);
       let result = [];
-      for (c of contents){
+      for (let c of contents){
         result.push(c.toObject().totalPaybacked)
       }
       resolve(result);
@@ -108,7 +108,9 @@ function PromiseGetAllUserPayback(UserModel){
  * */
 module.exports.promisegetPendingSum = async function promisegetPendingSum(UserModel){
   const PendingList = await PromiseGetAllUserPayback(UserModel);
-  return PendingList.reduce((a, b) => a + b, 0);
+  const res = PendingList.reduce((a, b) => a + b, 0);
+  console.log('res are', res)
+  return res
 }
 
 module.exports.User = User

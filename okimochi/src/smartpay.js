@@ -31,11 +31,7 @@ function extractUnusedAddress(userContent){
     address = paybackAddresses.pop().address
   } else {
     addressIndex = paybackAddresses.findIndex((e) => !e.used)
-    debug(addressIndex)
     address = paybackAddresses[addressIndex].address
-    debug(userContent)
-    console.log("\n\n\n\n")
-    debug(addressIndex)
     userContent.paybackAddresses[addressIndex].used = true;
   }
   replyMessage += "Sending Tx to " + address + "\n"
@@ -57,8 +53,14 @@ module.exports = async function smartPay(fromUserID, toUserID, amount, Txmessage
     throw new Error("tried to send to yourself!");
   }
 
-  const pendingSum = await promisegetPendingSum(UserModel);
-  const totalBitcoindBalance = await bitcoindclient.getBalance();
+  let pendingSum;
+  let totalBitcoindBalance;
+  try {
+    pendingSum = await promisegetPendingSum(UserModel);
+    totalBitcoindBalance = await bitcoindclient.getBalance();
+  } catch (e) {
+    throw e
+  }
   if (totalBitcoindBalance - pendingSum < amount){
     throw new Error(locale_message.needMoreDeposit);
   };

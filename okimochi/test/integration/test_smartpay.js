@@ -1,5 +1,5 @@
 const smartPay = require('../../src/smartpay')
-const { UserSchema } = require('../../src/db')
+const { UserSchema, PromiseSetAddressToUser } = require('../../src/db')
 const Mongoose = require('mongoose').Mongoose
 const mongoose = new Mongoose()
 const config = require("../../config")
@@ -22,7 +22,7 @@ describe('smartPay', () => {
 
   describe('When depisited balance is zero', () => {
     it('throws error when deposited balance are zero.', (done) => {
-      smartPay("@FROMUSERID", "@TOUSERID", 0.001, "test message", testUser)
+      smartPay("FROMUSERID", "TOUSERID", 0.001, "test message", testUser)
         .then(failTest)
         .catch((err) => done())
     })
@@ -37,9 +37,9 @@ describe('smartPay', () => {
     })
 
     it('creates a new user with Pendging Balance when paying for the first time .', (done) => {
-      smartPay("@FROMUSERID", "@TOUSERID", 0.001, "test message", testUser)
+      smartPay("FROMUSERID", "TOUSERID", 0.001, "test message", testUser)
         .then((retMessage) => {
-          testUser.findOne({id: '@TOUSERID'}, (err, content) => {
+          testUser.findOne({id: 'TOUSERID'}, (err, content) => {
             if (err) {throw err};
             assert.equal(content.pendingBalance, 0.001)
             done()
@@ -48,5 +48,32 @@ describe('smartPay', () => {
         .catch((err) => {throw err})
     })
 
+    describe('when the receiver has registered address', () => {
+      before((done) => {
+        PromiseSetAddressToUser('TOUSERID2', 'mufX2qkNPLFWXSrXha9uEK94rTwJKV6mA9', testUser)
+          .then(() => {done()})
+          .catch((err) => {throw err})
+      })
+
+      it('will send Tx to address when has enough balance', () => {
+        return smartPay("FROMUSERID", "TOUSERID2", 0.9, "test message", testUser)
+          .then((retMessage) => {
+            console.log('retMessage is', retMessage)
+            testUser.findOne({id: 'TOUSERID2'}, (err, content) => {
+              if (err) {throw err};
+              assert.equal(content.pendingBalance, 0)
+            })
+          })
+          .catch((err) => {throw err})
+      })
+
+    })
+
   })
+
+  after((done) => {
+    mongoose.connection.db.dropDatabase(() => {
+      mongoose.connection.close(done);
+    });
+  });
 })
