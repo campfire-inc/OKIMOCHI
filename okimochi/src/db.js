@@ -4,6 +4,11 @@ const debug = require('debug')
 const bitcoindclient = config.bitcoindclient
 const locale_message = config.locale_message
 
+process.on('unhandledRejection', (reason, p) => {
+  console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
+  // application specific logging, throwing an error, or other logic here
+});
+
 // database initialization
 const mongoose = require("mongoose");
 mongoose.Promise = global.Promise
