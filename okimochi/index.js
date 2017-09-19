@@ -10,7 +10,7 @@ const path = require('path');
 const util = require('util');
 const MyConvos = require(path.join(__dirname, "src", "conversations"))
 const getRateJPY = require(path.join(__dirname, "src", "lib")).getRateJPY
-const { User, PromiseSetAddressToUser } = require(path.join(__dirname, 'src', 'db'))
+const { User, PromiseSetAddressToUser, promisegetPendingSum } = require(path.join(__dirname, 'src', 'db'))
 const smartPay = require(path.join(__dirname, 'src', 'smartpay'))
 
 
@@ -59,19 +59,6 @@ function PromiseGetAllUsersDeposit(){
   })
 }
 
-
-function PromiseGetAllUserPayback(userinfos){
-  return new Promise((resolve, reject) => {
-    User.find({}, ["id", "totalPaybacked"], { sort: { 'id': 1 }}, (err, contents) => {
-      if (err) reject(err);
-      let result = [];
-      for (c of contents){
-        result.push(c.toObject().totalPaybacked)
-      }
-      resolve(result);
-    })
-  })
-}
 
 function makeTraceForPlotly(userinfo, hue){
   debug("makeing trace from", userinfo)
@@ -374,15 +361,6 @@ controller.on(['reaction_added'], (bot, message) => {
 })
 
 
-/**
- * Promise to return the total amount of pendingBalance
- * for all users
- * */
-async function promisegetPendingSum(){
-  const PendingList = await PromiseGetAllUserPayback();
-  return PendingList.reduce((a, b) => a + b, 0);
-}
-
 
 function PromiseOpenPrivateChannel(user){
   return new Promise((resolve,reject) => {
@@ -440,7 +418,7 @@ controller.hears(`pendingBalance`, ["direct_mention", "direct_message"], (bot, m
 
 // show total balance
 controller.hears(`totalBalance`, ["direct_mention", "direct_message"], (bot, message) => {
-  Promise.all([promisegetPendingSum(), bitcoindclient.getBalance()])
+  Promise.all([promisegetPendingSum(User), bitcoindclient.getBalance()])
     .then((sums) => sums[1] - sums[0])
     .then((balance) => bot.reply(message, util.format(locale_message.totalBalance, balance)))
 })

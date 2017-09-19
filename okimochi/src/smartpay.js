@@ -1,10 +1,19 @@
 'use strict'
+
+const config = require('../config')
+const bitcoindclient = config.bitcoindclient
+const locale_message = config.locale_message
+const debug = require('debug')
+const util = require('util')
+const { promisegetPendingSum } = require('./db')
+
+
 /**
  * function to mangae all payments done by this bot.
  * throws error when the bot has to reply to sender.
  * returns string when the bot has to reply to receiver
  */
-module.exports = async function smartPay(fromUserID, toUserID, amount, Txmessage) {
+module.exports = async function smartPay(fromUserID, toUserID, amount, Txmessage, UserModel) {
   debug("paying from ", fromUserID);
   debug("paying to ", toUserID);
 
@@ -13,21 +22,21 @@ module.exports = async function smartPay(fromUserID, toUserID, amount, Txmessage
     throw new Error("tried to send to yourself!");
   }
 
-  const pendingSum = await promisegetPendingSum();
+  const pendingSum = await promisegetPendingSum(UserModel);
   const totalBitcoindBalance = await bitcoindclient.getBalance();
   if (totalBitcoindBalance - pendingSum < amount){
     throw new Error(locale_message.needMoreDeposit);
   };
 
   let returnMessage = "";
-  toUserContent = await User.findOneAndUpdate({id: toUserID},
+  toUserContent = await UserModel.findOneAndUpdate({id: toUserID},
     {id: toUserID},
     { upsert: true, runValidators: true, new: true, setDefaultsOnInsert: true})
 
   // check if all paybackAddresses has been used.
   let [address, updatedContent, replyMessage] =
     extractUnusedAddress(toUserContent);
-  logger.debug("result of extractUnusedAddress was ", address, updatedContent, replyMessage);
+  debug("result of extractUnusedAddress was ", address, updatedContent, replyMessage);
 
   // pend payment when there is no registered address.
   if (!address || amount + toUserContent.pendingBalance < config.minimumTxAmount){

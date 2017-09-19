@@ -87,6 +87,30 @@ function PromiseSetAddressToUser(userId, address, UserModel){
   })
 }
 
+
+function PromiseGetAllUserPayback(UserModel){
+  return new Promise((resolve, reject) => {
+    UserModel.find({}, ["id", "totalPaybacked"], { sort: { 'id': 1 }}, (err, contents) => {
+      if (err) reject(err);
+      let result = [];
+      for (c of contents){
+        result.push(c.toObject().totalPaybacked)
+      }
+      resolve(result);
+    })
+  })
+}
+
+
+/**
+ * Promise to return the total amount of pendingBalance
+ * for all users
+ * */
+module.exports.promisegetPendingSum = async function promisegetPendingSum(UserModel){
+  const PendingList = await PromiseGetAllUserPayback(UserModel);
+  return PendingList.reduce((a, b) => a + b, 0);
+}
+
 module.exports.User = User
 module.exports.UserSchema = UserSchema
 module.exports.PromiseSetAddressToUser = PromiseSetAddressToUser
