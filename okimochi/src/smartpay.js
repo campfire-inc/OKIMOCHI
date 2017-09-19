@@ -5,7 +5,42 @@ const bitcoindclient = config.bitcoindclient
 const locale_message = config.locale_message
 const debug = require('debug')
 const util = require('util')
+const lib = require('./lib')
+const formatUser = lib.formatUser
 const { promisegetPendingSum } = require('./db')
+
+
+/**
+ * from users information. choose unused paybackAddress Preferentially.
+ * And mark that Address as "used". and returns updated info and address to use.
+ * @param {Object} userContent
+ * @return {Array}
+ *  1. first is the address for using as paying back tx.(null if no address registered.)
+ *  2. Second is updated user info.
+ *  3. And third is String for bot to speak
+ */
+function extractUnusedAddress(userContent){
+  let paybackAddresses = userContent.paybackAddresses
+  let address;
+  let replyMessage = "";
+  let addressIndex;
+  if (!paybackAddresses || paybackAddresses.length === 0){
+    address = null
+  } else if (paybackAddresses.every((a) => a.used)){
+    replyMessage += locale_message.allPaybackAddressUsed
+    address = paybackAddresses.pop().address
+  } else {
+    addressIndex = paybackAddresses.findIndex((e) => !e.used)
+    debug(addressIndex)
+    address = paybackAddresses[addressIndex].address
+    debug(userContent)
+    console.log("\n\n\n\n")
+    debug(addressIndex)
+    userContent.paybackAddresses[addressIndex].used = true;
+  }
+  replyMessage += "Sending Tx to " + address + "\n"
+  return [address, userContent, replyMessage];
+}
 
 
 /**
@@ -29,7 +64,7 @@ module.exports = async function smartPay(fromUserID, toUserID, amount, Txmessage
   };
 
   let returnMessage = "";
-  toUserContent = await UserModel.findOneAndUpdate({id: toUserID},
+  const toUserContent = await UserModel.findOneAndUpdate({id: toUserID},
     {id: toUserID},
     { upsert: true, runValidators: true, new: true, setDefaultsOnInsert: true})
 
@@ -42,7 +77,7 @@ module.exports = async function smartPay(fromUserID, toUserID, amount, Txmessage
   if (!address || amount + toUserContent.pendingBalance < config.minimumTxAmount){
     toUserContent.pendingBalance = toUserContent.pendingBalance + amount;
     toUserContent.totalPaybacked += amount
-    toUserContent.save()
+    await toUserContent.save()
     if (!address){
       return util.format(locale_message.cannot_pay, formatUser(fromUserID), amount)
     } else if (amount < config.minimumTxAmount) {

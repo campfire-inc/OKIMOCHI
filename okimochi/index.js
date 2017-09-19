@@ -9,7 +9,9 @@ const fs = require('fs');
 const path = require('path');
 const util = require('util');
 const MyConvos = require(path.join(__dirname, "src", "conversations"))
-const getRateJPY = require(path.join(__dirname, "src", "lib")).getRateJPY
+const lib = require(path.join(__dirname, "src", "lib"))
+const getRateJPY = lib.getRateJPY
+const formatUser = lib.formatUser
 const { User, PromiseSetAddressToUser, promisegetPendingSum } = require(path.join(__dirname, 'src', 'db'))
 const smartPay = require(path.join(__dirname, 'src', 'smartpay'))
 
@@ -124,38 +126,6 @@ async function PromisePlotRankingChart(){
   })
 }
 
-/**
- * from users information. choose unused paybackAddress Preferentially.
- * And mark that Address as "used". and returns updated info and address to use.
- * @param {Object} userContent
- * @return {Array}
- *  1. first is the address for using as paying back tx.(null if no address registered.)
- *  2. Second is updated user info.
- *  3. And third is String for bot to speak
- */
-function extractUnusedAddress(userContent){
-  let paybackAddresses = userContent.paybackAddresses
-  let address;
-  let replyMessage = "";
-  let addressIndex;
-  if (!paybackAddresses || paybackAddresses.length === 0){
-    address = null
-  } else if (paybackAddresses.every((a) => a.used)){
-    replyMessage += locale_message.allPaybackAddressUsed
-    address = paybackAddresses.pop().address
-  } else {
-    addressIndex = paybackAddresses.findIndex((e) => !e.used)
-    debug(addressIndex)
-    address = paybackAddresses[addressIndex].address
-    debug(userContent)
-    console.log("\n\n\n\n")
-    debug(addressIndex)
-    userContent.paybackAddresses[addressIndex].used = true;
-  }
-  replyMessage += "Sending Tx to " + address + "\n"
-  return [address, userContent, replyMessage];
-}
-
 
 function PromiseFindUser(userid){
   return new Promise((resolve, reject) => {
@@ -216,7 +186,6 @@ function PromisegetUserBalance(userid){
 const message_to_BTC_map = locale_message.message_to_BTC_map;
 const thxMessages = Object.keys(message_to_BTC_map);
 const userIdPattern = /<@([A-Z\d]+)>/ig;
-const formatUser = (user) => `<@${user}>`
 const amountPattern = /([\d\.]*)/ig;
 
 
