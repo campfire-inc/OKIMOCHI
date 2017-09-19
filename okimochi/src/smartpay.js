@@ -47,6 +47,8 @@ function extractUnusedAddress(userContent){
 module.exports = async function smartPay(fromUserID, toUserID, amount, Txmessage, UserModel) {
   debug("paying from ", fromUserID);
   debug("paying to ", toUserID);
+  amount = amount.toFixed(8) // since 1 satoshi is the smallest amount bitcoind can recognize
+  console.log('amount is ', amount)
 
   // can not pay to yourself
   if (fromUserID === toUserID){
@@ -77,16 +79,16 @@ module.exports = async function smartPay(fromUserID, toUserID, amount, Txmessage
 
   // pend payment when there is no registered address.
   if (!address || amount + toUserContent.pendingBalance < config.minimumTxAmount){
-    toUserContent.pendingBalance = toUserContent.pendingBalance + amount;
-    toUserContent.totalPaybacked += amount
-    await toUserContent.save()
+    toUserContent.pendingBalance = Number(toUserContent.pendingBalance) + amount;
+    toUserContent.totalPaybacked = toUserContent.totalPaybacked + amount
+    await toUserContent.save((err) => {if (err) throw err;})
     if (!address){
       return util.format(locale_message.cannot_pay, formatUser(fromUserID), amount)
     } else if (amount < config.minimumTxAmount) {
       return util.format(locale_message.pendingSmallTx, formatUser(fromUserID), amount)
     }
   } else {
-    const amountToPay = amount + Number(toUserContent.pendingBalance)
+    const amountToPay = Number(amount + Number(toUserContent.pendingBalance)).toFixed(8)
     debug("going to pay to " + address);
     debug("of user " + updatedContent);
 
@@ -97,9 +99,9 @@ module.exports = async function smartPay(fromUserID, toUserID, amount, Txmessage
     } catch (e) {
       throw e
     }
-    updatedContent.totalPaybacked += amount
-    updatedContent.pendingBlance -= amountToPay
-    updatedContent.save()
+    updatedContent.totalPaybacked = updatedContent.totalPaybacked + amount
+    updatedContent.pendingBlance = updatedContent.totalPaybacked - amountToPay
+    updatedContent.save((err) => {if (err) throw err;})
     return returnMessage
   }
 }

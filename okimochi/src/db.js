@@ -30,7 +30,7 @@ const BTCaddressValidator = {
           if (res.isvalid) {
             resolve(true)
          } else {
-           reject(false)
+           resolve(false)
          }
       })
     })
@@ -114,7 +114,6 @@ function PromiseGetAllUserPayback(UserModel){
 module.exports.promisegetPendingSum = async function promisegetPendingSum(UserModel){
   const PendingList = await PromiseGetAllUserPayback(UserModel);
   const res = PendingList.reduce((a, b) => a + b, 0);
-  console.log('res are', res)
   return res
 }
 

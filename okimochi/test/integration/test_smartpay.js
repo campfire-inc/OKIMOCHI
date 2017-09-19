@@ -62,11 +62,23 @@ describe('smartPay', () => {
             testUser.findOne({id: 'TOUSERID2'}, (err, content) => {
               if (err) {throw err};
               assert.equal(content.pendingBalance, 0)
+              assert.equal(bitcoindclient.getReceivedByAddress('mufX2qkNPLFWXSrXha9uEK94rTwJKV6mA9'), 0.9)
             })
           })
           .catch((err) => {throw err})
       })
 
+      it('can pay even when precision is too small', () => {
+       return smartPay('FROMUSERID', 'TOUSERID2', 0.99999999999999999, 'test message',testUser)
+          .then((retMessage) => {
+            console.log('retMessage is', retMessage)
+            testUser.findOne({id: 'TOUSERID2'}, (err, content) => {
+              if (err) {throw err};
+              assert.equal(content.pendingBalance, 0)
+            })
+          })
+        .catch((err) => {throw err})
+      })
     })
 
   })
