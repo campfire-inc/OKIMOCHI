@@ -28,9 +28,9 @@ const BTCaddressValidator = {
       bitcoindclient.validateAddress(v)
         .then((res) => {
           if (res.isvalid) {
-            resolve(false)
+            resolve(true)
          } else {
-           reject()
+           reject(false)
          }
       })
     })
