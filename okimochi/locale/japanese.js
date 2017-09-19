@@ -1,9 +1,9 @@
+
 // This module should not require config (to avoid circular dependency problem)
 
 const path = require('path');
 const util = require('util');
 const lib = require(path.join(__dirname, '..', 'src', 'lib'));
-const config = require(path.join(__dirname, '..', 'config'))
 
 const APP_NAME = process.env.APP_NAME || '@okimochi'
 let minimumTxAmount = process.env.MINIMUM_TX || 0.003

@@ -1,3 +1,4 @@
+'use strict'
 const winston = require("winston");
 
 const logLevel = (process.env.NODE_ENV === "development") ? 'debug' : 'info';

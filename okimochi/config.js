@@ -1,3 +1,4 @@
+'use strict'
 let mongoBaseUri
 const BitcoindClient = require('bitcoin-core');
 const network = process.env.BITCOIND_NETWORK || 'testnet';

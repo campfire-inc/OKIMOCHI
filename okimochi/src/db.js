@@ -1,7 +1,13 @@
+'use strict'
 const config = require('../config')
 const debug = require('debug')
 const bitcoindclient = config.bitcoindclient
 const locale_message = config.locale_message
+
+process.on('unhandledRejection', (reason, p) => {
+  console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
+  // application specific logging, throwing an error, or other logic here
+});
 
 // database initialization
 const mongoose = require("mongoose");
@@ -22,9 +28,9 @@ const BTCaddressValidator = {
       bitcoindclient.validateAddress(v)
         .then((res) => {
           if (res.isvalid) {
-            resolve(false)
+            resolve(true)
          } else {
-           reject()
+           resolve(false)
          }
       })
     })
@@ -84,6 +90,31 @@ function PromiseSetAddressToUser(userId, address, UserModel){
       }
     })
   })
+}
+
+
+function PromiseGetAllUserPayback(UserModel){
+  return new Promise((resolve, reject) => {
+    UserModel.find({}, ["id", "totalPaybacked"], { sort: { 'id': 1 }}, (err, contents) => {
+      if (err) reject(err);
+      let result = [];
+      for (let c of contents){
+        result.push(c.toObject().totalPaybacked)
+      }
+      resolve(result);
+    })
+  })
+}
+
+
+/**
+ * Promise to return the total amount of pendingBalance
+ * for all users
+ * */
+module.exports.promisegetPendingSum = async function promisegetPendingSum(UserModel){
+  const PendingList = await PromiseGetAllUserPayback(UserModel);
+  const res = PendingList.reduce((a, b) => a + b, 0);
+  return res
 }
 
 module.exports.User = User

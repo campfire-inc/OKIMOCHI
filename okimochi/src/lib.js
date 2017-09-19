@@ -1,8 +1,11 @@
+'use strict'
 const moment = require('moment');
 const sync_request = require('sync-request');
 
 let lastRequestTime = moment().unix()
 let responseCache;
+
+const formatUser = (user) => `<@${user}>`
 
 function getRateJPY() {
   const rate_api_url = 'https://coincheck.com/api/exchange/orders/rate?order_type=buy&pair=btc_jpy&amount=1';
@@ -44,6 +47,7 @@ module.exports = { getRateJPY: getRateJPY,
                    jpy2btc: jpy2btc,
                    btc2jpy: btc2jpy,
                    inBTC: inBTC,
-                   inSatoshi: inSatoshi
+                   inSatoshi: inSatoshi,
+                   formatUser: formatUser
 }
 
