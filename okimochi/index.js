@@ -84,13 +84,14 @@ function makeTraceForPlotly(userinfo, hue){
 
 
 async function PromisePlotRankingChart(){
-  let x;
+  let userinfos;
   try {
     userinfos = await PromiseGetAllUsersDeposit()
   } catch(e) {
     throw e
   }
 
+  let u;
   let data = [];
   for (u of userinfos){
     data.push(makeTraceForPlotly(u));
