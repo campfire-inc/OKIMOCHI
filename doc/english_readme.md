@@ -39,6 +39,14 @@ and run
 docker-compose up --build mongo okimochi
 ```
 
+<<<<<<< Updated upstream
+=======
+## how to run test.
+
+`./test.sh` for running test.
+test suite is far from complete and may contain bugs. We appreciate for PR adding new tests.
+
+>>>>>>> Stashed changes
 ## How to contribute
 
 see [TODO](https://github.com/campfire-inc/OKIMOCHI/issues/1)
