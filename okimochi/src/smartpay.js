@@ -61,6 +61,15 @@ module.exports = async function smartPay(fromUserID, toUserID, amount, Txmessage
     pendingSum = await promisegetPendingSum(UserModel);
     totalBitcoindBalance = await bitcoindclient.getBalance();
   } catch (e) {
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+    console.log(e)
+>>>>>>> 6b143f2... fixup! WIP: add new testcase
+=======
+    console.log(e)
+    console.log("pendingSum and totalBitcoindBalance are", pendingSum, totalBitcoindBalance)
+>>>>>>> 1c780e0... fix bug
     throw e
   }
   if (totalBitcoindBalance - pendingSum < amount){
@@ -75,22 +84,29 @@ module.exports = async function smartPay(fromUserID, toUserID, amount, Txmessage
   // check if all paybackAddresses has been used.
   let [address, updatedContent, replyMessage] =
     extractUnusedAddress(toUserContent);
-  debug("result of extractUnusedAddress was ", address, updatedContent, replyMessage);
+  console.log("result of extractUnusedAddress was ", address, updatedContent, replyMessage);
 
-  // pend payment when there is no registered address.
+  // pend payment when it does not satisfy condifitons
   if (!address || amount + toUserContent.pendingBalance < config.minimumTxAmount){
+    console.log("not going to send Tx")
     toUserContent.pendingBalance = Number(toUserContent.pendingBalance) + amount;
     toUserContent.totalPaybacked = toUserContent.totalPaybacked + amount
     await toUserContent.save((err) => {if (err) throw err;})
     if (!address){
+      console.log("because there were no address registered")
       return util.format(locale_message.cannot_pay, formatUser(fromUserID), amount)
-    } else if (amount < config.minimumTxAmount) {
+    } else if (amount + toUserContent.pendingBalance < config.minimumTxAmount) {
+      console.log("because amount to send is less than minimumTxAmount")
       return util.format(locale_message.pendingSmallTx, formatUser(fromUserID), amount)
+    } else {
+      throw new Error("unreachable!")
     }
+
+  // when it satisfies the criteria to send Tx.
   } else {
     const amountToPay = Number(amount + Number(toUserContent.pendingBalance)).toFixed(8)
-    debug("going to pay to " + address);
-    debug("of user " + updatedContent);
+    console.log("going to send Tx to " + address);
+    console.log("of user " + updatedContent);
 
     returnMessage = replyMessage +
       " payed to " + formatUser(toUserID)

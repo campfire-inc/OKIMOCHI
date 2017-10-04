@@ -308,7 +308,7 @@ controller.on(['reaction_added'], (bot, message) => {
 
     // 支払い
     const amount = message_to_BTC_map[emoji]
-    smartPay(message.user, message.item_user, amount, emoji)
+    smartPay(message.user, message.item_user, amount, emoji, User)
       .then((msg) => {
         PromiseOpenPrivateChannel(message.item_user)
           .then((channel) => {
@@ -358,7 +358,7 @@ controller.hears(`tip ${userIdPattern.source} ${amountPattern.source}(.*)`, ["di
   if (message.user === toPayUser){
     return bot.reply(message, "can not pay to your self !!")
   }
-  smartPay(message.user, toPayUser, amount, Txmessage)
+  smartPay(message.user, toPayUser, amount, Txmessage, User)
     .then((msg) => {
       PromiseOpenPrivateChannel(toPayUser)
         .then((channel) => {
