@@ -150,7 +150,7 @@ make_task_def(){
     volume_def='[
     {
       "host": {
-        "sourcePath": "/daba/db"
+        "sourcePath": "/daba/okimochi_db2"
       },
       "name": "userdb"
     }
