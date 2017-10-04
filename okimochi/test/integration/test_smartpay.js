@@ -79,6 +79,17 @@ describe('smartPay', () => {
           })
         .catch((err) => {throw err})
       })
+
+      it('will save to pendingBalance of the receiver when payment is small.', () => {
+        return smartPay('FROMUSERID', 'TOUSERID3', 0.0000001, 'test message', testUser)
+          .then((retmessage) => {
+            testUser.findOne({id: 'TOUSERID3'}, (err, content) => {
+              if (err) {throw err};
+              assert.equal(content.pendingBalance, 0.0000001)
+            })
+          })
+        .catch((err) => {throw err})
+      })
     })
 
   })
