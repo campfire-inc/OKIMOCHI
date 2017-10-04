@@ -61,15 +61,8 @@ module.exports = async function smartPay(fromUserID, toUserID, amount, Txmessage
     pendingSum = await promisegetPendingSum(UserModel);
     totalBitcoindBalance = await bitcoindclient.getBalance();
   } catch (e) {
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-    console.log(e)
->>>>>>> 6b143f2... fixup! WIP: add new testcase
-=======
     console.log(e)
     console.log("pendingSum and totalBitcoindBalance are", pendingSum, totalBitcoindBalance)
->>>>>>> 1c780e0... fix bug
     throw e
   }
   if (totalBitcoindBalance - pendingSum < amount){
