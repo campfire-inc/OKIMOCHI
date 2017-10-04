@@ -118,7 +118,7 @@ make_task_def(){
         "essential": true,
         "entryPoint": [
           "mongod",
-          "--dbpath=/data/okimochi_db2"
+          "--dbpath=/data/db"
         ],
         "mountPoints": [
           {
