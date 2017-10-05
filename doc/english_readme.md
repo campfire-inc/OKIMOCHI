@@ -7,8 +7,7 @@ OKIMOCHI stands for *gratitude* in japanese.
 This bot is still in alpha state, use as your own responsibility.
 
 Especially be careful to use only in trusted members since it is possible to steal almost whole deposited balance
-if more than two people have conspired.
-So it is recommended to not deposit too much amount at once.
+if more than two people have conspired.  So it is recommended to not deposit too much amount at once.
 
 ## What is it?
 
@@ -60,5 +59,4 @@ test suite is far from complete and may contain bugs. We appreciate for PR addin
 
 ## How to contribute
 
-see [TODO](https://github.com/campfire-inc/OKIMOCHI/issues/1)
-and give a PR to develop branch.
+see [TODO](https://github.com/campfire-inc/OKIMOCHI/issues/22) if you are looking for something thing to hack.
