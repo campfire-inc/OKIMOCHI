@@ -47,7 +47,7 @@ function extractUnusedAddress(userContent){
 module.exports = async function smartPay(fromUserID, toUserID, amount, Txmessage, UserModel) {
   debug("paying from ", fromUserID);
   debug("paying to ", toUserID);
-  amount = amount.toFixed(8) // since 1 satoshi is the smallest amount bitcoind can recognize
+  amount = Number(amount.toFixed(8)) // since 1 satoshi is the smallest amount bitcoind can recognize
   console.log('amount is ', amount)
 
   // can not pay to yourself
@@ -65,7 +65,8 @@ module.exports = async function smartPay(fromUserID, toUserID, amount, Txmessage
     console.log("pendingSum and totalBitcoindBalance are", pendingSum, totalBitcoindBalance)
     throw e
   }
-  if (totalBitcoindBalance - pendingSum < amount){
+  const ableToPayInPot = totalBitcoindBalance - pendingSum
+  if (ableToPayInPot < amount){
     throw new Error(locale_message.needMoreDeposit);
   };
 
@@ -82,9 +83,10 @@ module.exports = async function smartPay(fromUserID, toUserID, amount, Txmessage
   // pend payment when it does not satisfy condifitons
   if (!address || amount + toUserContent.pendingBalance < config.minimumTxAmount){
     console.log("not going to send Tx")
-    toUserContent.pendingBalance = Number(toUserContent.pendingBalance) + amount;
+    toUserContent.pendingBalance = toUserContent.pendingBalance + amount;
     toUserContent.totalPaybacked = toUserContent.totalPaybacked + amount
-    await toUserContent.save((err) => {if (err) throw err;})
+    await toUserContent.save()
+
     if (!address){
       console.log("because there were no address registered")
       return util.format(locale_message.cannot_pay, formatUser(fromUserID), amount)
@@ -97,7 +99,7 @@ module.exports = async function smartPay(fromUserID, toUserID, amount, Txmessage
 
   // when it satisfies the criteria to send Tx.
   } else {
-    const amountToPay = Number(amount + Number(toUserContent.pendingBalance)).toFixed(8)
+    const amountToPay = amount + Number(toUserContent.pendingBalance.toFixed(8))
     console.log("going to send Tx to " + address);
     console.log("of user " + updatedContent);
 
