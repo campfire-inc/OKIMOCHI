@@ -29,17 +29,16 @@ describe('smartPay', () => {
   })
 
 
-  describe("When it has enough balance to pay", () => {
-    before((done) => {
-     bitcoindclient.generate(450)
-        .then(() => {done()})
-        .catch((err) => {throw err})
+  describe("has enough balance to pay and then", () => {
+    before(function() { // not using anonymous function since it has no `this` binding
+      this.timeout(10000);
+      return bitcoindclient.generate(450)
     })
 
     it('creates a new user with Pendging Balance when paying for the first time .', (done) => {
-      smartPay("FROMUSERID", "TOUSERID", 0.001, "test message", testUser)
+      smartPay("FROMUSERID", "TOUSERID2", 0.001, "test message", testUser)
         .then((retMessage) => {
-          testUser.findOne({id: 'TOUSERID'}, (err, content) => {
+          testUser.findOne({id: 'TOUSERID2'}, (err, content) => {
             if (err) {throw err};
             assert.equal(content.pendingBalance, 0.001)
             done()
@@ -50,13 +49,13 @@ describe('smartPay', () => {
 
     describe('when the receiver has registered address', () => {
       before((done) => {
-        PromiseSetAddressToUser('TOUSERID2', 'mufX2qkNPLFWXSrXha9uEK94rTwJKV6mA9', testUser)
+        PromiseSetAddressToUser('TOUSERID3', 'mufX2qkNPLFWXSrXha9uEK94rTwJKV6mA9', testUser)
           .then(() => {done()})
           .catch((err) => {throw err})
       })
 
       it('will send Tx to address when has enough balance', () => {
-        return smartPay("FROMUSERID", "TOUSERID2", 0.9, "test message", testUser)
+        return smartPay("FROMUSERID", "TOUSERID3", 0.9, "test message", testUser)
           .then((retMessage) => {
             console.log('retMessage is', retMessage)
             testUser.findOne({id: 'TOUSERID2'}, (err, content) => {
@@ -69,10 +68,10 @@ describe('smartPay', () => {
       })
 
       it('can pay even when precision is too small', () => {
-       return smartPay('FROMUSERID', 'TOUSERID2', 0.99999999999999999, 'test message',testUser)
+       return smartPay('FROMUSERID', 'TOUSERID3', 0.99999999999999999, 'test message',testUser)
           .then((retMessage) => {
             console.log('retMessage is', retMessage)
-            testUser.findOne({id: 'TOUSERID2'}, (err, content) => {
+            testUser.findOne({id: 'TOUSERID3'}, (err, content) => {
               if (err) {throw err};
               assert.equal(content.pendingBalance, 0)
             })
@@ -81,9 +80,9 @@ describe('smartPay', () => {
       })
 
       it('will save to pendingBalance of the receiver when payment is small.', () => {
-        return smartPay('FROMUSERID', 'TOUSERID3', 0.0000001, 'test message', testUser)
+        return smartPay('FROMUSERID', 'TOUSERID4', 0.0000001, 'test message', testUser)
           .then((retmessage) => {
-            testUser.findOne({id: 'TOUSERID3'}, (err, content) => {
+            testUser.findOne({id: 'TOUSERID4'}, (err, content) => {
               if (err) {throw err};
               assert.equal(content.pendingBalance, 0.0000001)
             })

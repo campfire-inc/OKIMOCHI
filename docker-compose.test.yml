@@ -42,6 +42,8 @@ services:
       -rpcuser=testuser
       -rpcpassword=testpassword
       -rpcallowip=182.0.0.0/8
+    volumes:
+      - "/Users/miyamotojou/working/blockchain/BTC/okimochi/bitcoind/:/home/bitcoin/.bitcoin"
   mongo:
     restart: always
     image: mongo
@@ -51,6 +53,8 @@ services:
     command:
       --dbpath=/data/db
       --rest
+    volumes:
+      - "/Users/miyamotojou/working/blockchain/BTC/okimochi/userdb:/data/db"
 
 networks:
   ci:

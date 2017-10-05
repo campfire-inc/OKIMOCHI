@@ -42,7 +42,7 @@ const Schema = mongoose.Schema,
   ObjectId = Schema.ObjectId;
 
 let UserSchema = new Schema({
-  _id: ObjectId,
+  // _id: ObjectId, // comment out since this causes 'document must have an _id before saving' error.
   id: String,
   depositAddresses: [{ type: String, validate: BTCaddressValidator }],
   paybackAddresses: [

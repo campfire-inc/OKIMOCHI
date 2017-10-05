@@ -8,16 +8,17 @@ const mongoBaseUri = config.mongoBaseUri
 
 const testUser = mongoose.model('User', UserSchema)
 
-describe('User DB api', () => {
+describe('User Database entry', () => {
+
   before((done) => {
     mongoose.connect(mongoBaseUri + 'testDB', { useMongoClient: true }, (err) => {if (err) throw err})
     const db = mongoose.connection
     db.once('open', () => {done()})
   })
 
-  it('can be created from id', (done) => {
+  it('can be created from id', () => {
     const validUser = new testUser({id: "hoge user ID"})
-    validUser.save().then(done())
+    return validUser.save()
   })
 
   it('can not be created with invalid address', (done) => {
