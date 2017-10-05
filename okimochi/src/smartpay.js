@@ -111,7 +111,7 @@ module.exports = async function smartPay(fromUserID, toUserID, amount, Txmessage
       throw e
     }
     updatedContent.totalPaybacked = updatedContent.totalPaybacked + amount
-    updatedContent.pendingBlance = updatedContent.totalPaybacked - amountToPay
+    updatedContent.pendingBalance = updatedContent.totalPaybacked - amountToPay
     updatedContent.save((err) => {if (err) throw err;})
     return returnMessage
   }
