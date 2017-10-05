@@ -30,10 +30,9 @@ describe('smartPay', () => {
 
 
   describe("When it has enough balance to pay", () => {
-    before((done) => {
-     bitcoindclient.generate(450)
-        .then(() => {done()})
-        .catch((err) => {throw err})
+    before(function() { // not using anonymous function since it has no `this` binding
+      this.timeout(6000);
+      return bitcoindclient.generate(450)
     })
 
     it('creates a new user with Pendging Balance when paying for the first time .', (done) => {
