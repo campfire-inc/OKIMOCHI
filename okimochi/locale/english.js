@@ -135,5 +135,5 @@ waiting for someone to deposit :)`,
     wif: 'WIF format for the same private key',
     address: 'address generated from the private key above'
   },
-  noDBEntry: 'You have no entry in DB!'
+  noDBEntry: 'You have no entry in DB! You must first received tip from someone or deposit BTC'
 }

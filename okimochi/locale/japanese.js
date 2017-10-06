@@ -161,5 +161,5 @@ module.exports = {
     wif: '秘密鍵のwifフォーマット',
     address: '上の秘密鍵に対応するアドレス'
   },
-  noDBEntry: 'データベースにあなたのデータがありません！'
+  noDBEntry: 'データベースにあなたのデータがありません！誰かからtipを受け取るかdepositしましょう'
 }
