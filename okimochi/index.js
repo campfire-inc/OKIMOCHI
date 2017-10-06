@@ -381,7 +381,11 @@ controller.hears(`tip ${userIdPattern.source} ${amountPattern.source}(.*)`, ["di
 controller.hears(`pendingBalance`, ["direct_mention", "direct_message"], (bot, message) => {
   User.findOneAndUpdate({id: message.user}, {id: message.user}, (err, content) => {
     if (err) throw err;
-    bot.reply(message, util.format(locale_message.pendingBalance, content.pendingBalance))
+    if (!content) {
+      bot.reply(message, locale_message.noDBEntry)
+    } else {
+      bot.reply(message, util.format(locale_message.pendingBalance, content.pendingBalance))
+    }
   })
 })
 

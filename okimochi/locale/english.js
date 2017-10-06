@@ -134,5 +134,6 @@ waiting for someone to deposit :)`,
     base58: 'base58 of your master private key',
     wif: 'WIF format for the same private key',
     address: 'address generated from the private key above'
-  }
+  },
+  noDBEntry: 'You have no entry in DB!'
 }
