@@ -43,11 +43,12 @@ services:
       -rpcallowip=172.0.0.0/8
       -datadir=/home/bitcoin/.bitcoin
       -dbcache=500
+      -prune=600
       -rpcthreads=8
       -assumevalid=00000000000000000026c661d175ef328e415e834e62f3d316382e9f3d24e44e
   mongo:
     restart: always
-    image: mongo
+    image: mongo:3.4
     networks:
       okimochi-network:
         ipv4_address: 172.0.0.4
